@@ -37,148 +37,170 @@
 
 \begin{document}
 
-\title*{Chapter Title}
-\titlerunning{Short Title Max 5 Words}
-\author{John Smith\orcidID{0000-1111-2222-3333} and\\ Name of Second Author\orcidID{1111-2222-3333-4444}}
+\title*{Formal Methods for Cognitive Security: Engagement, Gaze, and Cybersickness}
+\titlerunning{Formal Methods}
+\author{Author One\orcidID{0000-0000-0000-0000} and\\ Author Two\orcidID{0000-0000-0000-0000}}
 
-\institute{Name of First Author \at Name, Address of Institute, \email{name@email.address}
-\and Name of Second Author \at Name, Address of Institute \email{name@email.address}}
+\institute{Author One \at Institution, City, Country, \email{author.one@example.edu}
+\and Author Two \at Institution, City, Country, \email{author.two@example.edu}}
 
 \maketitle
 
-\section{Section Heading}
-\label{sec:1}
-Instead of simply listing headings of different levels we recommend to let every heading be followed by at least a short passage of text.  Further on please use the \LaTeX\ automatism for all your cross-references and citations. And please note that the first line of text that follows a heading is not indented, whereas the first lines of all subsequent paragraphs are.
+\section{Introduction and Learning Goals}
+\label{sec:introduction}
+This opening section should motivate the chapter for an undergraduate and early graduate audience, explain why formal methods are relevant to cognitive security, and preview how the chapter will use engagement, gaze, and cybersickness as concrete case studies.
 
-There are 5 levels of headings is:
-\section{Sections}
-\label{sec:2} %Don't forget to label and reference all your sections
+\subsection{Why This Problem Matters}
+Explain why cognitive security needs models that are explicit about assumptions, evidence, uncertainty, and intervention limits. This subsection should connect the chapter to resilient decision-making rather than presenting formal methods as an abstract mathematical topic.
 
-\subsection{SubSections}
+\subsection{Learning Goals}
+State 3 to 5 learning goals in plain language. These should tell readers what they should be able to define, compare, or evaluate after finishing the chapter.
 
+\subsection{Scope and Roadmap}
+State what the chapter covers, what it leaves out, and how the sections are organized. This is also the right place to say that advanced mathematical detail should appear in clearly marked technical boxes rather than dominating the main narrative.
 
-\subsubsection{SubSubsections}
+\section{Defining Cognitive Security in This Setting}
+\label{sec:definition}
+This section should establish the chapter's working definition of cognitive security before any formal machinery is introduced. It should make clear which cognitive outcomes, risks, or interventions the chapter treats as central.
 
-\paragraph{Paragraphs}
+\subsection{Working Definition}
+Provide a definition that matches the chapter's scope and explain why it is appropriate for the application domains used later.
 
-\subparagraph{Subparagraphs}
+\subsection{Assumptions and Boundaries}
+Identify the main assumptions about human behavior, sensing, and decision-making that bound the chapter's claims.
 
-\subsection{Citations}
-\label{subsec:citations}
-This is an example of in-text citing: \textcite{thomson2024comparing}
+\subsection{Connections to Related Domains}
+Describe how this chapter relates to adjacent topics such as trust, resilience, influence, and human-machine teaming so readers can place it within the broader textbook.
 
-This is an example of parenthetical citing at the end of a sentence: 
-\parencite{thomson2024comparing} \footnote{You can use footnotes if you must}.
+\section{Formal Methods Toolbox}
+\label{sec:toolbox}
+This section should introduce the main kinds of formal or semi-formal approaches the chapter uses. Keep the emphasis on what each tool helps readers reason about, not on exhaustive methodological taxonomy.
 
-\subsection{Equations}
-\label{subsec:2}
-Use the standard \verb|equation| environment to typeset your equations, e.g.
-%
-\begin{equation}
-a \times b = c\;,
-\label{eq:01}
-\end{equation}
-%
-however, for multiline equations we recommend to use the \verb|eqnarray| environment
-\begin{eqnarray}
-\left|\nabla U_{\alpha}^{\mu}(y)\right| &\le&\frac1{d-\alpha}\int
-\left|\nabla\frac1{|\xi-y|^{d-\alpha}}\right|\,d\mu(\xi) =
-\int \frac1{|\xi-y|^{d-\alpha+1}} \,d\mu(\xi)  \cr
-&=&(d-\alpha+1) \int\limits_{d(y)}^\infty
-\frac{\mu(B(y,r))}{r^{d-\alpha+2}}\,dr \le (d-\alpha+1)
-\int\limits_{d(y)}^\infty \frac{r^{d-\alpha}}{r^{d-\alpha+2}}\,dr
-\end{eqnarray}
+\subsection{Quantitative Models}
+Describe mathematical, probabilistic, or statistical approaches that produce measurable predictions or structured estimates.
 
-\subsection{Figures}
-\label{subsec:Fig}
+\subsection{Qualitative and Knowledge-Driven Methods}
+Describe structured frameworks, expert-informed rules, or concept-based models that help organize reasoning when data are incomplete or contextual.
 
-% For figures use
-%
-\begin{figure}[ht]
-\sidecaption
-% Use the relevant command for your figure-insertion program
-% to insert the figure file.
-% For example, with the graphicx style use
-\includegraphics[scale=.65]{figure}
-%
-% If no graphics program available, insert a blank space i.e. use
-%\picplace{5cm}{2cm} % Give the correct figure height and width in cm
-%
-\caption{If the width of the figure is less than 7.8 cm use the \texttt{sidecaption} command to flush the caption on the left side of the page. If the figure is positioned at the top of the page, align the sidecaption with the top of the figure -- to achieve this you simply need to use the optional argument \texttt{[t]} with the \texttt{sidecaption} command}
-\label{fig:1}       % Give a unique label
-\end{figure}
+\subsection{Hybrid and Human-in-the-Loop Approaches}
+Explain how computational models and expert judgment can be combined, especially when the chapter argues for decision support rather than full automation.
 
-\subsection{Lists} %
-For typesetting numbered lists we recommend to use the \verb|enumerate| environment -- it will automatically rendered in line with the preferred layout.
-
-\begin{enumerate}
-\item{Livelihood and survival mobility are oftentimes outcomes of uneven socioeconomic development.}
-\begin{enumerate}
-\item{Livelihood and survival mobility are oftentimes outcomes of uneven socioeconomic development.}
-\item{Livelihood and survival mobility are oftentimes outcomes of uneven socioeconomic development.}
-\end{enumerate}
-\item{Livelihood and survival mobility are oftentimes outcomes of uneven socioeconomic development.}
-\end{enumerate}
-
-For unnumbered list we recommend to use the \verb|itemize| environment -- it will automatically be rendered in line with the preferred layout.
-
-\subsection{Tables}
-For tables use
-
-\begin{table}[ht]
-\caption{Please write your table caption here}
-\label{tab:1}       % Give a unique label
-%
-% Follow this input for your own table layout
-%
-\begin{tabular}{p{2cm}p{2.4cm}p{2cm}p{4.9cm}}
-\hline\noalign{\smallskip}
-Classes & Subclass & Length & Action Mechanism  \\
-\noalign{\smallskip}\svhline\noalign{\smallskip}
-Translation & mRNA$^a$  & 22 (19--25) & Translation repression, mRNA cleavage\\
-Translation & mRNA cleavage & 21 & mRNA cleavage\\
-Translation & mRNA  & 21--22 & mRNA cleavage\\
-Translation & mRNA  & 24--26 & Histone and DNA Modification\\
-\noalign{\smallskip}\hline\noalign{\smallskip}
-\end{tabular}
-$^a$ Table foot note (with superscript)
-\end{table}
-
-\subsection{Theorems} %
-
-\begin{theorem}
-Theorem text goes here.
-\end{theorem}
-%
-\begin{definition}
-Definition text goes here.
-\end{definition}
-%
-\begin{proof}
-%\smartqed
-Proof text goes here.
-%\qed
-\end{proof}
-%
-
-\subsection{Additional Capabilities}
-\label{subsec:addn}
 \begin{svgraybox}
-This is a way to put some essential information in a grey box.
+Use grey boxes for compact technical explanations, notation summaries, or assumptions that would otherwise interrupt the main teaching flow.
 \end{svgraybox}
 
+\section{Engagement as a Case Study}
+\label{sec:engagement}
+This section should show how the chapter's modeling ideas work in one concrete domain. The focus should be on what engagement means, how it is modeled, and what cognitive security questions those models help answer.
+
+\subsection{What Is Being Measured}
+Define engagement in the relevant setting and explain which signals, behaviors, or context variables are used.
+
+\subsection{Representative Models}
+Summarize the main modeling approaches used for engagement prediction or assessment. This is also a good place to insert one representative figure later.
+
+\subsection{What the Models Explain Well and Poorly}
+Explain what current engagement models do well, where uncertainty enters, and what claims about generalization should remain cautious.
+
+\section{Gaze as a Case Study}
+\label{sec:gaze}
+This section should treat gaze as a second concrete example that is closely connected to attention, workload, situational awareness, or inference of cognitive state.
+
+\subsection{Why Gaze Matters}
+Explain why gaze or related attention signals matter for cognitive security tasks and how they differ from more direct behavioral outcomes.
+
+\subsection{Observables and Inference Tasks}
+Describe the features, tasks, and inference goals supported by gaze data.
+
+\subsection{Ambiguities and Deployment Challenges}
+Use this subsection to capture confounds, sensing limits, population differences, and interpretation risks.
+
+\section{Cybersickness as a Case Study}
+\label{sec:cybersickness}
+This section should present cybersickness as a domain where modeling accuracy, safety, and usability interact directly. It should connect prediction and explanation to operational decisions in immersive environments.
+
+\subsection{Why Cybersickness Matters}
+Define cybersickness in the chapter's terms and explain why it is operationally relevant to cognitive security applications in VR, MR, or related settings.
+
+\subsection{Predictive or Explanatory Models}
+Describe the models used to explain or predict cybersickness, including what inputs they use and what decisions they support.
+
+\subsection{Safety, Robustness, and Limits}
+Explain which claims about robustness or safe deployment are supportable and which should remain explicitly qualified.
+
+\section{Cross-Case Comparison}
+\label{sec:comparison}
+This section should synthesize the three case studies instead of leaving them as isolated examples. It should help readers see both recurring modeling patterns and important differences.
+
+\subsection{Shared Modeling Patterns}
+Compare the common structure across engagement, gaze, and cybersickness models, such as observables, latent-state assumptions, and validation needs.
+
+\subsection{Where the Cases Differ}
+Explain where the three domains diverge in terms of measurement, intervention, uncertainty, or operational risk.
+
+\subsection{Lessons for Cognitive Security}
+Use this subsection to generalize from the case studies back to the broader cognitive security problem.
+
+\section{Evaluation, Guarantees, and Limitations}
+\label{sec:evaluation}
+This section should unify the chapter's language about evidence, confidence, and caution after the reader has already seen the concrete case studies.
+
+\subsection{Performance Metrics and Validation Strategies}
+Describe how the chapter uses predictive performance, calibration, uncertainty, benchmarking, and replication to evaluate models.
+
+\subsection{Guarantee Language and Assumptions}
+Clarify the difference between empirical validation, robustness claims, formal guarantees, and heuristic confidence so the chapter does not overstate what the source papers actually show.
+
+\subsection{Threats to Validity and Generalization}
+Identify dataset limits, domain shift, measurement noise, participant variability, and other reasons why models may fail outside their training or test conditions.
+
+\begin{definition}
+A guarantee in this chapter should be described only at the level supported by the cited work, such as empirical robustness, bounded error under stated assumptions, or formal verification of a specified property.
+\end{definition}
+
+\section{Implications for Resilience, Trust, and Practice}
+\label{sec:implications}
+This section should translate the technical discussion into the textbook's broader themes and explain what readers should take away for real-world use.
+
+\subsection{Resilience Versus Mitigation}
+Explain how the methods discussed in this chapter support resilience, mitigation, or both, and why the distinction matters.
+
+\subsection{Trust, Credibility, and Individual Differences}
+Discuss where trust, credibility, and individual differences shape the design, evaluation, or interpretation of the models.
+
+\subsection{Practical Application}
+Describe how readers, practitioners, or researchers might use the chapter's ideas in operational, educational, or research settings.
+
+\section{Future Directions}
+\label{sec:future}
+This section should directly address unresolved questions and identify what advances could change the field over the next few years.
+
+\subsection{Outstanding Technical Gaps}
+Summarize the main unresolved issues in data, modeling, validation, or deployment.
+
+\subsection{Emerging Opportunities}
+Identify promising directions such as better multimodal sensing, stronger guarantees, richer datasets, or interactive educational supplements.
+
+\subsection{Research Questions for the Next Generation}
+Frame a small number of forward-looking questions that reinforce the textbook's role as a roadmap for future work.
+
 \begin{trailer}{Key Points}
-Please re-state 3-5 Key terms or takeaways from the chapter here
-\begin{description}[Term 1]
-\item[\textbf{System 1}]{\index{System 1}Thinking Fast}
-\item[\textbf{System 2}]{Thinking Slow. See \ref{sec:1}.}
-\end{description}
+Replace these placeholders with 3 to 5 final teaching takeaways.
+\begin{itemize}
+\item Formal methods clarify assumptions and make claims easier to test.
+\item Engagement, gaze, and cybersickness reveal different modeling tradeoffs.
+\item Evaluation and generalization limits should be stated as clearly as results.
+\end{itemize}
 \end{trailer}
 
 \begin{trailer}{Questions}
-\noindent What were some future questions which could be essays/tested content from this chapter? I'd recommend 5-10 questions
+\noindent Replace these placeholders with 5 to 10 final discussion or exam questions.
 \begin{enumerate}
-    \item Where do errors come from? How can they be mitigated?
+    \item How should cognitive security be defined for the types of models discussed in this chapter?
+    \item What kinds of claims can formal methods support that descriptive summaries alone cannot?
+    \item Why is it important to separate empirical validation from stronger guarantee language?
+    \item How do engagement, gaze, and cybersickness reveal different limits of cognitive-state modeling?
+    \item In what ways do trust, credibility, and individual differences complicate model deployment?
 \end{enumerate}
 \end{trailer}
 
@@ -195,10 +217,11 @@ Please re-state 3-5 Key terms or takeaways from the chapter here
 %\end{tips}
 
 \section{Further Reading}
-Use this section if you have recommended readings which were not cited in the references. 
+Use this section for recommended readings that are useful for students but are not cited directly in the chapter text. Replace the examples below once the source base for the chapter is stable.
 \begin{enumerate}\leftskip3pt\itemsep6pt
-\item [] Thomson, R., \& Lebiere, C. (2024, September). Comparing Similarity and Homophily-Based Cognitive Models of Influence and Conformity. In International Conference on Social Computing, Behavioral-Cultural Modeling and Prediction and Behavior Representation in Modeling and Simulation (pp. 47-57). Cham: Springer Nature Switzerland.
-\item [] Thomson, R., \& Pyke, A. (2025). Social cybersecurity in 2023: a review of the 16th annual SBP-BRiMS conference. Computational and Mathematical Organization Theory, 1-4.
+\item Add one or two broad readings on cognitive security foundations.
+\item Add one or two readings on formal methods, probabilistic reasoning, or decision support.
+\item Add one or two readings that extend beyond the cited application papers.
 \end{enumerate}
 
 \printbibliography
