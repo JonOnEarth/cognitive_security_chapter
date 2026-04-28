@@ -46,143 +46,55 @@
 
 \maketitle
 
-\section{Introduction and Learning Goals}
+\section{Introduction}
 \label{sec:introduction}
-This opening section should motivate the chapter for an undergraduate and early graduate audience, explain why formal methods are relevant to cognitive security, and preview how the chapter will use engagement, gaze, and cybersickness as concrete case studies.
+This opening section motivates the chapter for an undergraduate and early graduate audience. It explains why formal methods are relevant to cognitive security in mixed-reality (MR) settings, states 3 to 5 learning goals in plain language, and previews how the chapter uses engagement, gaze, and cybersickness as concrete case studies. The introduction also sets the chapter's scope: assuming that earlier chapters of the textbook cover general cognitive security foundations, we focus on the MR context and treat formal methods as a tool for resilient decision-making rather than as an abstract mathematical topic. Advanced derivations are isolated in clearly marked technical boxes so they do not disrupt the main narrative.
 
-\subsection{Why This Problem Matters}
-Explain why cognitive security needs models that are explicit about assumptions, evidence, uncertainty, and intervention limits. This subsection should connect the chapter to resilient decision-making rather than presenting formal methods as an abstract mathematical topic.
-
-\subsection{Learning Goals}
-State 3 to 5 learning goals in plain language. These should tell readers what they should be able to define, compare, or evaluate after finishing the chapter.
-
-\subsection{Scope and Roadmap}
-State what the chapter covers, what it leaves out, and how the sections are organized. This is also the right place to say that advanced mathematical detail should appear in clearly marked technical boxes rather than dominating the main narrative.
-
-\section{Defining Cognitive Security in This Setting}
-\label{sec:definition}
-This section should establish the chapter's working definition of cognitive security before any formal machinery is introduced. It should make clear which cognitive outcomes, risks, or interventions the chapter treats as central.
-
-\subsection{Working Definition}
-Provide a definition that matches the chapter's scope and explain why it is appropriate for the application domains used later.
-
-\subsection{Assumptions and Boundaries}
-Identify the main assumptions about human behavior, sensing, and decision-making that bound the chapter's claims.
-
-\subsection{Connections to Related Domains}
-Describe how this chapter relates to adjacent topics such as trust, resilience, influence, and human-machine teaming so readers can place it within the broader textbook.
-
-\section{Formal Methods Toolbox}
-\label{sec:toolbox}
-This section should introduce the main kinds of formal or semi-formal approaches the chapter uses. Keep the emphasis on what each tool helps readers reason about, not on exhaustive methodological taxonomy.
+\section{Cognitive Security and the Formal Methods Toolbox}
+\label{sec:foundations}
+This section establishes the chapter's working definition of cognitive security in the MR setting and introduces the formal and semi-formal approaches used in the case studies. The opening paragraphs give a working definition, identify the assumptions about sensing, behavior, and decision-making that bound the chapter's claims, and connect the topic to adjacent textbook themes such as trust, resilience, and human--machine teaming.
 
 \subsection{Quantitative Models}
-Describe mathematical, probabilistic, or statistical approaches that produce measurable predictions or structured estimates.
+Describe the mathematical, probabilistic, and statistical approaches the chapter relies on, including Bayesian networks and related structured estimators that produce measurable predictions with explicit uncertainty.
 
-\subsection{Qualitative and Knowledge-Driven Methods}
-Describe structured frameworks, expert-informed rules, or concept-based models that help organize reasoning when data are incomplete or contextual.
-
-\subsection{Hybrid and Human-in-the-Loop Approaches}
-Explain how computational models and expert judgment can be combined, especially when the chapter argues for decision support rather than full automation.
+\subsection{Qualitative and Hybrid Approaches}
+Describe structured, knowledge-driven frameworks and explain how they combine with quantitative models when data are incomplete or context dominates. This subsection also covers human-in-the-loop designs that pair computational predictions with expert judgment for decision support rather than full automation.
 
 \begin{svgraybox}
-Use grey boxes for compact technical explanations, notation summaries, or assumptions that would otherwise interrupt the main teaching flow.
+Use this grey box for a compact notation summary or a short worked example that would otherwise interrupt the main flow.
 \end{svgraybox}
 
-\section{Engagement as a Case Study}
+\section{Case Studies: Engagement, Gaze, and Cybersickness}
+\label{sec:cases}
+This section grounds the chapter in three MR domains where formal methods directly support cognitive security decisions. Each case study briefly defines what is being measured, summarizes the representative models, and notes where current models are reliable and where they are not. A short cross-case synthesis at the end pulls out shared patterns and meaningful differences so the cases do not read as isolated examples.
+
+\subsection{Engagement}
 \label{sec:engagement}
-This section should show how the chapter's modeling ideas work in one concrete domain. The focus should be on what engagement means, how it is modeled, and what cognitive security questions those models help answer.
+Define engagement in the MR setting, identify the signals and context variables used, and summarize the main modeling approaches drawn from the engagement-prediction work. Include one representative figure and a short note on what the models explain well and where generalization claims should remain cautious.
 
-\subsection{What Is Being Measured}
-Define engagement in the relevant setting and explain which signals, behaviors, or context variables are used.
-
-\subsection{Representative Models}
-Summarize the main modeling approaches used for engagement prediction or assessment. This is also a good place to insert one representative figure later.
-
-\subsection{What the Models Explain Well and Poorly}
-Explain what current engagement models do well, where uncertainty enters, and what claims about generalization should remain cautious.
-
-\section{Gaze as a Case Study}
+\subsection{Gaze}
 \label{sec:gaze}
-This section should treat gaze as a second concrete example that is closely connected to attention, workload, situational awareness, or inference of cognitive state.
+Explain why gaze and related attention signals matter for inference of cognitive state, describe the observables and inference tasks they support, and identify the main confounds, sensing limits, and population-level interpretation risks.
 
-\subsection{Why Gaze Matters}
-Explain why gaze or related attention signals matter for cognitive security tasks and how they differ from more direct behavioral outcomes.
-
-\subsection{Observables and Inference Tasks}
-Describe the features, tasks, and inference goals supported by gaze data.
-
-\subsection{Ambiguities and Deployment Challenges}
-Use this subsection to capture confounds, sensing limits, population differences, and interpretation risks.
-
-\section{Cybersickness as a Case Study}
+\subsection{Cybersickness}
 \label{sec:cybersickness}
-This section should present cybersickness as a domain where modeling accuracy, safety, and usability interact directly. It should connect prediction and explanation to operational decisions in immersive environments.
+Define cybersickness in the chapter's terms and explain why it is operationally relevant to MR cognitive security. Summarize the predictive or explanatory models, the inputs they use, and the operational decisions they support, and qualify which robustness or safety claims are defensible.
 
-\subsection{Why Cybersickness Matters}
-Define cybersickness in the chapter's terms and explain why it is operationally relevant to cognitive security applications in VR, MR, or related settings.
-
-\subsection{Predictive or Explanatory Models}
-Describe the models used to explain or predict cybersickness, including what inputs they use and what decisions they support.
-
-\subsection{Safety, Robustness, and Limits}
-Explain which claims about robustness or safe deployment are supportable and which should remain explicitly qualified.
-
-\section{Cross-Case Comparison}
+\subsection{Cross-Case Synthesis}
 \label{sec:comparison}
-This section should synthesize the three case studies instead of leaving them as isolated examples. It should help readers see both recurring modeling patterns and important differences.
-
-\subsection{Shared Modeling Patterns}
-Compare the common structure across engagement, gaze, and cybersickness models, such as observables, latent-state assumptions, and validation needs.
-
-\subsection{Where the Cases Differ}
-Explain where the three domains diverge in terms of measurement, intervention, uncertainty, or operational risk.
-
-\subsection{Lessons for Cognitive Security}
-Use this subsection to generalize from the case studies back to the broader cognitive security problem.
+Compare the three cases in terms of observables, latent-state assumptions, validation needs, and operational risk, then generalize the lessons back to the broader cognitive security problem.
 
 \section{Evaluation, Guarantees, and Limitations}
 \label{sec:evaluation}
-This section should unify the chapter's language about evidence, confidence, and caution after the reader has already seen the concrete case studies.
-
-\subsection{Performance Metrics and Validation Strategies}
-Describe how the chapter uses predictive performance, calibration, uncertainty, benchmarking, and replication to evaluate models.
-
-\subsection{Guarantee Language and Assumptions}
-Clarify the difference between empirical validation, robustness claims, formal guarantees, and heuristic confidence so the chapter does not overstate what the source papers actually show.
-
-\subsection{Threats to Validity and Generalization}
-Identify dataset limits, domain shift, measurement noise, participant variability, and other reasons why models may fail outside their training or test conditions.
+This section unifies the chapter's language about evidence, confidence, and caution after the reader has seen the concrete case studies. It covers performance metrics and validation strategies (predictive performance, calibration, uncertainty, benchmarking, and replication), distinguishes empirical validation from robustness claims and formal guarantees so the chapter does not overstate what the source papers show, and identifies the dataset limits, domain shift, measurement noise, and participant variability that bound generalization.
 
 \begin{definition}
-A guarantee in this chapter should be described only at the level supported by the cited work, such as empirical robustness, bounded error under stated assumptions, or formal verification of a specified property.
+A guarantee in this chapter is described only at the level supported by the cited work, such as empirical robustness, bounded error under stated assumptions, or formal verification of a specified property.
 \end{definition}
 
-\section{Implications for Resilience, Trust, and Practice}
+\section{Implications and Future Directions}
 \label{sec:implications}
-This section should translate the technical discussion into the textbook's broader themes and explain what readers should take away for real-world use.
-
-\subsection{Resilience Versus Mitigation}
-Explain how the methods discussed in this chapter support resilience, mitigation, or both, and why the distinction matters.
-
-\subsection{Trust, Credibility, and Individual Differences}
-Discuss where trust, credibility, and individual differences shape the design, evaluation, or interpretation of the models.
-
-\subsection{Practical Application}
-Describe how readers, practitioners, or researchers might use the chapter's ideas in operational, educational, or research settings.
-
-\section{Future Directions}
-\label{sec:future}
-This section should directly address unresolved questions and identify what advances could change the field over the next few years.
-
-\subsection{Outstanding Technical Gaps}
-Summarize the main unresolved issues in data, modeling, validation, or deployment.
-
-\subsection{Emerging Opportunities}
-Identify promising directions such as better multimodal sensing, stronger guarantees, richer datasets, or interactive educational supplements.
-
-\subsection{Research Questions for the Next Generation}
-Frame a small number of forward-looking questions that reinforce the textbook's role as a roadmap for future work.
+This section translates the technical discussion into the textbook's broader themes and identifies where the field is likely to move next. It discusses how the methods support resilience as distinct from mitigation, where trust, credibility, and individual differences shape design and interpretation, and how readers might apply the chapter's ideas in operational, educational, or research settings. It then summarizes the main outstanding technical gaps in data, modeling, validation, and deployment, and frames a small number of forward-looking research questions that reinforce the textbook's role as a roadmap for the next generation.
 
 \begin{trailer}{Key Points}
 Replace these placeholders with 3 to 5 final teaching takeaways.
