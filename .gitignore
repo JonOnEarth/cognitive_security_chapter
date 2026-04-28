@@ -9,5 +9,4 @@
 *.bbl
 *.ind
 *.xml
-*.pdf
-*.gz
+*.gzs
