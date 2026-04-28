@@ -23,7 +23,7 @@
 \usepackage[bottom]{footmisc}% places footnotes at page bottom
 
 
-\usepackage{newtxtext}       % 
+\usepackage{newtxtext}       %
 \usepackage[varvw]{newtxmath}       % selects Times Roman as basic font
 
 \usepackage[style=apa, natbib]{biblatex}
@@ -48,92 +48,233 @@
 
 \section{Introduction}
 \label{sec:introduction}
-This opening section motivates the chapter for an undergraduate and early graduate audience. It explains why formal methods are relevant to cognitive security in mixed-reality (MR) settings, states 3 to 5 learning goals in plain language, and previews how the chapter uses engagement, gaze, and cybersickness as concrete case studies. The introduction also sets the chapter's scope: assuming that earlier chapters of the textbook cover general cognitive security foundations, we focus on the MR context and treat formal methods as a tool for resilient decision-making rather than as an abstract mathematical topic. Advanced derivations are isolated in clearly marked technical boxes so they do not disrupt the main narrative.
+
+Mixed-reality (MR) systems are moving rapidly out of the laboratory and into settings where the cost of a wrong decision is high. Pilots train in head-worn displays, surgeons rehearse procedures on virtual patients, search-and-rescue teams plan operations against synthetic terrain, and combat medics learn casualty care under simulated battlefield stress. In each of these settings the user is asked to attend to information that arrives through a rendering pipeline whose behavior is not perfectly stable. Frame rates fluctuate, network jitter delays head-tracking updates, scene complexity strains the renderer, and the user's own physiology drifts over a long session. When the pipeline degrades, the user's cognition does too: attention wanders, gaze loses its tight coupling to objects of interest, and discomfort accumulates until performance breaks down. Cognitive security in this setting is not about firewalls or cryptography. It is about whether the user remains in a cognitive state from which good decisions can still be made.
+
+This chapter takes a particular position on how to make that question tractable. We argue that three measurable cognitive states---\emph{engagement}, \emph{gaze}, and \emph{cybersickness}---are concrete enough that formal and semi-formal methods can reason about them, and important enough that operational MR systems already need quantitative answers to questions about them. We use these three as the chapter's case studies. The emphasis throughout is on what kind of guarantee a given method actually provides: an empirical accuracy number on a held-out cohort is not the same thing as a confidence-bounded statistical certificate, which is not the same thing as a probabilistic posterior derived from a graphical model, which is not the same thing as a sound bound on a model's worst-case output. Treating ``formal methods'' as a single category obscures these distinctions; the chapter spends considerable effort separating them.
+
+By the end of the chapter, readers should be able to: (i) define cognitive security in an MR context and explain why the user's engagement, gaze stability, and discomfort are decision-relevant signals; (ii) name the four rungs of an empirical-to-formal guarantee ladder and identify which rung is being exercised in a given paper or system; (iii) describe at least one concrete model and one concrete verification technique for each of the three case studies; (iv) explain why two cybersickness models with similar predictive accuracy can produce different operational claims because they are verified differently; and (v) articulate a small number of unresolved problems where the next generation of researchers can usefully push the field.
+
+The chapter assumes that earlier chapters of the textbook have introduced cognitive security at a general level, including notions such as resilience versus mitigation, individual differences, and trust. We focus on the MR context and treat formal methods as a tool for resilient decision-making rather than as an abstract mathematical topic. Section~\ref{sec:foundations} introduces the verification toolbox we will use throughout the chapter. Section~\ref{sec:cases} works through the three case studies in turn and ends with a short cross-case synthesis. Section~\ref{sec:evaluation} returns to the toolbox to discuss what each kind of guarantee licenses an operational system to do. Section~\ref{sec:implications} connects the technical material back to the broader textbook themes of resilience, trust, and individual differences, and frames a small number of forward-looking research questions.
 
 \section{Cognitive Security and the Formal Methods Toolbox}
 \label{sec:foundations}
-This section establishes the chapter's working definition of cognitive security in the MR setting and introduces the formal and semi-formal approaches used in the case studies. The opening paragraphs give a working definition, identify the assumptions about sensing, behavior, and decision-making that bound the chapter's claims, and connect the topic to adjacent textbook themes such as trust, resilience, and human--machine teaming.
 
-\subsection{Quantitative Models}
-Describe the mathematical, probabilistic, and statistical approaches the chapter relies on, including Bayesian networks and related structured estimators that produce measurable predictions with explicit uncertainty.
+For the purposes of this chapter, cognitive security in MR is the property that user attention, comfort, and decision-making remain inside operationally safe regions despite measurable degradation of the rendering and sensing pipeline. ``Operationally safe'' is intentionally application-specific: a tactical-medicine trainee should not become so disoriented that they cannot complete a triage protocol; a search-and-rescue operator should orient to a target object within a deadline; a surgical resident should sustain visual attention long enough to recognize a critical anatomical landmark. In each case the safety property is a statement about the user's cognitive state, not about the system's bits or pixels.
 
-\subsection{Qualitative and Hybrid Approaches}
-Describe structured, knowledge-driven frameworks and explain how they combine with quantitative models when data are incomplete or context dominates. This subsection also covers human-in-the-loop designs that pair computational predictions with expert judgment for decision support rather than full automation.
+A predictive model alone---no matter how accurate on a held-out test set---does not tell an operational system \emph{when to believe} its own prediction at decision time. Average accuracy describes typical behavior over the data we happened to collect; it does not tell us anything about an individual user, a particular minute of a particular session, or an input region we did not sample. Formal methods, in the sense used in this chapter, fill that gap. A formal method takes three inputs---a fixed trained model, a property to check (for example, ``predicted FMS stays below~4'', or ``predicted gaze enters the object-of-interest region within one second''), and a region of admissible inputs---and returns one of three outputs: a guarantee that the property holds throughout the region, a counterexample that demonstrates a failure, or a quantified probabilistic bound on how often the property holds. Different formal methods make different choices about which of those three outputs they aim for and what assumptions they require to produce it.
+
+\subsection{The Empirical-to-Formal Guarantee Ladder}
+\label{sec:ladder}
+
+The verification techniques used in this chapter sit on a single ladder, ordered by how much the guarantee commits to. Each rung is exercised by at least one of the case studies in Section~\ref{sec:cases}, and the chapter returns to the ladder in Section~\ref{sec:evaluation} to discuss what each rung licenses an operational system to do.
+
+\textbf{Rung~1, empirical evaluation.} A predictor is run on data it has not been trained on, and average error or accuracy is reported. Cross-validation, leave-one-user-out evaluation, and held-out cohorts all live here. The guarantee is statistical in a weak sense: ``on data drawn from a distribution similar to the test set, the model behaves on average like this.'' This rung is the baseline against which everything else is compared and is often the only rung reported in the literature. Its limitation is that it says nothing about a particular input or input region.
+
+\textbf{Rung~2, statistical certification of a runtime predicate.} A binary predicate is defined over the model's output (for example, ``predicted gaze entered the target region within one second and stayed there for at least 0.4 seconds''), the predicate is evaluated empirically over many windows that fall inside a chosen operating region~$\Omega$, and an exact binomial confidence bound such as the Clopper--Pearson lower bound \citep{clopper1934} is computed. The output is a statement of the form: ``with confidence~$1-\alpha$, the predicate holds with probability at least~$p_{\text{LB}}$ whenever the system state lies in~$\Omega$.'' The gaze case study in Section~\ref{sec:gaze} uses this rung, with $\alpha=0.10$ and $p_{\text{LB}}\geq0.82$ inside an operating region defined by optical-flow and temporal-smoothness constraints \citep{gaze2025reliability}. The strength of the rung is that the guarantee is checkable at runtime: if measurable scene statistics drift outside~$\Omega$, the system knows the certificate no longer applies.
+
+\textbf{Rung~3, probabilistic verification on a graphical model.} A Bayesian network is specified or learned over the variables of interest, and exact inference is performed to compute a posterior probability of an outcome under specified evidence. The chapter uses Dice \citep{holtzen2020dice}, a probabilistic-programming language in which the network can be encoded directly and queries of the form $P(X_q \mid C)$ can be answered exactly under both ``hard'' evidence (deterministic constraints) and ``soft'' evidence (uncertain observations). The cybersickness snapshot model in Section~\ref{sec:cybersickness} sits on this rung \citep{wu2025cybersickness_bn}. The strength of the rung is that the answer is a calibrated probability rather than a point estimate; the cost is that the guarantee is only as good as the assumed causal structure of the network.
+
+\textbf{Rung~4, deterministic verification of a fixed model artifact.} A trained model is treated as a fixed mathematical object, and a sound algorithm proves that for every input in a bounded region the model's output stays within specified bounds---or it returns a counterexample. Two flavors appear in this chapter. For neural networks, abstract interpretation in the DeepPoly relational domain \citep{singh2019deeppoly}, scaled to recurrent architectures by Prover \citep{ryou2021prover}, propagates polyhedral approximations of the input region forward through the network. For tree ensembles, the VoRF framework \citep{tornblom2019vorf} encodes each decision tree as a set of linear constraints, formulates a mixed-integer linear program whose objective is the worst-case forest output, and solves it exactly. The engagement case study in Section~\ref{sec:engagement} uses the neural-network flavor; the extended-exposure cybersickness case in Section~\ref{sec:cybersickness} uses the tree-ensemble flavor. The strength of the rung is that the guarantee is sound: no input in the certified region can violate the property. The cost is conservatism: certified regions can be very narrow, especially for high-capacity neural networks.
+
+\subsection{What Each Rung Commits To}
+\label{sec:rungs}
+
+The four rungs differ along three axes that are easy to confuse. The first is what is being verified. Rung~1 verifies an average; rung~2 verifies a probability of a binary predicate; rung~3 verifies a posterior distribution; rung~4 verifies a deterministic bound on the model output. The second is what assumptions the guarantee rests on. Rung~1 assumes the test data is exchangeable with the deployment data. Rung~2 additionally assumes the certified operating region~$\Omega$ is correctly identified at runtime. Rung~3 assumes the causal structure of the Bayesian network is correctly specified, which is itself learned heuristically. Rung~4 assumes only that the model artifact is exactly the one that was certified and that the input region is correctly bounded; the guarantee is otherwise model-conditional and sound. The third axis is computational price. Rung~1 is essentially free given the test data. Rung~2 is cheap because it is just empirical-frequency counting plus a confidence-bound formula. Rung~3 is exact but exponential in the worst case; the cybersickness BN works because its size is moderate and Dice's compilation is efficient on discrete graphs. Rung~4 is the most expensive and the most conservative: DeepPoly intervals tighten only on small regions, and VoRF MILP encodings can grow with the number of trees and the depth of the forest.
 
 \begin{svgraybox}
-Use this grey box for a compact notation summary or a short worked example that would otherwise interrupt the main flow.
+\textbf{Notation reused throughout this chapter.} The Bayesian network used in the cybersickness case study factorizes as
+\[
+P(\mathbf{S}, \mathbf{H}, X_q) = \prod_i P(S_i)\,\prod_j P(H_j \mid \mathrm{Pa}(H_j))\,P(X_q \mid \mathrm{Pa}(X_q)),
+\]
+where $\mathbf{S} = (S_1,\dots,S_m)$ are MR system parameters (latency, brightness, spectral entropy, optical flow), $\mathbf{H} = (H_1,\dots,H_k)$ are physiological responses (heart rate, galvanic skin response, gaze and pupil signals), and $X_q$ is cybersickness severity \citep{wu2025cybersickness_bn}. The parent operator $\mathrm{Pa}(\cdot)$ encodes a hierarchical constraint that system parameters affect physiology, and physiology affects cybersickness, but not the other way around within one observation window.
 \end{svgraybox}
+
+A reader who keeps the four rungs straight will already extract more value from the case studies than a reader who treats ``formal methods'' as a single technique. The case studies themselves were chosen partly because they exercise different rungs on superficially similar problems.
 
 \section{Case Studies: Engagement, Gaze, and Cybersickness}
 \label{sec:cases}
-This section grounds the chapter in three MR domains where formal methods directly support cognitive security decisions. Each case study briefly defines what is being measured, summarizes the representative models, and notes where current models are reliable and where they are not. A short cross-case synthesis at the end pulls out shared patterns and meaningful differences so the cases do not read as isolated examples.
+
+Each of the three case studies below takes the same shape. We define the cognitive state of interest, describe the experimental setup, sketch the predictor briefly, report the headline empirical numbers, and then explain which rung of the ladder in Section~\ref{sec:ladder} the case actually exercises and what the resulting guarantee says. A short cross-case synthesis closes the section.
 
 \subsection{Engagement}
 \label{sec:engagement}
-Define engagement in the MR setting, identify the signals and context variables used, and summarize the main modeling approaches drawn from the engagement-prediction work. Include one representative figure and a short note on what the models explain well and where generalization claims should remain cautious.
+
+\textbf{What is being measured.} Engagement here is operationalized as sustained attention to task-relevant virtual content under cognitive stress \citep{engagement2026mr}. The construct is deliberately narrower than ``presence'' or ``immersion''; it is the property that the user remains attentively coupled to the task even when the MR pipeline is being perturbed. Engagement is reported on a 1--7 Likert scale, sampled once per minute during a session; this gives a fine-grained-enough signal to track within-session change without overwhelming the participant with self-report.
+
+\textbf{Setup.} Eleven participants completed a ten-minute hostage-rescue scenario on a HoloLens~2. The session was divided into ten one-minute intervals. In each interval the system was perturbed with a step change in latency: ``low'' (45--60~FPS), ``medium'' (20--45~FPS), or ``high'' (5--20~FPS), pseudo-randomized across intervals. At the end of each interval the participant rated their engagement. The dataset is small but tightly controlled, with multimodal telemetry continuously recorded throughout.
+
+\textbf{Predictor.} The predictor is a two-phase architecture. In the first phase, an LSTM \citep{hochreiter1997lstm} encodes variable-length multimodal trajectories into a 128-dimensional embedding using a contrastive objective \citep{khosla2020supervised}. The contrastive loss is a soft InfoNCE in which the similarity weight between two trajectories is determined by the distance between their engagement ratings, so trajectories with similar engagement are pulled together in embedding space. In the second phase the encoder is frozen and a two-layer feedforward head regresses from the embedding to a continuous engagement score, with a variance-regularized mean-squared-error loss that penalizes uneven error across rating levels. The observable inputs span human signals (binocular eye tracking, head 6-DoF pose, gaze-target encodings) and system signals (latency indicator, nine video-derived scene descriptors including optical-flow magnitude, spatial frequency, spectral entropy, brightness, and contrast).
+
+\textbf{Empirical results (rung~1).} Under label-stratified four-fold cross-validation, the model achieves mean absolute error MAE~$=0.94 \pm 0.24$ on the 1--7 scale; on three users held out from training and cross-validation it achieves MAE~$=0.84$. Three baselines on the same temporally averaged features are weaker (Ridge: 1.09, SVR: 1.24, XGBoost: 0.96), supporting the choice of a sequence model with learned representations \citep{engagement2026mr}. Permutation feature importance indicates that the predictor uses both system and human signals: latency dominates, but spatial frequency, temporal smoothness, gaze direction, and luminance all contribute meaningfully.
+
+\textbf{Verification (rung~4).} The trained regressor was passed to Prover \citep{ryou2021prover}, which uses DeepPoly \citep{singh2019deeppoly} to compute sound bounds on the network's output over a bounded input region. The certification question is: ``for all inputs in this region, does the predicted engagement stay above a threshold?'' The procedure returns sound \emph{safe operating intervals} on the input variables. These intervals are sound but extremely narrow---for example, the certified luminance interval for an engagement-${\geq}5$ predicate is~[110.2, 111.0]. The conservatism is not a bug in DeepPoly; it is a consequence of asking a worst-case question over a region in which both system parameters and uncontrolled user features can vary. The honest reading is that current deterministic NN verification can certify a useful property only over very small, very tightly constrained regions of input space. This is exactly the limitation that motivates the chapter's other rungs.
+
+\begin{figure}[t]
+\centering
+%\includegraphics[width=0.9\textwidth]{fig_engagement_architecture}
+\rule{0.9\textwidth}{0.5pt}\\[0.5em]
+\textit{[Placeholder: two-phase contrastive LSTM encoder followed by a regression head.]}
+\caption{Engagement predictor architecture. Phase~1 trains an LSTM encoder under a soft InfoNCE objective so that trajectories with similar engagement ratings are mapped to nearby embeddings. Phase~2 freezes the encoder and trains a regression head with a variance-regularized loss. Adapted from \citet{engagement2026mr}.}
+\label{fig:engagement-arch}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+%\includegraphics[width=0.7\textwidth]{fig_engagement_tsne}
+\rule{0.7\textwidth}{0.5pt}\\[0.5em]
+\textit{[Placeholder: t-SNE projection of trajectory embeddings, colored by ground-truth engagement level.]}
+\caption{Two-dimensional projection of the 128-dimensional embeddings learned during contrastive pretraining. Trajectories at the extremes of the engagement scale separate cleanly. Adapted from \citet{engagement2026mr}.}
+\label{fig:engagement-tsne}
+\end{figure}
 
 \subsection{Gaze}
 \label{sec:gaze}
-Explain why gaze and related attention signals matter for inference of cognitive state, describe the observables and inference tasks they support, and identify the main confounds, sensing limits, and population-level interpretation risks.
+
+\textbf{Why gaze.} Gaze is interesting in cognitive security for a reason that is easy to state empirically: in this dataset, gaze dwell duration on the target object correlates with mission-completion latency at $r=0.504$, $p=0.0053$ \citep{gaze2025reliability}. Users who maintain deliberate fixation on the right thing finish their tasks faster, which is exactly the pattern one would expect if gaze stability were a usable proxy for engaged, task-coupled attention. Gaze also has the operational advantage of being measurable in real time, so a system can act on a gaze certificate on the order of hundreds of milliseconds.
+
+\textbf{Setup.} Data come from a tactical search-and-rescue MR testbed evaluated under leave-one-user-out cross-validation across thirty users. The display resolution is $2304 \times 2064$ and the nominal eye-tracking rate is approximately 60~Hz, with substantial irregularity introduced by rendering variability. Two attention properties are defined. The first is \emph{timely orientation}: predicted gaze should enter an object-of-interest region within $T_{\text{resp}}=1.0$~second of its appearance. The second is \emph{sustained attention}: gaze should remain in the region for at least $D=0.4$~seconds, the threshold conventionally separating deliberate fixation from a transient glance.
+
+\textbf{Predictor.} The predictor is a Time-Aware LSTM \citep{baytas2017tlstm} that explicitly models the elapsed time $\Delta t$ between observations. Its hidden state is attenuated by a learned exponential decay $\gamma_t = \exp(-W_\gamma \Delta t_t)$ before the recurrent update, which prevents stale information from dominating after large gaps in the data stream. Sparse asynchronous events and object detections are folded in via a last-observation-carried-forward scheme with their own staleness decay, and the resulting fused features feed a regression head that predicts normalized gaze coordinates. On a 100~ms horizon the model achieves normalized RMSE of $0.059 \pm 0.015$ ($128.8 \pm 34.5$ pixels), a 27\% reduction relative to a standard LSTM and a much larger reduction relative to a persistence baseline. Cross-user generalization is tight: the interquartile range of normalized RMSE across the 30~LOUO folds is only 0.023.
+
+\textbf{Verification (rung~2).} The verification question is not whether the network's outputs are bounded---it is whether the two attention properties hold often enough to be operationally trustworthy. The framework defines a domain~$\Omega$ over runtime-measurable scene statistics (optical flow and temporal smoothness), evaluates the binary predicate ``the property held in this window'' over many windows that fall inside~$\Omega$, and computes the Clopper--Pearson lower bound on the success probability. The published primary certificate states that whenever optical flow is in $[0.02, 0.07]$ and temporal smoothness is in $[20, 55]$, the orientation-and-fixation property holds with probability $p_{\text{LB}}\geq 0.82$ at 90\% confidence \citep{gaze2025reliability}. A separate bounded-divergence certificate gives stronger numbers ($p_{\text{LB}}\geq 0.998$ in the lowest-perturbation FPS bin, decaying to $0.970$ in the highest), and a window-length sensitivity analysis confirms that the certificate is not brittle to the choice of $T_{\text{resp}}$.
+
+The framework explicitly does \emph{not} claim formal NN verification. The authors are precise about this: the guarantee is a statistical certificate of a runtime predicate over an empirically defined domain, not a deductive proof about the network's outputs \citep{gaze2025reliability}. Inside~$\Omega$ the system is licensed to act on gaze; outside~$\Omega$ the certificate does not apply and the system should fall back to mitigation strategies such as target enlargement or rendering stabilization. This is exactly the operational shape that rung~2 supports.
+
+\begin{figure}[t]
+\centering
+%\includegraphics[width=0.9\textwidth]{fig_gaze_arch}
+\rule{0.9\textwidth}{0.5pt}\\[0.5em]
+\textit{[Placeholder: Time-Aware LSTM with learned exponential decay and sparse-context fusion.]}
+\caption{Time-Aware LSTM architecture for gaze prediction. Hidden state is attenuated by a learned exponential decay before each recurrent update; sparse events and object detections are fused via decayed last-observation carrying. Adapted from \citet{gaze2025reliability}.}
+\label{fig:gaze-arch}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+%\includegraphics[width=0.7\textwidth]{fig_gaze_domain}
+\rule{0.7\textwidth}{0.5pt}\\[0.5em]
+\textit{[Placeholder: scatter of optical flow vs.\ temporal smoothness with the certified domain $\Omega$ shaded.]}
+\caption{Domain-conditioned safe operating region for gaze certification. Inside~$\Omega$ the orientation-and-fixation predicate holds with probability $p_{\text{LB}}\geq 0.82$ at 90\% confidence; outside~$\Omega$ the certificate does not apply. Adapted from \citet{gaze2025reliability}.}
+\label{fig:gaze-domain}
+\end{figure}
 
 \subsection{Cybersickness}
 \label{sec:cybersickness}
-Define cybersickness in the chapter's terms and explain why it is operationally relevant to MR cognitive security. Summarize the predictive or explanatory models, the inputs they use, and the operational decisions they support, and qualify which robustness or safety claims are defensible.
+
+\textbf{What is being measured.} Cybersickness is a cluster of symptoms---nausea, disorientation, oculomotor strain, visual fatigue---that arise during VR or MR exposure and can persist after it ends \citep{rebenitsch2016cybersickness}. The chapter's two cybersickness models both operationalize severity using the Fast Motion Sickness scale (FMS, 0--10) \citep{keshavarz2011fms}, a single-item verbal rating well suited to repeated in-task assessment. Cybersickness is operationally relevant for MR cognitive security in two distinct ways: as a snapshot risk that conditions on the current state of the system, and as a cumulative risk that grows with exposure duration. The two case studies below treat each in turn, and they exercise different rungs of the ladder.
+
+\textbf{Snapshot model: Bayesian network with probabilistic verification (rung~3).} The first model \citep{wu2025cybersickness_bn} learns a hierarchical Bayesian network over twelve system features (latency, brightness, spectral entropy, temporal smoothness, optical flow, etc.), eleven physiological features (heart rate, galvanic skin response, pupil diameter, gaze angle, reaction time, etc.), and one outcome variable (FMS severity). The structure is constrained to follow the causal hierarchy ``System $\to$ Physiology $\to$ Cybersickness'' and is then learned within that constraint via Hill-Climbing. The continuous variables are discretized via clustering, and the resulting discrete network is encoded directly in Dice \citep{holtzen2020dice} so that exact posterior inference is available. On 12-participant data from the VR-Walking corpus, the network achieves 62.12\% exact-label accuracy and 70.35\% within-one-level accuracy, indicating that most errors are off by a single severity level.
+
+The interesting output is not the predictive accuracy; it is the verification step. Dice computes posteriors of the form $P(X_q \mid C)$ exactly. The conditioning set~$C$ may be ``hard'' (e.g., $\text{luminance} > 3$) or ``soft'' (e.g., a probabilistic observation with 90\% confidence on a particular feature value). For example, the framework can compute that when luminance, optical-flow-derived HOG features, and galvanic skin response are all elevated together, the posterior probability of severe cybersickness rises from a baseline of approximately 0.45 to approximately 0.80 \citep{wu2025cybersickness_bn}. This is a calibrated probabilistic risk number, not a binary classification, and it is exactly the form an adaptive system needs in order to threshold an intervention. The guarantee is conditional on the BN being correctly structured; the structure is learned with hierarchical priors that are themselves a domain assumption.
+
+\textbf{Extended-exposure model: Random Forest with MILP verification (rung~4).} The second model \citep{cybersickness2025extended} addresses a different question: what happens to cybersickness over a 30-minute MR session, when system perturbations are sustained and fatigue is allowed to accumulate? Thirty-two participants completed a Tactical Combat Casualty Care training session on a HoloLens~2, with camera-jitter perturbations applied at three intensities after a 4-minute baseline. FMS was sampled at 12 scheduled timepoints, yielding 285 participant--timepoint samples. A Random Forest \citep{breiman2001randomforests} of 600 trees over 24 features---spanning susceptibility (motion-sickness questionnaire, sleep, baseline FMS, migraine history), exposure context (session minute, perturbation intensity), gaze and head dynamics (origin variance, gaze direction, head yaw, angular speed), visual scene statistics (optical flow, contrast, spatial frequency, spectral entropy), and one physiological signal (skin conductance level)---was trained with five-fold band-balanced cross-validation. The model achieves MAE~$=1.005 \pm 0.040$ and $R^2 = 0.812 \pm 0.027$ on the 0--10 scale; at the moderate-symptom threshold $\tau=4$ it has 82.2\% sensitivity and 84.1\% specificity, and at the severe threshold $\tau=6$ it has 82.1\% sensitivity and 98.0\% specificity \citep{cybersickness2025extended}.
+
+The verification question is again distinct from the prediction question. The trained Random Forest is treated as a fixed mathematical object, and VoRF \citep{tornblom2019vorf} encodes it as a mixed-integer linear program whose objective is the worst-case forest output over a bounded input region. The certified result is the following: for every admissible input satisfying $\text{hours\_of\_sleep}\geq 7$, $\text{msq\_score}\leq 2$, $\text{fms\_pre\_min\_4}\leq 2$, $\text{mhq\_score}\leq 11$, and $\text{intensity\_numeric}\leq 2$, the trained forest's output cannot exceed~4. This is a sound, model-conditional, deterministic guarantee on the predictor. Crucially, it is a guarantee about the model output, not about the underlying physiological outcome---a distinction the source paper takes care to flag and one we return to in Section~\ref{sec:evaluation}. Outside the certified region no formal guarantee applies, and the model's empirical risk curves take over: $P(\text{FMS} > 4)$ remains below 35\% through the first 16~minutes and crosses 50\% around minute~28--30, defining a natural intervention window.
+
+\textbf{Why two cybersickness models.} The reason to keep both models in the same case study is pedagogical. They make almost the same kind of prediction (FMS severity) on overlapping kinds of data (system + physiology + gaze in MR), but they answer different operational questions and they sit on different rungs. The BN with Dice is a probabilistic-verification tool: it gives a posterior $P(\text{FMS} > 4 \mid \text{evidence})$ that can be thresholded to trigger an intervention. The Random Forest with VoRF is a model-conditional bounded-output tool: it gives a sound certificate that defines a low-risk \emph{screening region} for users, before the session begins. The two are complementary, not competing.
+
+\begin{figure}[t]
+\centering
+%\includegraphics[width=0.85\textwidth]{fig_bn_structure}
+\rule{0.85\textwidth}{0.5pt}\\[0.5em]
+\textit{[Placeholder: hierarchical Bayesian network with system, physiology, and outcome layers.]}
+\caption{Learned hierarchical Bayesian network over system parameters, physiological responses, and cybersickness severity. Edges respect the constraint that system parameters affect physiology and physiology affects severity within one observation window. Adapted from \citet{wu2025cybersickness_bn}.}
+\label{fig:bn-structure}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+%\includegraphics[width=0.7\textwidth]{fig_temporal_risk}
+\rule{0.7\textwidth}{0.5pt}\\[0.5em]
+\textit{[Placeholder: observed and predicted $P(\text{FMS} > 4)$ as a function of session minute.]}
+\caption{Temporal exceedance risk over a 30-minute extended-exposure session. Observed $P(\text{FMS} > 4)$ stays below 35\% through minute~16 and rises sharply afterward, crossing 50\% near minutes~28--30. Adapted from \citet{cybersickness2025extended}.}
+\label{fig:temporal-risk}
+\end{figure}
 
 \subsection{Cross-Case Synthesis}
 \label{sec:comparison}
-Compare the three cases in terms of observables, latent-state assumptions, validation needs, and operational risk, then generalize the lessons back to the broader cognitive security problem.
+
+The three cases share an architectural shape: a multimodal time-aligned dataset of MR system parameters, head and eye signals, and a self-reported cognitive-state label; a learned predictor; and a verification step layered on top. They differ in which rung of the ladder the verification step sits on, and that difference is what determines the operational claim each case can support. Table~\ref{tab:cross} summarizes the comparison.
+
+\begin{table}[t]
+\centering
+\caption{Cross-case comparison. Each case study uses a different verification rung (Section~\ref{sec:ladder}), reflecting the operational decision the guarantee is designed to support.}
+\label{tab:cross}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{1.7cm}p{2.1cm}p{1.9cm}p{2.3cm}p{2.2cm}}
+\hline
+\textbf{Case} & \textbf{Predictor} & \textbf{Label} & \textbf{Verification rung} & \textbf{Operational use}\\
+\hline
+Engagement & Contrastive LSTM + regression & Likert 1--7 self-report & Rung 4: DeepPoly / Prover & Provably safe input intervals\\
+Gaze & Time-Aware LSTM & Predicate on gaze output & Rung 2: Clopper--Pearson on predicate & Runtime gate for adaptation\\
+Cybersickness (snapshot) & Hierarchical BN & FMS 0--10 (discrete) & Rung 3: Dice on BN posterior & Risk-thresholded intervention\\
+Cybersickness (extended) & Random Forest (600 trees) & FMS 0--10 (continuous) & Rung 4: VoRF MILP on ensemble & Pre-session screening\\
+\hline
+\end{tabular}
+\end{table}
+
+The pattern that emerges is not that one rung is best. It is that the right rung is determined by the operational decision the guarantee has to support. A runtime gate (``can the system trust gaze right now?'') wants a runtime-checkable predicate certificate; an intervention trigger (``has cumulative risk crossed a threshold?'') wants a calibrated posterior probability; a screening decision (``is this user safe to admit to a high-intensity session?'') wants a sound bound on the model's worst-case output.
 
 \section{Evaluation, Guarantees, and Limitations}
 \label{sec:evaluation}
-This section unifies the chapter's language about evidence, confidence, and caution after the reader has seen the concrete case studies. It covers performance metrics and validation strategies (predictive performance, calibration, uncertainty, benchmarking, and replication), distinguishes empirical validation from robustness claims and formal guarantees so the chapter does not overstate what the source papers show, and identifies the dataset limits, domain shift, measurement noise, and participant variability that bound generalization.
+
+This section returns to the ladder of Section~\ref{sec:ladder} now that the case studies have grounded each rung in a concrete example, and discusses three things: how performance is measured, what each rung's guarantee licenses an operational system to do, and the threats to validity that bound how far any of these claims can be carried.
+
+\textbf{Performance metrics.} The case studies use complementary metrics, each suited to the prediction problem. The engagement, gaze, and extended-exposure cybersickness models are regression problems and report mean absolute error (MAE), root-mean-squared error (RMSE), and the coefficient of determination ($R^2$). The cybersickness Bayesian network is an ordinal classification problem and reports exact-label accuracy together with within-one-level (``$\pm 1$'') accuracy, the latter being more informative when the cost of a small severity miscalibration is low. Both cybersickness models additionally report sensitivity and specificity at safety thresholds (FMS~$>4$ for moderate symptoms, FMS~$>6$ for severe), which is the right framing for threshold-crossing detection. The gaze case adds a behavioral coupling metric (Pearson $r$ between gaze dwell duration and mission-completion latency) to make the case that the predictor is measuring something operationally meaningful, not just statistically predictable. Calibration matters too. The extended-exposure cybersickness model is well calibrated at low and high perturbation intensity but predicts $P(\text{FMS} > 4) = 0.475$ in the medium-intensity condition where the observed rate is 0.288---a discrepancy the source paper is careful to label as ``an important limitation of the current model rather than evidence of reliable conservatism'' \citep{cybersickness2025extended}.
+
+\textbf{What each rung licenses an operational system to do.} Reading the four rungs from the perspective of an operational system clarifies what they are useful for. Rung~1 supports \emph{average-case decision support}: ``on this kind of cohort, this kind of model performs at this level on average.'' It is appropriate for deciding whether a model is worth deploying at all, but not for individual-decision authority. Rung~2 supports a \emph{runtime gate}: ``inside the certified domain~$\Omega$, the system is licensed to use the gaze-driven adaptation; outside~$\Omega$ it must fall back to mitigation.'' Rung~3 supports a \emph{risk-threshold action}: ``if the posterior $P(\text{FMS} > 4 \mid \text{evidence})$ exceeds~$\varepsilon$, intervene.'' Rung~4 supports \emph{pre-deployment screening}: ``the model is certified never to predict above~4 over this region of admissible inputs, so users whose pre-session features fall in that region can be admitted to the session with the predictor as a safety net.'' These four shapes of guarantee correspond to four different operational architectures and different placements of the verification step in the deployment pipeline. The chapter's central argument is that none of these four substitutes for the others.
 
 \begin{definition}
-A guarantee in this chapter is described only at the level supported by the cited work, such as empirical robustness, bounded error under stated assumptions, or formal verification of a specified property.
+A \textbf{guarantee} in this chapter is described only at the level supported by the cited work. Specifically: rung~1 is empirical evaluation (average behavior on an exchangeable test set); rung~2 is a statistical certificate on a runtime predicate inside a defined operating region; rung~3 is an exact posterior probability computed under specified evidence on a graphical model; and rung~4 is a sound deterministic bound on the output of a fixed model artifact over a bounded input region.
 \end{definition}
+
+\textbf{Threats to validity.} The chapter's case studies are honest about their limits, and the patterns are worth flagging because they are typical of cognitive-state modeling more broadly. \emph{Cohort size and homogeneity}: the four datasets used here have 11, 12, 30, and 32 participants respectively, with limited age and demographic diversity, so generalization claims should be conservative. \emph{Subject-independent versus within-cohort cross-validation}: the extended-exposure cybersickness model explicitly uses band-balanced (not leave-one-subject-out) cross-validation, so the same participant can appear in both training and test folds; the source paper warns that the reported performance should be read as within-cohort rather than truly subject-independent \citep{cybersickness2025extended}. \emph{Self-report dominance}: engagement, FMS, and SSQ are all self-report scales, with the usual recall and demand-characteristic biases; objective physiological correlates exist but are only partially integrated. \emph{Single-testbed validation}: each model is trained and tested on a single MR scenario; transfer to other tasks (medical, educational, gaming) is currently unverified. \emph{Conservatism of deterministic verification}: the engagement DeepPoly result certifies sound but extremely narrow operating intervals; the bound is correct but the certified region is too small to cover most realistic operating points. This is a structural property of high-capacity NN verification, not a failure of the case study. \emph{Calibration in the medium regime}: the extended-exposure cybersickness model is poorly calibrated at medium perturbation intensity; the source paper explicitly does not interpret this as ``conservatism'' but as a model limitation. Each of these threats is a real bound on what the chapter can claim.
 
 \section{Implications and Future Directions}
 \label{sec:implications}
-This section translates the technical discussion into the textbook's broader themes and identifies where the field is likely to move next. It discusses how the methods support resilience as distinct from mitigation, where trust, credibility, and individual differences shape design and interpretation, and how readers might apply the chapter's ideas in operational, educational, or research settings. It then summarizes the main outstanding technical gaps in data, modeling, validation, and deployment, and frames a small number of forward-looking research questions that reinforce the textbook's role as a roadmap for the next generation.
+
+This section connects the technical material back to the textbook's broader themes and outlines where the field is likely to move next.
+
+\textbf{Resilience versus mitigation.} The textbook draws a useful distinction between making users \emph{resilient} (so they continue to perform well even when the system degrades) and \emph{mitigating} the degradation when it occurs. The methods in this chapter support both, and they do so in characteristic ways. Certified safe operating regions (rungs~2 and~4) support resilience by construction: the system stays inside a region where the cognitive-state property is known to hold, so the user's attention or comfort is preserved without any reactive intervention. Threshold-crossing predictions (rungs~1 and~3) support mitigation: the system acts when an intervention is needed---rendering stabilization, target enlargement, content simplification, a rest break, or in the limit a session abort. All three case studies provide both shapes. Engagement provides certified safe input intervals plus a runtime engagement estimate that can fire a disengagement alert. Gaze provides a certified domain plus a runtime predicate evaluator that triggers fallback when the certificate no longer applies. The cybersickness BN provides a posterior used for threshold-based intervention, while the cybersickness Random Forest with VoRF provides a screening certificate that selects users into safe regions before they ever start a session.
+
+\textbf{Trust, credibility, and individual differences.} The textbook's recurring question about the role of trust, credibility, and individual differences has a sharp empirical answer in this chapter. In the extended-exposure cybersickness model, baseline susceptibility, hours of sleep, and early-session FMS together account for roughly 62\% of the impurity-based feature importance, while runtime gaze and scene features together account for only about 10\% \citep{cybersickness2025extended}. A similar pattern is visible in the engagement case study, where held-out user variability is non-trivial even for a model that performs well on average. The implication is that an MR cognitive-security system that ignores individual differences in baseline susceptibility---and instead assumes that real-time signals are the dominant source of risk---will be miscalibrated in exactly the cases it most needs to handle. The right architecture combines pre-session screening (where individual differences dominate) with runtime certification (where they are smaller but not zero).
+
+\textbf{Practical application.} For a practitioner, the chapter's framing translates into three concrete deployment patterns. Pre-session, run a screening certificate (rung~4 on a pre-session feature vector) to admit users into safe regions of the operating space. During the session, run a runtime gate (rung~2 on measurable scene statistics) that decides whether a gaze-driven or attention-driven adaptation is licensed. In parallel, run an intervention trigger (rung~3 on a probabilistic posterior) that fires when cumulative risk crosses an application-specific threshold. Each of these uses a different rung because each answers a different operational question.
+
+\textbf{Future directions.} A small number of unresolved problems would meaningfully change the field if solved. First, hybrid symbolic--statistical verification. The deterministic verification result for engagement is sound but conservative; the statistical certification result for gaze is actionable but not deductive; combining the two---formal guarantees on a probabilistic property---would let a system carry a sound claim outside the regions where rung~4 alone is feasible. Second, leave-one-subject-out validation as a methodological default. The within-cohort cross-validation in the extended-exposure cybersickness model is a known limitation, and the field would benefit from systematically reporting the gap between within-cohort and subject-independent performance. Third, multimodal physiological integration. Skin conductance is the only physiological signal carried through the extended-exposure cybersickness model; richer physiology (heart-rate variability, EEG power, respiration) is plausibly available on next-generation MR hardware and would allow better separation of attention, workload, and discomfort. Fourth, larger and more diverse cohorts that span age, gender, and prior MR experience would expand the regions over which the certificates in this chapter actually apply. Fifth, cross-testbed transfer: training and certifying on one MR scenario and evaluating on another is largely untested and is the natural next step.
+
+The next generation of researchers entering this field will inherit a field where the predictive-modeling problems have been largely tamed by deep learning, but where the verification and certification problems are still wide open. The four-rung ladder is a useful map of where the open problems live, and the case studies in this chapter are concrete demonstrations of how each rung looks in practice.
 
 \begin{trailer}{Key Points}
-Replace these placeholders with 3 to 5 final teaching takeaways.
 \begin{itemize}
-\item Formal methods clarify assumptions and make claims easier to test.
-\item Engagement, gaze, and cybersickness reveal different modeling tradeoffs.
-\item Evaluation and generalization limits should be stated as clearly as results.
+\item Cognitive security in MR is the property that user attention, comfort, and decision-making remain inside operationally safe regions despite measurable degradation of the rendering and sensing pipeline.
+\item ``Formal methods'' in this setting is not a single technique. The chapter organizes them as a ladder: empirical evaluation, statistical certification of a runtime predicate, probabilistic verification on a graphical model, and deterministic verification of a fixed model artifact.
+\item Each case study exercises a different rung because each answers a different operational question. The gaze case uses Clopper--Pearson certificates; the cybersickness BN uses Dice exact inference; the engagement and cybersickness Random Forest cases use sound verification of a fixed predictor (DeepPoly and VoRF respectively).
+\item The right rung for a deployment is determined by the operational decision the guarantee has to support, not by which technique is mathematically strongest.
+\item Individual differences and pre-session susceptibility dominate runtime signals in the extended-exposure cybersickness data, which means deployments should combine pre-session screening with runtime certification rather than relying on either alone.
 \end{itemize}
 \end{trailer}
 
 \begin{trailer}{Questions}
-\noindent Replace these placeholders with 5 to 10 final discussion or exam questions.
 \begin{enumerate}
-    \item How should cognitive security be defined for the types of models discussed in this chapter?
-    \item What kinds of claims can formal methods support that descriptive summaries alone cannot?
-    \item Why is it important to separate empirical validation from stronger guarantee language?
-    \item How do engagement, gaze, and cybersickness reveal different limits of cognitive-state modeling?
-    \item In what ways do trust, credibility, and individual differences complicate model deployment?
+\item State the four rungs of the empirical-to-formal guarantee ladder introduced in Section~\ref{sec:ladder}, and give one example from this chapter for each rung.
+\item Why does the engagement case study report \emph{sound but extremely narrow} certified intervals after DeepPoly verification? What does this tell you about the limits of deterministic neural-network verification on high-capacity models?
+\item The gaze case study explicitly does \emph{not} attempt formal NN verification. What does it certify instead, and why is a runtime-checkable certificate the right shape for the gaze-driven-adaptation decision?
+\item Compare the two cybersickness models. They predict almost the same thing (FMS severity) but produce different shapes of guarantee. What operational question does each one's guarantee answer?
+\item Pearson correlation between gaze dwell duration and rescue latency in the gaze case is $r=0.504$, $p=0.0053$. What does this correlation tell us about the construct validity of using gaze as a proxy for engagement, and what would you need to show to claim a causal relationship?
+\item In the extended-exposure cybersickness data, baseline susceptibility and sleep account for roughly 62\% of feature importance while runtime gaze and scene features account for about 10\%. What does this imply for the design of a deployment that wants to support both resilience and mitigation?
+\item The cybersickness Random Forest is well calibrated at low and high perturbation intensities but poorly calibrated at medium intensity. Why does this matter operationally, and which rung of the ladder is most affected by miscalibration?
+\item A team proposes to deploy an MR cognitive-security system that issues a single ``safe / unsafe'' light to the user based on the output of any of the predictors in this chapter. Critique the proposal in terms of the four rungs.
 \end{enumerate}
 \end{trailer}
 
-
-%
-
-%\begin{warning}{Attention}
-%If you want to emphasize complete paragraphs of texts in an |Attention| we recommend to
-%use this functionality.
-%\end{warning}
-
-%\begin{tips}{Tips}
-% If you need to use tips.
-%\end{tips}
-
 \section{Further Reading}
-Use this section for recommended readings that are useful for students but are not cited directly in the chapter text. Replace the examples below once the source base for the chapter is stable.
 \begin{enumerate}\leftskip3pt\itemsep6pt
-\item Add one or two broad readings on cognitive security foundations.
-\item Add one or two readings on formal methods, probabilistic reasoning, or decision support.
-\item Add one or two readings that extend beyond the cited application papers.
+\item \citet{rebenitsch2016cybersickness} for a broad review of cybersickness in applications and visual displays, and \citet{yang2022cybersicknessml} for a more recent systematic review of machine-learning approaches to cybersickness prediction.
+\item \citet{plopski2023eye} for a comprehensive survey of gaze interaction and eye tracking in head-worn extended reality.
+\item \citet{singh2019deeppoly} for the abstract-interpretation foundation of the DeepPoly verifier used in the engagement case study, and \citet{tornblom2019vorf} for the MILP-based VoRF framework used to certify the cybersickness Random Forest.
 \end{enumerate}
 
 \printbibliography
