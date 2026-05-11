@@ -97,36 +97,189 @@ A reader who keeps the four rungs straight will already extract more value from 
 
 Each of the three case studies below takes the same shape. We define the cognitive state of interest, describe the experimental setup, sketch the predictor briefly, report the headline empirical numbers, and then explain which rung of the ladder in Section~\ref{sec:ladder} the case actually exercises and what the resulting guarantee says. A short cross-case synthesis closes the section.
 
+\subsection{Cybersickness}
+\label{sec:cybersickness}
+
+\textbf{What cybersickness is and why it belongs in cognitive security.}
+Cybersickness is a cluster of symptoms including nausea, disorientation, oculomotor strain, and visual fatigue that arise during virtual or mixed reality exposure and can persist well after the session ends \citep{rebenitsch2016cybersickness}. The symptoms closely resemble motion sickness but are triggered not by physical movement in the real world but by a mismatch between what the visual system perceives inside the headset and what the vestibular and proprioceptive systems report about the body's actual position. When the rendering pipeline introduces latency, drops frames, or injects camera jitter, the visual scene shifts in ways the body's balance sensors did not anticipate. The brain interprets this conflict as a threat, and the resulting physiological response is what we call cybersickness.
+
+Three broad categories of factors drive cybersickness in MR systems (adapted from \cite{}). First, adversarial manipulations are deliberate modifications to system parameters such as display brightness, latency, or field of view that exploit known perceptual vulnerabilities to induce disorientation. Second, system limitations including tracking drift, sensor noise, rendering instability, and network latency create inconsistencies between virtual stimuli and human perception, amplifying discomfort. Third, environmental scene factors such as high object density, rapid scene motion, abrupt contrast gradients, and depth perception conflicts overload sensory processing and worsen symptoms. In safety-critical MR deployments all three categories can be present simultaneously, making reliable cybersickness modeling both challenging and essential.
+
+From a cognitive security perspective, cybersickness is not merely a comfort problem. It is a degradation of the cognitive state from which decisions must be made. A military trainee experiencing moderate disorientation is less likely to triage a casualty correctly. A surgical resident whose gaze is compromised by visual fatigue may miss a critical anatomical landmark. A search-and-rescue operator struggling with nausea may fail to recognize an anomaly in a synthetic terrain model. The loss of cognitive integrity is the real threat, and cybersickness is one of its causes. This places cybersickness squarely within the cognitive security framing introduced in Section~\ref{sec:foundations}: the property that user attention, comfort, and decision-making remain inside operationally safe regions despite measurable degradation of the sensing and rendering pipeline.
+
+\textbf{How cybersickness is measured.}
+Both models in this case study operationalize cybersickness severity using the Fast Motion Sickness scale (FMS, 0 to 10) \citep{keshavarz2011fms}, a single-item verbal rating that participants report by briefly interrupting the task to give a number. The scale is particularly well suited to repeated in-task assessment because it takes only a few seconds to collect and does not require a multi-item questionnaire. A score of zero means no discomfort at all, and a score of ten means the most severe discomfort imaginable; intermediate values track the progression from mild awareness through moderate nausea to severe incapacitation. A threshold of FMS greater than four is commonly used in the MR safety literature to define a moderate-symptom event, and a threshold of FMS greater than six defines a severe event.
+
+The FMS scale captures the user's subjective experience, which is the operationally relevant quantity, but subjective reporting has known limits. Users differ in their baseline sensitivity to motion, their willingness to report discomfort early, and their interpretation of the numeric scale. These individual differences are not noise to be averaged away; they turn out to be among the strongest predictors of cumulative cybersickness risk, a point the extended-exposure model makes explicit.
+
+\textbf{Two timescales, two models.}
+Cybersickness presents itself across two operationally distinct timescales. At the snapshot timescale, risk depends on the current configuration of the rendering pipeline: a sudden increase in display brightness, a burst of camera jitter, or an abrupt rise in scene complexity can elevate symptoms within seconds. At the extended-exposure timescale, risk accumulates over a session as fatigue compounds initial discomfort, and individual susceptibility characteristics determined before the user ever puts on the headset account for much of the variance. These two timescales call for different modeling strategies.
+
+The first model addressed here (adapted from \cite{}) addresses the snapshot problem using a Bayesian Network verified through exact probabilistic inference, sitting on Rung~3 of the guarantee ladder. The second model (adapted from \cite{}) addresses the extended-exposure problem using a Random Forest regressor certified through mixed-integer linear programming, sitting on Rung~4. The two are not competing approaches to the same question; they are complementary tools that answer different operational questions and produce different forms of safety evidence.
+
+\textbf{Snapshot model: Bayesian Network with probabilistic verification (Rung~3).}
+The first model builds a hierarchical Bayesian Network over system-level features, human physiological signals, and cybersickness severity (adapted from \cite{}). The organizing insight is a causal hierarchy: system parameters influence the body's physiological responses, and those physiological responses drive cybersickness severity. This hierarchy is encoded as a directed acyclic graph in which system parameter nodes have no incoming edges, physiological response nodes receive edges only from system parameters, and the FMS severity node receives edges only from physiological signals. The joint distribution over all variables factorizes as:
+
+\begin{equation}
+P(\mathbf{S}, \mathbf{H}, X_q) = \prod_i P(S_i)\,\prod_j P(H_j \mid \mathrm{Pa}(H_j))\,P(X_q \mid \mathrm{Pa}(X_q)),
+\end{equation}
+
+where $\mathbf{S} = (S_1, \dots, S_m)$ are system parameters including luminance, spectral entropy, histogram-of-oriented-gradient (HOG) scene complexity features, and temporal smoothness; $\mathbf{H} = (H_1, \dots, H_k)$ are physiological features including heart rate variability, galvanic skin response (GSR), gaze error angle, pupil diameter, and reaction time; and $X_q$ is cybersickness severity.
+
+Structure learning used the Hill-Climbing algorithm with the hierarchical constraints enforced throughout, so that learned dependencies never violate the causal ordering. After learning, node reduction removed variables with no directed path to the FMS outcome node, resulting in a compact 12-node network whose inference complexity is tractable in real time. Continuous features were discretized into five bins using K-means clustering before learning, enabling exact rather than sampling-based inference.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.7\linewidth]{figures/structure_learned.png}
+\caption{Structure of the learned hierarchical Bayesian Network. System-level features (orange nodes) influence physiological responses (blue nodes), which in turn drive cybersickness severity measured by FMS (green node). Directed edges encode the learned probabilistic dependencies under the imposed causal hierarchy. Adapted from \cite{}.}
+\label{fig:bn-structure}
+\end{figure}
+
+The network was evaluated on data from 32 participants performing a 15-minute virtual reality walking task. It achieved 62.12\% exact-label accuracy and 83.55\% within-one-level accuracy across five participant-level cross-validation folds, meaning that most errors were off by a single severity level rather than grossly misclassified. The learned network structure is shown in Figure~\ref{fig:bn-structure}; system parameters form the top tier, physiological signals form the middle tier, and FMS severity occupies the bottom.
+
+The critical output of this model is not the accuracy number. It is the verification step. Because all variables are discrete and the network has been compiled into the Dice probabilistic programming language \citep{holtzen2020dice}, the posterior probability of any Boolean property can be computed exactly. Two kinds of evidence can be applied. Hard conditioning fixes a variable to a known range, for example requiring that luminance exceeds discretized level three. Soft conditioning specifies that a variable satisfies a condition with some stated probability, for example that scene complexity reaches level four with 90\% confidence. Both forms of evidence update the joint distribution and propagate through the learned network to yield a calibrated posterior probability over FMS severity.
+
+Figure~\ref{fig:system-impact} shows how individual system parameters influence the posterior probability of elevated FMS. Luminance and HOG-based scene complexity features emerge as the parameters with the greatest relative effect, while temporal smoothness and spectral entropy show negligible standalone impact. This finding directly informs which parameters a safety-aware MR system should monitor or constrain.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.6\linewidth]{figures/system_params_impact_seaborn.png}
+\caption{Impact of individual system parameters on the posterior probability of elevated FMS. Luminance and HOG-based scene complexity show the greatest relative influence on cybersickness risk. Temporal smoothness and spectral entropy contribute minimally as standalone indicators. Adapted from \cite{}.}
+\label{fig:system-impact}
+\end{figure}
+
+The most operationally significant verification result concerns the combined effect of multiple high-risk parameters. When luminance, HOG scene complexity, and galvanic skin response are all constrained to discretized levels of at least four simultaneously, the posterior probability of severe cybersickness (FMS greater than four) rises from a baseline of approximately 45\% to approximately 81\% (adapted from \cite{}). Figure~\ref{fig:fms-shift} shows this shift in the FMS distribution. In practical terms, roughly four out of five users would experience significant discomfort under those combined conditions. This is not a prediction about a particular user in a particular session; it is a calibrated posterior derived from the learned joint distribution, and it is exactly the form an adaptive system needs to decide when to intervene.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.6\linewidth]{figures/fms_comparison.png}
+\caption{Shift in the FMS severity distribution under elevated conditions. When luminance, scene complexity (HOG features), and galvanic skin response are simultaneously constrained to high discretized levels, the distribution shifts markedly toward severe cybersickness outcomes (dark blue) compared to the baseline distribution (light blue). Adapted from \cite{}.}
+\label{fig:fms-shift}
+\end{figure}
+
+The framework also supports the inverse inference direction: given that a safety threshold must be met with high probability, what operational constraints does that impose on physiological signals? Enforcing that FMS remains at or below four with 95\% probability shifts the posterior distribution of galvanic skin response strongly toward lower levels, as shown in Figure~\ref{fig:gsr-constraint}. The result is a formally derived operational guideline: maintaining galvanic skin response within discrete levels one through three is a necessary condition for safe operation under those parameter settings. This reversal of inference direction, from a desired safety property back to required physiological bounds, is a capability that purely predictive models cannot provide.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.6\linewidth]{figures/gsr_comparison.png}
+\caption{Posterior distribution of galvanic skin response under a 95\% safety constraint on FMS. Enforcing low cybersickness probability eliminates high-risk GSR levels from the feasible range, providing a formally derived operational bound for real-time physiological monitoring. Adapted from \cite{}.}
+\label{fig:gsr-constraint}
+\end{figure}
+
+The guarantee sits on Rung~3 of the ladder. It is an exact posterior probability computed under specified evidence on a graphical model whose causal structure encodes a domain assumption about how system parameters, physiology, and cybersickness relate. The strength of the guarantee is conditional on that structural assumption being correct, which is why Rung~3 is distinct from the deterministic bound that Rung~4 provides.
+
+\textbf{Extended-exposure model: Random Forest with MILP verification (Rung~4).}
+The second model (adapted from \cite{}) addresses a qualitatively different question: what happens to cybersickness across a 30-minute MR session when perturbations are sustained, fatigue accumulates, and individual susceptibility shapes much of the variance? The experimental setting was a Tactical Combat Casualty Care training scenario on a HoloLens~2. Thirty-two participants completed approximately 30-minute sessions that included controlled camera-jitter perturbations at three intensity levels (Low, Medium, High) applied after a four-minute baseline. FMS was sampled at twelve scheduled timepoints, yielding 285 usable participant-timepoint samples.
+
+A Random Forest regressor \citep{breiman2001randomforests} of 600 trees was trained over 24 features spanning five families. Susceptibility and pre-perturbation baseline variables captured individual differences in vulnerability: hours of sleep, a motion-sickness questionnaire score, a migraine-history score, and baseline simulator sickness subscales. Exposure context features encoded session elapsed time and perturbation intensity level. Gaze and head dynamics summarized report-aligned windows of 3D gaze origin, gaze direction, head position, and derived angular kinematics. Visual scene statistics captured optical flow, contrast, spectral entropy, and spatial frequency from the rendering stream. Skin conductance level provided a single physiological arousal signal.
+
+The model was evaluated under five-fold band-balanced cross-validation, which distributed samples proportionally across low, mid, and high FMS bands in each fold to ensure balanced coverage of the discomfort range. It achieved a mean absolute error of $1.005 \pm 0.040$ on the 0 to 10 FMS scale and explained more than 80\% of the variance in self-reported discomfort ($R^2 = 0.812 \pm 0.027$). At the moderate-symptom threshold of FMS greater than four, the model correctly identified 82.2\% of threshold-crossing episodes with 84.1\% specificity. At the severe-symptom threshold of FMS greater than six, specificity rose to 98.0\%, indicating very few false alarms for extreme discomfort detection.
+
+Temporal analysis revealed an important structure in how risk evolves across a session. The probability of predicted FMS exceeding four remained below 35\% through the first 16 minutes of the session and then rose sharply, crossing 50\% near minutes 28 to 30. This trajectory defines a natural intervention window: the system can operate with reasonable confidence that symptoms remain controlled through mid-session, but late-session risk requires proactive attention well before symptoms become severe.
+
+The verification step applied the VoRF framework \citep{tornblom2019vorf} to the exported Random Forest. VoRF encodes every decision tree in the ensemble as a set of mixed-integer linear constraints and formulates an optimization problem whose objective is the worst-case forest output over a bounded input region. Solving this problem exactly yields a model-conditional deterministic certificate.
+
+The certified region that satisfies FMS at or below four requires all of the following conditions to hold: hours of sleep of at least seven, a motion-sickness questionnaire score of at most two, a pre-session FMS reading at minute four of at most two, a migraine-history score of at most eleven, and a perturbation intensity of at most moderate. When all five conditions are met, no admissible combination of the remaining features can drive the model output above four. This is a sound guarantee about the model's behavior over every point in that region, not just on average. Outside this region, no formal certificate applies. Regions outside the certificate are not declared unsafe; the absence of a certificate simply means the formal guarantee no longer holds.
+
+The feature importance structure carries a key message for cognitive security. Susceptibility and pre-session baseline variables together account for approximately 62\% of impurity-based importance across the ensemble, while runtime gaze and visual scene features contribute roughly 10\%. Session elapsed time contributes an additional meaningful share. Who the user is matters more than what the rendering pipeline is doing at any given moment, at least for predicting cumulative FMS across a 30-minute session. A safety system that relies only on real-time scene statistics will systematically underestimate vulnerability in high-susceptibility users, precisely the population that most needs early intervention.
+
+\textbf{Two models, two operational shapes, one cognitive security framework.}
+Keeping both models in a single case study is not redundant; it is pedagogically essential because the two models produce different forms of safety evidence suited to different points in the deployment pipeline.
+
+The Bayesian Network model produces a calibrated posterior probability over FMS severity given observed or hypothesized evidence about current system and physiological conditions. This is a risk-quantification tool designed for in-session use. When the posterior probability of FMS exceeding four rises above an application-specific threshold, the system can trigger an adaptive response: reducing display brightness, simplifying scene content, recommending a brief rest, or in the extreme case initiating a session abort. The formal guarantee is probabilistic and conditioned on the causal structure of the network. It is updated continuously as new evidence arrives, which makes it well matched to the dynamic character of in-session risk.
+
+The Random Forest model with VoRF certification produces a deterministic bound on the model output over a pre-specified region of admissible inputs. This is a screening tool designed for pre-session use. Before the session begins, the system can check whether the user's susceptibility profile and planned exposure intensity fall within the certified safe region. If they do, the model provides a sound guarantee that predicted FMS cannot reach the moderate-symptom threshold given the other features remain within their observed admissible ranges. This guarantee is binary: the user either satisfies the certified conditions or does not, and no probability threshold needs to be calibrated.
+
+The two tools sit on different rungs of the guarantee ladder for reasons that reflect their operational purposes. A posterior probability (Rung~3) is the right output format for an in-session risk-thresholded intervention because it quantifies uncertainty and can be updated as evidence changes. A deterministic worst-case bound (Rung~4) is the right output format for a pre-session screening decision because it eliminates uncertainty about whether the threshold can be exceeded: the model is either certified or it is not, and the certificate is valid for every admissible input in the region. Neither substitutes for the other. A complete cognitive-security framework for MR cybersickness needs both: screening to select users into safe regions before exposure begins, and continuous probabilistic monitoring to detect when cumulative risk is approaching the intervention threshold during the session.
+
 \subsection{Engagement}
 \label{sec:engagement}
 
-\textbf{What is being measured.} Engagement here is operationalized as sustained attention to task-relevant virtual content under cognitive stress \citep{engagement2026mr}. The construct is deliberately narrower than ``presence'' or ``immersion''; it is the property that the user remains attentively coupled to the task even when the MR pipeline is being perturbed. Engagement is reported on a 1--7 Likert scale, sampled once per minute during a session; this gives a fine-grained-enough signal to track within-session change without overwhelming the participant with self-report.
+\textbf{What engagement is and why it belongs in cognitive security.}
+Engagement, in the MR setting used here, is a latent cognitive state that reflects sustained attention to task-relevant virtual content \citep{engagement2026mr}. The construct is deliberately narrower than several related ones with which it is sometimes confused. \emph{Presence} captures the subjective feeling of ``being there'' in a virtual environment. \emph{Immersion} refers to properties of the system and display, such as field of view and rendering fidelity, that determine the perceptual envelope of the experience. \emph{Workload} characterizes cognitive demand, regardless of whether the user is actually attending to the relevant content. Engagement, by contrast, is the property that the user remains behaviorally and cognitively coupled to the task even when the rendering and interaction pipeline are being perturbed. It is influenced jointly by human-level features (gaze patterns, head dynamics, prior MR familiarity) and system-level parameters (latency, resolution, luminance), and by their temporal evolution within a session.
 
-\textbf{Setup.} Eleven participants completed a ten-minute hostage-rescue scenario on a HoloLens~2. The session was divided into ten one-minute intervals. In each interval the system was perturbed with a step change in latency: ``low'' (45--60~FPS), ``medium'' (20--45~FPS), or ``high'' (5--20~FPS), pseudo-randomized across intervals. At the end of each interval the participant rated their engagement. The dataset is small but tightly controlled, with multimodal telemetry continuously recorded throughout.
+From a cognitive security standpoint, engagement is not a user-experience concern; it is the operational state from which decisions get made. A pilot trainee whose attention drifts during a synthetic instrument approach is not learning the procedure. A surgical resident who disengages from the virtual patient is not building the perceptual habits the simulation is designed to instill. A search-and-rescue operator who stops orienting to objects of interest is not extracting the situational awareness the MR interface is meant to deliver. This case study treats engagement as a measurable cognitive-security state and asks how MR systems can both estimate it under stress and provide formal guarantees about the conditions under which it is preserved.
 
-\textbf{Predictor.} The predictor is a two-phase architecture. In the first phase, an LSTM \citep{hochreiter1997lstm} encodes variable-length multimodal trajectories into a 128-dimensional embedding using a contrastive objective \citep{khosla2020supervised}. The contrastive loss is a soft InfoNCE in which the similarity weight between two trajectories is determined by the distance between their engagement ratings, so trajectories with similar engagement are pulled together in embedding space. In the second phase the encoder is frozen and a two-layer feedforward head regresses from the embedding to a continuous engagement score, with a variance-regularized mean-squared-error loss that penalizes uneven error across rating levels. The observable inputs span human signals (binocular eye tracking, head 6-DoF pose, gaze-target encodings) and system signals (latency indicator, nine video-derived scene descriptors including optical-flow magnitude, spatial frequency, spectral entropy, brightness, and contrast).
+A useful framing for those guarantees is the \emph{cognitive attack}: an adversarial or system-level perturbation of the MR interaction loop that degrades attention, situational awareness, or task execution \citep{engagement2026mr}. We focus on induced latency as a concrete instance because it is operationally relevant in MR, directly tied to rendering and interaction fidelity, and easily injected in controlled study. Other cognitive attacks (luminance shifts, jitter, tracking dropouts) follow the same template.
 
-\textbf{Empirical results (rung~1).} Under label-stratified four-fold cross-validation, the model achieves mean absolute error MAE~$=0.94 \pm 0.24$ on the 1--7 scale; on three users held out from training and cross-validation it achieves MAE~$=0.84$. Three baselines on the same temporally averaged features are weaker (Ridge: 1.09, SVR: 1.24, XGBoost: 0.96), supporting the choice of a sequence model with learned representations \citep{engagement2026mr}. Permutation feature importance indicates that the predictor uses both system and human signals: latency dominates, but spatial frequency, temporal smoothness, gaze direction, and luminance all contribute meaningfully.
+\textbf{How engagement is measured.}
+Engagement is reported on a 1--7 Likert scale, sampled once per minute through an in-headset prompt. A score of~1 denotes complete disengagement from the MR content and~7 denotes full engagement. The single-item, minute-level format is well suited to repeated in-task assessment because it does not interrupt the task for long, but it inherits the usual limits of subjective self-report: users differ in their reporting style, the label distribution is uneven across both individuals and engagement levels, and there is no objective physiological ground truth against which the rating can be cross-validated. The sparsity and ordinality of the label shape two downstream choices that the predictor below makes explicit: contrastive pretraining as a way to learn structure from weak supervision, and a per-engagement-level evaluation rather than a single pooled error metric.
 
-\textbf{Verification (rung~4).} The trained regressor was passed to Prover \citep{ryou2021prover}, which uses DeepPoly \citep{singh2019deeppoly} to compute sound bounds on the network's output over a bounded input region. The certification question is: ``for all inputs in this region, does the predicted engagement stay above a threshold?'' The procedure returns sound \emph{safe operating intervals} on the input variables. These intervals are sound but extremely narrow---for example, the certified luminance interval for an engagement-${\geq}5$ predicate is~[110.2, 111.0]. The conservatism is not a bug in DeepPoly; it is a consequence of asking a worst-case question over a region in which both system parameters and uncontrolled user features can vary. The honest reading is that current deterministic NN verification can certify a useful property only over very small, very tightly constrained regions of input space. This is exactly the limitation that motivates the chapter's other rungs.
+\textbf{The cognitive-attack setup.}
+The study \citep{engagement2026mr} ran on a Microsoft HoloLens~2 in a controlled room-scale setup. Eleven male college students aged 25--32 each completed a single ten-minute mixed-reality hostage-rescue scenario containing hostages, enemies, fires, medical kits, and weapons. Participants were free to move, inspect the scene, and interact with virtual elements, but no explicit score or time-critical objective was imposed. The session was divided into ten one-minute intervals. In each interval the system was perturbed with a step change in rendering latency, drawn pseudo-randomly from three intensities: low (45--60~FPS), medium (20--45~FPS), and high (5--20~FPS). The next latency level was applied immediately after the participant submitted the engagement rating for the previous interval. Throughout each session, high-frequency multimodal telemetry was recorded continuously: binocular eye tracking (3D eye positions, gaze directions, and ocular rotations), gaze-target encodings identifying the object category being attended to, and 6-DoF head pose. The system stream contributed a latency-perturbation indicator and nine video-derived scene descriptors --- optical-flow magnitude, histogram-of-oriented-gradients features, edge intensity, temporal smoothness, brightness flicker, spectral entropy, spatial frequency, luminance, and contrast. These streams were sampled at their native rates and later aligned to the minute-wise engagement labels. The resulting dataset is small but tightly controlled, with both human and system signals densely sampled across all three perturbation conditions.
+
+\textbf{Predictor: a two-phase contrastive encoder with a regression head.}
+The predictor is a two-phase architecture designed for this regime of sparse ordinal labels and entangled multimodal inputs \citep{engagement2026mr}. In the first phase, an LSTM encoder \citep{hochreiter1997lstm} processes the variable-length multimodal trajectory $X = \{x_1, \ldots, x_T\}$, where each $x_t$ stacks the human and system features at time $t$, and maps it through masked average pooling and an L2-normalized projection into a 128-dimensional embedding $z$. The encoder is trained with a \emph{soft InfoNCE} objective \citep{khosla2020supervised} that uses the ordinal proximity of engagement labels as supervision: for two trajectories $i$ and $j$ with reported scores $y^{(i)}, y^{(j)} \in \{1,\dots,7\}$, the similarity weight is $\omega_{ij} \propto \exp(-|y^{(i)} - y^{(j)}|/\tau_s)$, so trajectories with similar engagement are pulled together in the embedding space and dissimilar ones pushed apart. With cosine similarity $\mathrm{Sim}(z_i, z_j)$ between embeddings, the contrastive loss takes the form
+\begin{equation}
+\mathcal{L}_{\text{con}} \;=\; -\sum_{i} \omega_{ij}\,\log\!\frac{\exp\!\bigl(\mathrm{Sim}(z_i, z_j)/\tau\bigr)}{\sum_{k \neq i} \exp\!\bigl(\mathrm{Sim}(z_i, z_k)/\tau\bigr)},
+\end{equation}
+where $\tau > 0$ is a separate temperature for the embedding space. In the second phase the encoder is frozen and a two-layer feedforward regression head $\hat{y} = W_2\,\mathrm{ReLU}(W_1 z + b_1) + b_2$ maps each embedding to a continuous engagement score in $[1, 7]$. The training objective combines mean-squared error with a variance regularizer over per-engagement-level errors, so the model does not concentrate accuracy on mid-scale ratings, and stratified mini-batch sampling keeps rare engagement levels represented in every batch. Figure~\ref{fig:engagement-overview} summarizes the full pipeline from multimodal MR telemetry through the contrastive encoder and regression head to the downstream verification step.
 
 \begin{figure}[t]
 \centering
-%\includegraphics[width=0.9\textwidth]{fig_engagement_architecture}
-\rule{0.9\textwidth}{0.5pt}\\[0.5em]
-\textit{[Placeholder: two-phase contrastive LSTM encoder followed by a regression head.]}
-\caption{Engagement predictor architecture. Phase~1 trains an LSTM encoder under a soft InfoNCE objective so that trajectories with similar engagement ratings are mapped to nearby embeddings. Phase~2 freezes the encoder and trains a regression head with a variance-regularized loss. Adapted from \citet{engagement2026mr}.}
-\label{fig:engagement-arch}
+\includegraphics[width=\linewidth]{figures/engagement_teaser.pdf}
+\caption{Overview of the engagement case study. Multimodal MR signals (eye tracking, head motion, scene dynamics, and system latency) feed a contrastive LSTM encoder that learns engagement-aligned embeddings under a cognitive attack (here, latency perturbation). A calibrated regressor maps embeddings to a continuous engagement score, and the trained model is analyzed with formal verification to derive conservative operating envelopes for controllable MR parameters. Adapted from \citet{engagement2026mr}.}
+\label{fig:engagement-overview}
 \end{figure}
 
-\begin{figure}[t]
+\textbf{Empirical results (Rung~1).}
+Under label-stratified four-fold cross-validation, the model achieves a mean absolute error of $0.94 \pm 0.24$ on the 1--7 engagement scale, ahead of pooled-feature baselines on the same splits (Ridge 1.09, SVR 1.24, XGBoost 0.96). On three users excluded entirely from training and cross-validation, the model reaches MAE $0.84$ across 1{,}200 holdout samples --- \emph{better} than the cross-validation average. That gap is the cognitive-security signal that matters here: the contrastive embedding suppressed user-identity nuisance variation rather than memorizing the training participants, which is exactly the property a deployment-time predictor needs.
+
+Table~\ref{tab:engagement-importance} reports the top ten features by permutation importance, the increase in MAE when each feature is independently shuffled at test time \citep{engagement2026mr}. The injected latency intensity is by far the strongest single feature, as expected for a cognitive-attack study, but it does not stand alone. Scene descriptors (spatial frequency, temporal smoothness, luminance) and gaze direction features (right gaze $z$, right gaze $y$) each contribute meaningfully, so the predictor is reading both the attack channel and how the user visually and behaviorally responds to it. This matters for cognitive security: a system that watches only its own perturbations is blind to whether those perturbations actually disrupted the user, whereas a system that watches the user's response alone misses the controllable system parameters that triggered the disruption in the first place.
+
+\begin{table}[t]
 \centering
-%\includegraphics[width=0.7\textwidth]{fig_engagement_tsne}
-\rule{0.7\textwidth}{0.5pt}\\[0.5em]
-\textit{[Placeholder: t-SNE projection of trajectory embeddings, colored by ground-truth engagement level.]}
-\caption{Two-dimensional projection of the 128-dimensional embeddings learned during contrastive pretraining. Trajectories at the extremes of the engagement scale separate cleanly. Adapted from \citet{engagement2026mr}.}
-\label{fig:engagement-tsne}
-\end{figure}
+\caption{Top ten features for the engagement regressor by permutation importance. The importance score is the increase in MAE when the feature is permuted at test time; larger values indicate features the model relies on more heavily. Adapted from \citet{engagement2026mr}.}
+\label{tab:engagement-importance}
+\footnotesize
+\setlength{\tabcolsep}{8pt}
+\begin{tabular}{lr}
+\hline
+\textbf{Feature} & \textbf{Importance (MAE Increase)}\\
+\hline
+AttackIntensity              & 1.0324\\
+Feature\_spatial\_frequency    & 0.4454\\
+Feature\_temporal\_smoothness  & 0.4145\\
+RightGazeDirectionZ          & 0.1865\\
+RightGazeDirectionY          & 0.1688\\
+Feature\_luminance            & 0.1216\\
+ObjectCount\_encoded          & 0.0328\\
+Feature\_spectral\_entropy     & 0.0057\\
+HeadRotationY                & 0.0055\\
+LeftEyePositionZ             & 0.0045\\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Verification (Rung~4).}
+The empirical numbers above tell us how the model behaves \emph{on average}. They do not tell an MR system designer whether a given operating envelope of system parameters is \emph{guaranteed} to keep engagement above a desired level. That is a Rung~4 question, and it is the formal-methods contribution of this case study. Given the trained engagement regressor $f$ and a bounded region $I$ of MR system-parameter values, the verification question is whether the model's prediction stays above an engagement threshold $\tau$ for every input in that region:
+\begin{equation}
+\forall\, x \in I:\; f(x) \;\geq\; \tau.
+\end{equation}
+We report two natural thresholds. The first, $\tau = 4$, marks the midpoint of the 1--7 scale and separates distracted from attentive states. The second, $\tau = 5$, the second-highest score actually observed in the study, represents strong engagement. Verifying the predicate at both thresholds therefore captures both an acceptable and a higher standard of cognitive coupling. The verifier is Prover \citep{ryou2021prover}, which discharges the property by propagating DeepPoly relational abstractions \citep{singh2019deeppoly} through the unrolled LSTM and its nonlinear gates. If the property holds across the polyhedral over-approximation of the region, the certificate is sound; if a counterexample is found, the property fails. Table~\ref{tab:engagement-verification} reports the resulting certified intervals over the four most influential controllable system parameters.
+
+\begin{table}[t]
+\centering
+\caption{Verified safety intervals for the engagement regressor using DeepPoly \citep{singh2019deeppoly} and Prover \citep{ryou2021prover}. Each cell reports a bounded range of an MR system parameter for which the predicted engagement is provably at least $\tau$ over every admissible input in the region. Intervals are sound but tight, reflecting the worst-case combination of stochastic user behavior and controllable system parameters. Adapted from \citet{engagement2026mr}.}
+\label{tab:engagement-verification}
+\footnotesize
+\setlength{\tabcolsep}{8pt}
+\begin{tabular}{lcc}
+\hline
+\textbf{System Parameter} & \textbf{Engagement $\geq 4$} & \textbf{Engagement $\geq 5$}\\
+\hline
+Luminance           & $[110.2,\,111.0]$ & $[109.8,\,110.6]$\\
+Optical Flow        & $[0.021,\,0.024]$ & $[0.019,\,0.022]$\\
+Spatial Frequency   & $[943.5,\,944.2]$ & $[944.0,\,945.2]$\\
+Temporal Smoothness & $[7.1,\,8.0]$     & ---\\
+Spectral Entropy    & ---               & $[7.01,\,7.05]$\\
+\hline
+\end{tabular}
+\end{table}
+
+The certified intervals are extremely tight: luminance is confined to a window of less than a single unit, optical flow to a few thousandths. This conservatism is not a bug in DeepPoly. It is a structural consequence of asking a deterministic worst-case question over a region in which much of the input is not controllable. The engagement model receives 40 inputs at every timestep, mixing controllable system parameters (latency, luminance, scene complexity) with uncontrolled user features (gaze stability, blink frequency, head motion). To certify the predicate for \emph{all} admissible inputs in a region, the verifier must absorb the worst-case user behavior as well as the worst-case system perturbation, and that worst case is what shrinks the certified slice of the input space.
+
+The right reading of Table~\ref{tab:engagement-verification} is therefore not that deterministic NN verification is broken. It is that soundness has a price, and the price is paid in the size of the certified region. This is the chapter's central pedagogical move: the gaze case study in Section~\ref{sec:gaze} trades soundness for a statistical certificate over a runtime-checkable domain (Rung~2), and the cybersickness Bayesian network in Section~\ref{sec:cybersickness} uses probabilistic verification on a learned graphical model (Rung~3). The engagement case shows what soundness costs in practice on a high-capacity neural network; the next two cases show what techniques fill the gap when sound deterministic verification produces certified ranges that are too narrow to deploy.
 
 \subsection{Gaze}
 \label{sec:gaze}
@@ -159,38 +312,7 @@ The framework explicitly does \emph{not} claim formal NN verification. The autho
 \label{fig:gaze-domain}
 \end{figure}
 
-\subsection{Cybersickness}
-\label{sec:cybersickness}
 
-\textbf{What is being measured.} Cybersickness is a cluster of symptoms---nausea, disorientation, oculomotor strain, visual fatigue---that arise during VR or MR exposure and can persist after it ends \citep{rebenitsch2016cybersickness}. The chapter's two cybersickness models both operationalize severity using the Fast Motion Sickness scale (FMS, 0--10) \citep{keshavarz2011fms}, a single-item verbal rating well suited to repeated in-task assessment. Cybersickness is operationally relevant for MR cognitive security in two distinct ways: as a snapshot risk that conditions on the current state of the system, and as a cumulative risk that grows with exposure duration. The two case studies below treat each in turn, and they exercise different rungs of the ladder.
-
-\textbf{Snapshot model: Bayesian network with probabilistic verification (rung~3).} The first model \citep{wu2025cybersickness_bn} learns a hierarchical Bayesian network over twelve system features (latency, brightness, spectral entropy, temporal smoothness, optical flow, etc.), eleven physiological features (heart rate, galvanic skin response, pupil diameter, gaze angle, reaction time, etc.), and one outcome variable (FMS severity). The structure is constrained to follow the causal hierarchy ``System $\to$ Physiology $\to$ Cybersickness'' and is then learned within that constraint via Hill-Climbing. The continuous variables are discretized via clustering, and the resulting discrete network is encoded directly in Dice \citep{holtzen2020dice} so that exact posterior inference is available. On 12-participant data from the VR-Walking corpus, the network achieves 62.12\% exact-label accuracy and 70.35\% within-one-level accuracy, indicating that most errors are off by a single severity level.
-
-The interesting output is not the predictive accuracy; it is the verification step. Dice computes posteriors of the form $P(X_q \mid C)$ exactly. The conditioning set~$C$ may be ``hard'' (e.g., $\text{luminance} > 3$) or ``soft'' (e.g., a probabilistic observation with 90\% confidence on a particular feature value). For example, the framework can compute that when luminance, optical-flow-derived HOG features, and galvanic skin response are all elevated together, the posterior probability of severe cybersickness rises from a baseline of approximately 0.45 to approximately 0.80 \citep{wu2025cybersickness_bn}. This is a calibrated probabilistic risk number, not a binary classification, and it is exactly the form an adaptive system needs in order to threshold an intervention. The guarantee is conditional on the BN being correctly structured; the structure is learned with hierarchical priors that are themselves a domain assumption.
-
-\textbf{Extended-exposure model: Random Forest with MILP verification (rung~4).} The second model \citep{cybersickness2025extended} addresses a different question: what happens to cybersickness over a 30-minute MR session, when system perturbations are sustained and fatigue is allowed to accumulate? Thirty-two participants completed a Tactical Combat Casualty Care training session on a HoloLens~2, with camera-jitter perturbations applied at three intensities after a 4-minute baseline. FMS was sampled at 12 scheduled timepoints, yielding 285 participant--timepoint samples. A Random Forest \citep{breiman2001randomforests} of 600 trees over 24 features---spanning susceptibility (motion-sickness questionnaire, sleep, baseline FMS, migraine history), exposure context (session minute, perturbation intensity), gaze and head dynamics (origin variance, gaze direction, head yaw, angular speed), visual scene statistics (optical flow, contrast, spatial frequency, spectral entropy), and one physiological signal (skin conductance level)---was trained with five-fold band-balanced cross-validation. The model achieves MAE~$=1.005 \pm 0.040$ and $R^2 = 0.812 \pm 0.027$ on the 0--10 scale; at the moderate-symptom threshold $\tau=4$ it has 82.2\% sensitivity and 84.1\% specificity, and at the severe threshold $\tau=6$ it has 82.1\% sensitivity and 98.0\% specificity \citep{cybersickness2025extended}.
-
-The verification question is again distinct from the prediction question. The trained Random Forest is treated as a fixed mathematical object, and VoRF \citep{tornblom2019vorf} encodes it as a mixed-integer linear program whose objective is the worst-case forest output over a bounded input region. The certified result is the following: for every admissible input satisfying $\text{hours\_of\_sleep}\geq 7$, $\text{msq\_score}\leq 2$, $\text{fms\_pre\_min\_4}\leq 2$, $\text{mhq\_score}\leq 11$, and $\text{intensity\_numeric}\leq 2$, the trained forest's output cannot exceed~4. This is a sound, model-conditional, deterministic guarantee on the predictor. Crucially, it is a guarantee about the model output, not about the underlying physiological outcome---a distinction the source paper takes care to flag and one we return to in Section~\ref{sec:evaluation}. Outside the certified region no formal guarantee applies, and the model's empirical risk curves take over: $P(\text{FMS} > 4)$ remains below 35\% through the first 16~minutes and crosses 50\% around minute~28--30, defining a natural intervention window.
-
-\textbf{Why two cybersickness models.} The reason to keep both models in the same case study is pedagogical. They make almost the same kind of prediction (FMS severity) on overlapping kinds of data (system + physiology + gaze in MR), but they answer different operational questions and they sit on different rungs. The BN with Dice is a probabilistic-verification tool: it gives a posterior $P(\text{FMS} > 4 \mid \text{evidence})$ that can be thresholded to trigger an intervention. The Random Forest with VoRF is a model-conditional bounded-output tool: it gives a sound certificate that defines a low-risk \emph{screening region} for users, before the session begins. The two are complementary, not competing.
-
-\begin{figure}[t]
-\centering
-%\includegraphics[width=0.85\textwidth]{fig_bn_structure}
-\rule{0.85\textwidth}{0.5pt}\\[0.5em]
-\textit{[Placeholder: hierarchical Bayesian network with system, physiology, and outcome layers.]}
-\caption{Learned hierarchical Bayesian network over system parameters, physiological responses, and cybersickness severity. Edges respect the constraint that system parameters affect physiology and physiology affects severity within one observation window. Adapted from \citet{wu2025cybersickness_bn}.}
-\label{fig:bn-structure}
-\end{figure}
-
-\begin{figure}[t]
-\centering
-%\includegraphics[width=0.7\textwidth]{fig_temporal_risk}
-\rule{0.7\textwidth}{0.5pt}\\[0.5em]
-\textit{[Placeholder: observed and predicted $P(\text{FMS} > 4)$ as a function of session minute.]}
-\caption{Temporal exceedance risk over a 30-minute extended-exposure session. Observed $P(\text{FMS} > 4)$ stays below 35\% through minute~16 and rises sharply afterward, crossing 50\% near minutes~28--30. Adapted from \citet{cybersickness2025extended}.}
-\label{fig:temporal-risk}
-\end{figure}
 
 \subsection{Cross-Case Synthesis}
 \label{sec:comparison}

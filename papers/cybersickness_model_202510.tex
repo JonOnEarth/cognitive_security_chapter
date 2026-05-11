@@ -1,0 +1,1247 @@
+% \documentclass[journal]{vgtc}                     % final (journal style)
+\documentclass[review]{vgtc}              % review (journal style)
+%\documentclass[widereview]{vgtc}                  % wide-spaced review
+%\documentclass[preprint,journal]{vgtc}            % preprint (journal style)
+
+\onlineid{0}
+
+\vgtccategory{Research}
+
+%% Paper title.
+\title{Predicting and Verifying Cybersickness Over Extended Mixed-Reality Exposure in Tactical Training}
+
+%% Author and affiliation (to be filled in before final submission)
+\author{%
+  Author~1,
+  Author~2,
+  Author~3,
+  Author~4,
+  Author~5,
+  Author~6,
+  Author~7,
+  Author~8,
+  and Author~9
+}
+
+\authorfooter{
+  \item Author affiliations withheld for review.
+}
+
+%% Abstract section.
+\abstract{%
+Cybersickness remains a major barrier to prolonged mixed-reality (MR) training, yet comparatively less attention has been given to determining whether safety-relevant symptom thresholds can be bounded or empirically characterized during extended exposure. This paper presents a safety-oriented framework for continuous FMS prediction and threshold-based safety analysis in a Tactical Combat Casualty Care (TCCC) training scenario. We train a Random Forest regressor on multimodal features spanning susceptibility questionnaires, early-session baseline responses, gaze and head dynamics, visual scene descriptors, and exposure context. The analytic dataset comprises 32 participants with usable recordings collected during 30-minute MR sessions with system-injected camera-jitter perturbations at three intensity levels (Low, Medium, High). In our evaluation, the model achieves a mean absolute error (MAE) of $1.005 \pm 0.040$ on the 0--10 Fast Motion Sickness (FMS) scale, with $85.6\%$ of predictions falling within $\pm 2$ FMS units. We then conduct two complementary safety analyses: a formal certification analysis and an empirical threshold-risk analysis. First, using the VoRF framework, we perform model-conditional bounded-output certification on a fixed exported Random Forest model by showing that, within a bounded region characterized by low susceptibility, low early-session baseline FMS, and low-to-moderate perturbation intensity, the predicted FMS cannot exceed the moderate-symptom threshold $\tau = 4$. Second, using out-of-fold predictions under the adopted cross-validation protocol, we analyze how threshold-exceedance risk evolves over time and across perturbation intensities. The model identifies $82.2\%$ of safety-critical episodes (FMS $> 4$) with $84.1\%$ specificity, captures the broad temporal rise in cybersickness risk, and reveals where prediction bias remains across intensity conditions. Feature analysis further indicates that early baseline FMS, sleep, susceptibility measures, and elapsed session time are the strongest contributors to predicted risk across both the certification and empirical threshold analyses, while runtime gaze and scene-motion features provide additional temporal discrimination for within-session monitoring. Together, these results show that cybersickness during prolonged MR exposure can be analyzed through model-conditional bounded-output certification and operational risk analysis, providing a foundation for adaptive MR safety monitoring and future systems that incorporate explicit safety constraints.
+%Cybersickness remains a critical barrier to sustained mixed-reality (MR) training, yet most existing work focuses on prediction without certifying whether safety constraints hold. This paper presents a verification-centered framework for cybersickness over extended MR exposure in a Tactical Combat Casualty Care (TCCC) training scenario. We train a Random Forest regressor on multimodal features---pre-exposure questionnaires, gaze and head dynamics, visual scene descriptors, and exposure context---from 32 participants across 30-minute sessions with system-injected cognitive attacks at three intensity levels (Low, Medium, High). Using 5-fold band-balanced cross-validation, the model achieves a mean absolute error (MAE) of $1.005 \pm 0.040$ on the 0--10 Fast Motion Sickness (FMS) scale ($R^2 = 0.812$), with 85.6\% of predictions within $\pm 2$ FMS units. We then perform two complementary forms of verification. First, using the VoRF framework, we certify a bounded input region of the selected Random Forest and show that, for participants with favorable pre-exposure susceptibility profiles and low-to-moderate perturbation intensity, the model output cannot exceed the clinically meaningful threshold $\tau = 4$. Second, through empirical verification on out-of-fold predictions, we identify when and under which attack intensities the probability of exceeding this threshold becomes unacceptable. The model correctly identifies 82.2\% of safety-critical episodes (FMS $> 4$) with 84.1\% specificity, and it faithfully tracks the temporal escalation and intensity-dependent risk of cybersickness. Feature importance analysis shows that pre-exposure susceptibility (MSQ, sleep) and session context (minute) are the dominant verification drivers, while runtime gaze and scene-motion features provide the temporal discrimination needed for within-session safety monitoring. Together, these results show that duration-exposure cybersickness can be verified through exact bounded-output guarantees and operational risk analysis, supporting adaptive MR systems with explicit safety constraints.%
+}
+
+%% Keywords
+\keywords{Cybersickness, mixed reality, random forest, verification, duration exposure, tactical training}
+
+%% Teaser figure (optional)
+\teaser{
+  \centering
+  \includegraphics[width=\linewidth]{teaser_tccc_mr}
+  \caption{Tactical Combat Casualty Care mixed-reality training combines a physical casualty-care setup with immersive virtual overlays and battlefield context. Left: the physical manikin-based training environment used for casualty-care interaction. Right: the mixed-reality operational scene viewed by participants during extended exposure, where virtual casualties, overlays, and task context are integrated into the training workflow.}
+  \label{fig:teaser}
+}
+
+%% Uncomment below to disable the manuscript note
+%\renewcommand{\manuscriptnotetxt}{}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%% LOAD PACKAGES %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\graphicspath{{figs/}{figures/}{./}}
+
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{mathptmx}
+
+\sisetup{round-mode=places,round-precision=3}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%% START OF THE PAPER %%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\firstsection{Introduction}
+
+\maketitle
+
+\label{sec:intro}
+Virtual and mixed reality (VR/MR) technologies are increasingly used for prolonged training and decision support in safety-critical domains such as healthcare, defense, and tactical operations~\cite{Harper2021AR, Stanney2022AUGMED}. As exposure duration and scenario complexity increase, cybersickness---including nausea, disorientation, oculomotor strain, and visual fatigue---remains a major obstacle to sustained performance and safe task completion~\cite{Rebenitsch2016Review, LaViola2000Cybersickness,Ahmed:2025:XRReview}. Prior studies report widely varying prevalence, often ranging from 20--80\% depending on system and task conditions~\cite{Stanney1997HumanFactors}, and symptom severity typically increases with exposure duration, making prolonged MR sessions especially challenging. In such settings, safety assessment should be proactive rather than reactive: the goal is not only to detect discomfort after it becomes severe, but to identify unsafe operating conditions early enough to support mitigation, adapt system behavior, or trigger intervention before symptoms escalate.
+
+Most existing machine-learning approaches to cybersickness assessment focus on \emph{prediction}: models estimate symptom severity from physiological signals, eye-tracking data, head-motion dynamics, or system parameters~\cite{Jeong2019EEG, qi2025cpnet, GarciaAgundez2019Classifier}. While many of these methods achieve strong predictive accuracy, they do not directly provide explicit reasoning about safety: whether discomfort is likely to exceed an operationally unacceptable level under observed conditions, or whether it can be certified not to exceed that level within a bounded admissible region of inputs. In safety-critical MR applications---where users may be military trainees, surgical residents, or first responders---a point estimate alone is insufficient for safe continuation decisions. What is needed is a safety-oriented framework that supports both threshold-risk estimation during exposure and bounded guarantees over constrained operating regimes.
+
+Recent work by Wu~et~al.~\cite{Wu2025BN} introduced a probabilistic verification framework based on Bayesian Networks (BNs) for cybersickness risk analysis. Their approach models dependencies among system parameters, physiological responses, and cybersickness severity, enabling reasoning of the form $P(\mathrm{FMS} > \tau \mid \mathrm{conditions}) < \alpha$ for a threshold $\tau$ and confidence level $\alpha$. This probabilistic perspective is valuable because it quantifies threshold-exceedance risk under uncertainty. However, it is complementary to bounded-output certification of a trained predictor, which asks whether any admissible input within a specified region can produce an output above a safety threshold. Moreover, the BN framework was validated on a 15-minute VR walking task with classification-level FMS labels, leaving open whether similar safety reasoning extends to prolonged, operationally relevant MR training with continuous FMS prediction. These two verification views therefore answer different questions: BN-based inference estimates posterior threshold risk under evidence, whereas bounded-output certification asks whether any admissible input in a specified region can drive a trained predictor above a safety threshold.
+
+In this paper, we study prolonged cybersickness in a 30-minute MR tactical training scenario through a dual safety-analysis framework. The framework combines continuous FMS prediction with bounded-output certification of a trained Random Forest regressor and threshold-based empirical risk analysis over out-of-fold predictions across session time and perturbation intensity. Unlike prior short-duration VR verification work, our setting focuses on extended MR exposure, continuous FMS regression, and safety analysis in an operational training task. We therefore ask whether prolonged MR cybersickness can be managed through both screening and early-session certification of low-risk conditions and within-session threshold-risk monitoring during extended exposure. We make the following contributions:
+\begin{enumerate}[leftmargin=*, nosep]
+  \item A \textbf{dual safety-analysis framework} for prolonged MR exposure that combines continuous FMS prediction with VoRF-based bounded-output certification of a trained Random Forest regressor.
+  \item A \textbf{threshold-based empirical risk analysis} that characterizes how threshold-exceedance risk evolves over session time and perturbation intensity, supporting proactive mitigation during extended exposure.
+  \item An \textbf{interpretable analysis} of how susceptibility measures, early-session baseline indicators, and runtime signals contribute differently to low-risk certification and within-session monitoring in operational MR training.
+\end{enumerate}
+
+
+%========================================================================
+\section{Related Work}\label{sec:related}
+%========================================================================
+
+\paragraph{Cybersickness Measurement and Contributing Factors.}
+Cybersickness is commonly assessed using the Simulator Sickness Questionnaire (SSQ)~\cite{Kennedy1993SSQ} and the Fast Motion Sickness (FMS) scale~\cite{Keshavarz2011FMS}. The FMS scale, a single-item verbal rating administered on a 0--20 or 0--10 scale, is especially suitable for repeated in-task assessment because it enables rapid measurement during exposure without substantially interrupting the user experience. Established contributing factors include optical flow magnitude, display latency, field of view, scene complexity, and individual susceptibility characteristics such as prior motion-sickness history and sleep deprivation~\cite{Reason1975MotionSickness, Golding1998MSSQ, Stanney1997HumanFactors, LaViola2000Cybersickness, Rebenitsch2016Review}. Together, these findings motivate cybersickness models that combine user susceptibility, exposure context, and sensorimotor dynamics, particularly in prolonged MR sessions where threshold-risk evolves over time.
+
+\paragraph{Machine Learning for Cybersickness Prediction.}
+Machine learning methods have shown strong performance for cybersickness prediction using eye-tracking, head-tracking, and physiological signals. Deep models such as CNNs, LSTMs, and multimodal fusion networks have demonstrated promising predictive accuracy across VR settings~\cite{Islam2020DeepCybersickness}. Explainability-oriented approaches such as LiteVR~\cite{LiteVR2023} use SHAP analysis to improve post-hoc transparency, but transparency alone does not provide explicit threshold-oriented safety reasoning. Related work on personalized Bayesian Networks further shows that subject-specific structure can improve cybersickness prediction in VR settings~\cite{Wu:2025:PBN}. Classical statistical models, including linear and logistic regression, offer interpretable associations among contributing factors~\cite{Gavgani2017Profiling, Stauffert2020Latency}, yet they do not directly provide the bounded certification and threshold-based safety analysis pursued here. Random Forests have also been used for cybersickness-related classification~\cite{GarciaAgundez2019Classifier}, but, to our knowledge, prior work has not established them for continuous FMS regression coupled with bounded-output certification and temporal- and intensity-aware safety analysis in prolonged MR exposure. The missing capability is not only symptom prediction, but translating continuous symptom estimates into actionable safety judgments for prolonged MR operation.
+
+\paragraph{Formal Verification for Cybersickness Risk.}
+Wu~et~al.~\cite{Wu2025BN} proposed a Bayesian Network framework for probabilistic verification of cybersickness, computing posterior threshold-exceedance probabilities under hard and soft evidence. Their framework supports formal probabilistic reasoning about cybersickness risk and identifies parameter adjustments that may restore compliance with a desired safety threshold. However, it was validated on 15-minute VR walking sessions with discrete FMS categories rather than prolonged MR exposure with continuous FMS regression. Beyond probabilistic graphical models, recent work has also studied safety validation for sequence models in MR, including formal analysis of LSTM behavior under safety constraints~\cite{Huang:2025:LSTM}. In parallel, T\"{o}rnblom and Nadjm-Tehrani~\cite{Tornblom2018FormalRF} showed that Random Forest models can support formal verification reasoning in safety-critical settings, providing a foundation for bounded analysis of tree-ensemble predictors.
+
+Our work combines two complementary safety-analysis views for prolonged MR exposure: (1) \textbf{formal bounded-output certification} of a trained Random Forest regressor over constrained input regions, and (2) \textbf{empirical threshold-based risk analysis} across session duration and perturbation intensity using out-of-fold predictions. The former provides exact model-conditional guarantees for a fixed trained forest within a bounded region of admissible inputs, whereas the latter characterizes operational risk over observed exposure trajectories. Together, these two views help close the gap between short-duration probabilistic verification in VR and safety-oriented monitoring for prolonged MR training with continuous cybersickness outcomes.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Virtual and mixed reality (VR/MR) technologies are increasingly used in safety-critical domains such as healthcare, defense, and tactical training~\cite{Harper2021AR, Stanney2022AUGMED}. As immersion duration and scenario complexity grow, cybersickness---a collection of symptoms including nausea, disorientation, and visual fatigue---remains a major barrier to sustained user engagement~\cite{Rebenitsch2016Review, LaViola2000Cybersickness}. Surveys report that 20--80\% of VR users experience some form of cybersickness~\cite{Stanney1997HumanFactors}, and its severity typically increases with exposure duration, making extended MR sessions especially challenging. In such settings, safety assessment should be proactive rather than reactive: the goal is not merely to detect discomfort after users become sick, but to identify unsafe conditions early enough to trigger mitigation, adjust system behavior, or screen high-risk users before severe symptoms emerge.
+
+% Most existing approaches address cybersickness through \emph{prediction}: machine learning models estimate symptom severity from physiological signals, eye-tracking data, or system parameters~\cite{Islam2020DeepCybersickness, Jeong2019EEG, GarciaAgundez2019Classifier, Zhu2023Lightweight}. While these methods achieve strong predictive accuracy, they function as black-box estimators lacking guarantees about whether safety constraints will be met. In safety-critical MR applications---where users may be military trainees, surgical residents, or first responders---it is not enough to know only the point prediction. One must also reason about safety in two complementary ways: whether discomfort is \emph{likely} to exceed a tolerable level under observed operating conditions, and whether it can be \emph{certified not to exceed} that level within a bounded set of admissible conditions.
+
+% Recent work by Wu~et~al.~\cite{Wu2025BN} introduced a probabilistic verification framework leveraging Bayesian Networks (BN) to provide safety guarantees on cybersickness risk. That approach models causal dependencies among system parameters, physiological responses, and cybersickness severity, enabling reasoning about whether $P(\text{FMS} > \tau \mid \text{conditions}) < \alpha$ for a safety threshold $\tau$ and confidence level $\alpha$. Probabilistic verification of this kind is valuable for estimating operational risk under uncertainty. However, it is complementary to deterministic bounded-output verification, which instead certifies that no input within a specified region can drive the model output above a safety threshold. Moreover, the BN framework was validated on a 15-minute VR walking task with classification-level FMS labels, leaving open the question of whether either form of verification applies to longer, operationally relevant MR training scenarios.
+
+% This paper bridges prediction and verification for \textbf{extended MR exposure} (30 minutes) in an operational military training setting. We make the following contributions:
+
+% \begin{enumerate}[leftmargin=*, nosep]
+%   \item A \textbf{formal bounded-output verification} procedure for continuous FMS prediction in extended MR exposure, using VoRF to certify safe input regions of a trained Random Forest regressor.
+%   \item A complementary \textbf{empirical verification} analysis assessing temporal and intensity-dependent safety constraints: at which session minutes and under which attack levels does cybersickness risk exceed acceptable thresholds, and when should mitigation be triggered proactively?
+%   \item A verification-driven interpretation showing that pre-exposure susceptibility variables dominate certified safety regions, while runtime signals provide the temporal discrimination needed for within-session monitoring.
+%   \item Evidence that the verification paradigm extends from short VR tasks~\cite{Wu2025BN} to extended operational MR training while maintaining predictive accuracy sufficient for safety analysis.
+% \end{enumerate}
+
+
+% %========================================================================
+% \section{Related Work}\label{sec:related}
+% %========================================================================
+
+% \subsection{Cybersickness Measurement and Factors}
+% Cybersickness is commonly assessed using the Simulator Sickness Questionnaire (SSQ)~\cite{Kennedy1993SSQ} and the Fast Motion Sickness (FMS) scale~\cite{Keshavarz2011FMS}. The FMS scale, a single-item verbal rating (0--20 or 0--10), enables rapid repeated assessment during exposure without interrupting the task. Known risk factors include optical flow magnitude, display latency, field of view, scene complexity, and individual susceptibility characteristics such as prior motion-sickness history and sleep deprivation~\cite{Reason1975MotionSickness, Golding1998MSSQ, Stanney1997HumanFactors, LaViola2000Cybersickness, Rebenitsch2016Review}. These factors motivated the multimodal feature set used in this work.
+
+% \subsection{Machine Learning for Cybersickness Prediction}
+% Deep learning methods---CNNs, LSTMs, and multimodal fusion networks---have achieved strong prediction of cybersickness from eye-tracking, head-tracking, and biosignal data~\cite{Islam2020DeepCybersickness, Zhu2023Lightweight}. Explainability-oriented approaches like LiteVR~\cite{LiteVR2023} apply SHAP analysis to recurrent models for post-hoc transparency. Statistical models, including linear and logistic regression, provide interpretable factor identification but lack causal structure~\cite{Gavgani2017Profiling, Stauffert2020Latency}.
+% Setu~et~al.~\cite{Setu2025CogLoad} predicted cognitive load, attention, and working memory in virtual multitasking using deep learning with SHAP explainability, achieving 91--96\% accuracy on the VRWalking dataset. While related in using multimodal VR data and ML, their focus is cognitive load classification rather than continuous cybersickness regression with safety verification.
+% Random Forests have been used for cybersickness-related classification~\cite{GarciaAgundez2019Classifier} but are less explored for continuous FMS regression with temporal and intensity verification, which is our focus.
+
+% \subsection{Probabilistic Verification of Cybersickness}
+% Wu~et~al.~\cite{Wu2025BN} proposed a Bayesian Network framework for probabilistic verification of cybersickness, computing posterior probabilities of the form $P(\text{FMS} > \tau \mid \text{conditions})$ under hard and soft evidence. Their framework provides formal safety guarantees and identifies parameter adjustments to restore compliance. However, it was validated on 15-minute VR walking sessions with discrete FMS categories. T\"{o}rnblom and Nadjm-Tehrani~\cite{Tornblom2018FormalRF} addressed formal verification of Random Forests in safety-critical applications, establishing that tree-ensemble models can support verification reasoning.
+
+% This paper combines two complementary verification views for extended MR exposure: (1)~\textbf{formal verification} of a Random Forest regressor via bounded-output certification over constrained input regions, and (2)~\textbf{empirical verification} of threshold exceedance risk across session duration and attack intensity using out-of-fold predictions. This distinction is important: the former provides exact model-conditional guarantees for a fixed trained forest, while the latter characterizes operational risk over observed exposure trajectories.
+
+
+
+
+%========================================================================
+\section{Testbed, Data, Prediction, and Verification}\label{sec:method}
+%========================================================================
+
+\subsection{TCCC Mixed-Reality Testbed}\label{sec:testbed}
+
+Data were collected using a Tactical Combat Casualty Care (TCCC) mixed-reality testbed~\cite{Harper2021AR, Stanney2022AUGMED, Laxton2025MobileXR}. The training scenario follows a \textit{Tell--Show--Do} instructional sequence comprising structured presentation of injury signs and treatment steps (\textit{Tell}), immersive demonstrations through overlay animations (\textit{Show}), and guided participant execution on a manikin using casualty-care tools (\textit{Do}). The testbed is built around standardized TCCC instructional materials from Deployed Medicine~\cite{DeployedMedicine2025}.
+
+The MR session includes a fixed sequence of structured activities designed to maintain exposure consistency across participants, including \textit{Discovery} (3D marker exploration), \textit{Question \& Answer} (knowledge checks), \textit{Locate \& Select} (spatial search and awareness), \textit{Navigate} (audiovisual guidance), \textit{Timer} (timed practice), and \textit{Action Plan} (procedural sequencing). This fixed schedule reduces protocol variability and allows differences in symptom progression to be interpreted against a common exposure structure.
+
+Thirty-five participants completed approximately 30-minute sessions. For the present modeling and verification analyses, three participants were excluded due to incomplete or unusable post-perturbation trajectories, yielding a final analytic cohort of 32 participants. After an initial pre-perturbation baseline period (minutes 0--4), the system introduced controlled camera-jitter perturbations at one of three predefined intensity levels (\textit{Low}, \textit{Medium}, \textit{High}). Perturbations remained active for the remainder of the session, with bounded within-level variation to reduce adaptation while preserving the assigned severity condition.
+
+Participants verbally reported Fast Motion Sickness (FMS) on a 0--10 scale at 12 scheduled timepoints: two pre-perturbation baseline reports (minutes 3 and 4) and ten post-perturbation reports (minutes 5, 7, 10, 13, 16, 19, 22, 25, 28, and 30). The denser early sampling and sparser late sampling were chosen to capture both early onset and later-session progression of cybersickness. Only post-perturbation reports were used as prediction targets, yielding 285 usable aligned participant--timepoint samples. Relative to the 320 possible post-perturbation observations from the 32-participant analytic cohort, 35 observations were removed because the aligned sensor-report record was missing or unusable.
+
+The analysis pipeline used synchronized 1~Hz gaze and head kinematic streams from HoloLens~2 together with application-logged visual scene statistics from the MR rendering stream, including optical flow, contrast, spectral entropy, and spatial frequency. These streams were aggregated into fixed report-aligned windows ending at each FMS report. Before immersion, participants completed screening measures including a motion-sickness susceptibility score (\texttt{msq\_score})~\cite{Reason1975MotionSickness, Golding1998MSSQ}, a migraine-history score (\texttt{mhq\_score}), baseline simulator sickness subscales from the SSQ~\cite{Kennedy1993SSQ}, and self-reported sleep duration.
+
+\subsection{Participant Cohort}
+
+The full study cohort comprised 35 participants (18 female, 17 male), while the final analytic cohort included the 32 participants with usable post-perturbation trajectories. Participants self-identified as Asian (13), White (12), Hispanic/Latino (5), American Indian or Alaskan Native (2), Black or African American (1), multiracial (1), or preferred not to answer (1). The average participant age was $22.94 \pm 8.53$ years, and inter-pupillary distance (IPD) was $63.23 \pm 2.94$~mm. Most participants reported no corrective lenses (24), while 8 reported using both contacts and glasses and 3 reported contacts only. Twenty-eight participants reported prior AR exposure and 7 reported no prior AR exposure. The study was approved by institutions, all participants provided informed consent, and participants could stop the session at any time.
+
+\subsection{Feature Engineering and Preprocessing}\label{sec:features}
+
+Features were organized into five complementary families. \textbf{Susceptibility and pre-perturbation baseline state} captured between-participant vulnerability and initial discomfort through hours of sleep, \texttt{msq\_score}, \texttt{mhq\_score}, baseline SSQ subscales (oculomotor, disorientation, and total), and pre-perturbation FMS at minutes 3 and 4. \textbf{Exposure context} encoded cumulative session progression and perturbation severity using session minute (5--30) and perturbation intensity (Low$=1$, Medium$=2$, High$=3$). \textbf{Gaze and head dynamics} summarized report-aligned windows of 3D gaze origin, gaze direction, head position, and derived angular kinematics. \textbf{Visual scene dynamics} captured properties of the rendered MR content through optical flow, contrast, spectral entropy, and spatial frequency. \textbf{Physiological arousal} was represented through synchronized skin conductance level (SCL).
+
+Within each training fold, candidate features were ranked by absolute Pearson correlation with FMS computed on the training partition only. The top 20 training-fold-ranked features were retained, with domain-motivated forced inclusion of \texttt{minute}, \texttt{intensity\_numeric}, \texttt{optical\_flow\_mean}, and \texttt{contrast\_mean}. This yielded 24 selected features (\cref{tab:features}).
+
+\begin{table}[tb]
+\centering
+\caption{Selected features grouped by category with absolute Pearson correlation $|r|$ with FMS. Absolute correlations are reported for compactness. Susceptibility and pre-perturbation baseline variables show the strongest univariate associations.}
+\label{tab:features}
+\scriptsize
+\begin{tabular}{llc}
+\toprule
+\textbf{Category} & \textbf{Feature} & $|r|$ \\
+\midrule
+\multirow{8}{*}{Susceptibility / Baseline}
+  & hours\_of\_sleep & 0.575 \\
+  & msq\_score & 0.563 \\
+  & fms\_pre\_min\_4 & 0.351 \\
+  & mhq\_score & 0.350 \\
+  & fms\_pre\_min\_3 & 0.317 \\
+  & bl\_ssq\_oculomotor & 0.246 \\
+  & bl\_ssq\_disorientation & 0.192 \\
+  & bl\_ssq\_total & 0.168 \\
+\midrule
+\multirow{2}{*}{Context}
+  & minute & 0.265 \\
+  & intensity\_numeric & 0.124 \\
+\midrule
+\multirow{9}{*}{Gaze / Head}
+  & GazeOriginX\_std & 0.327 \\
+  & HeadGazeDirectionY\_std & 0.242 \\
+  & HeadPositionX\_mean & 0.239 \\
+  & GazeOriginX\_mean & 0.236 \\
+  & GazeDirectionZ\_mean & 0.232 \\
+  & gaze\_pitch\_deg\_mean & 0.229 \\
+  & head\_yaw\_deg\_mean & 0.157 \\
+  & GazeDirectionX\_std & 0.150 \\
+  & gaze\_ang\_speed\_dps\_mean & 0.142 \\
+\midrule
+\multirow{4}{*}{Visual Scene}
+  & spatial\_frequency\_mean & 0.197 \\
+  & spectral\_entropy\_mean & 0.152 \\
+  & optical\_flow\_mean & 0.124$^{*}$ \\
+  & contrast\_mean & 0.109$^{*}$ \\
+\midrule
+\multirow{1}{*}{Physiology}
+  & scl & 0.169 \\
+\bottomrule
+\end{tabular}
+\vspace{2pt}
+\begin{flushleft}
+\scriptsize $^{*}$Forced inclusion based on domain knowledge.
+\end{flushleft}
+\end{table}
+
+\paragraph{Preprocessing and evaluation.}
+Numeric features were median-imputed and standardized as part of a common preprocessing pipeline, while categorical variables, when present, were one-hot encoded. All preprocessing, feature ranking, and feature selection were performed strictly within the training partition of each fold to prevent train--test leakage from transformation or ranking steps.
+
+Primary predictive evaluation in the current manuscript used 5-fold band-balanced cross-validation over participant--timepoint samples. FMS values were grouped into Low (0--2), Mid (3--5), and High (6--10) bands, and samples were distributed across folds to preserve coverage across the discomfort range. Because multiple samples from the same participant may appear in different folds, the resulting performance should be interpreted as within-cohort generalization rather than a strictly subject-independent estimate.
+The distribution of FMS scores across the 285 usable participant--timepoint samples is shown in \cref{fig:fmsdist}. Lower scores predominate overall, consistent with an aggregated distribution skewed toward lower discomfort levels. Because the baseline FMS values at minutes 3 and 4 are collected after immersion begins but before perturbation onset, we interpret them as early-session calibration variables rather than purely pre-session screening variables.
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\columnwidth]{fms_distribution}
+  \caption{Distribution of FMS scores (0--10) across the 285 usable participant--timepoint samples. Lower scores predominate overall in the aggregated sample distribution.}
+  \label{fig:fmsdist}
+\end{figure}
+
+\subsection{Random Forest Prediction Model}\label{sec:rf}
+
+We trained a \textbf{Random Forest Regressor}~\cite{Breiman2001RF} to predict continuous FMS scores from the 24-feature multimodal input. The model used 600 trees with a minimum of two samples per leaf. These settings were fixed during model development and retained for all reported experiments to balance stable regression behavior with the tractability of the subsequent VoRF certification step. Modeling FMS as a continuous target preserves symptom resolution and avoids the information loss induced by discretizing discomfort into coarse severity classes. Predictive performance was assessed using mean absolute error (MAE), root mean squared error (RMSE), and coefficient of determination ($R^2$). The Random Forest served not only as the predictive model, but also as the model artifact subjected to formal bounded-output certification.
+
+\cref{fig:pipeline} presents the full prediction-and-verification workflow: multimodal MR inputs are processed through a fold-isolated Random Forest pipeline to produce continuous FMS predictions, which then feed complementary formal and empirical verification branches before supporting safety decisions.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\linewidth]{paper_duration/figs/N_duration_Frame.pdf}
+  \caption{Integrated framework for cybersickness prediction and verification during extended MR exposure. Multimodal pre-exposure, contextual, gaze/head, and scene-motion inputs are processed through fold-isolated preprocessing and a Random Forest regressor to generate continuous FMS predictions. These predictions support two complementary verification pathways: formal verification, which uses VoRF to certify bounded safe regions or return counterexamples, and empirical verification, which evaluates out-of-fold temporal risk, intensity-dependent risk, and safety-critical detection. The outputs of both branches are used for proactive safety support through pre-session screening, in-session monitoring, and mitigation decisions.}
+  \label{fig:pipeline}
+\end{figure*}
+
+
+\subsection{Empirical Threshold-Based Risk Analysis}\label{sec:empirical}
+
+Beyond point prediction, we evaluate whether model outputs support threshold-based empirical risk analysis over observed exposure trajectories. Following the safety-question structure of Wu~et~al.~\cite{Wu2025BN}, but using held-out Random Forest predictions rather than posterior probabilities from a Bayesian Network, we define three empirical properties over out-of-fold predictions.
+
+\paragraph{Property 1 --- Temporal risk.}
+For each session minute $t$ and threshold $\tau$, we compute the empirical exceedance probability
+\begin{equation}
+\hat{P}(\mathrm{FMS} > \tau \mid \mathrm{minute}=t)
+= \frac{1}{n_t}\sum_{i:t_i=t}\mathbf{1}\!\left[\hat{y}_i > \tau\right],
+\end{equation}
+where $n_t$ is the number of samples observed at minute $t$ and $\hat{y}_i$ is the predicted FMS. This quantity identifies the session times at which cybersickness risk crosses an unacceptable level.
+
+\paragraph{Property 2 --- Intensity-dependent risk.}
+For each perturbation level $k \in \{\mathrm{Low}, \mathrm{Medium}, \mathrm{High}\}$ and threshold $\tau$, we compute
+\begin{equation}
+\hat{P}(\mathrm{FMS} > \tau \mid \mathrm{intensity}=k)
+= \frac{1}{n_k}\sum_{i:k_i=k}\mathbf{1}\!\left[\hat{y}_i > \tau\right].
+\end{equation}
+This analysis characterizes how threshold-crossing risk changes with perturbation severity.
+
+\paragraph{Property 3 --- Prediction reliability.}
+For an error tolerance $\epsilon$, we compute the fraction of out-of-fold predictions within the acceptable bound:
+\begin{equation}
+\hat{P}(|\hat{y}-y| \le \epsilon)
+= \frac{1}{N}\sum_{i=1}^{N}\mathbf{1}\!\left[|\hat{y}_i-y_i| \le \epsilon\right].
+\end{equation}
+
+We additionally evaluate \textbf{safety-critical detection} by treating $\mathrm{FMS} > \tau$ as a binary event and reporting sensitivity, specificity, and precision for the model's threshold-crossing predictions. Consistent with the later results, we use $\tau = 4$ as the primary operational threshold corresponding to moderate cybersickness onset and $\tau = 6$ as a secondary threshold for more severe symptom levels. Unlike the formal VoRF analysis below, these empirical quantities summarize model behavior over observed test samples rather than certifying all admissible inputs in a region.
+
+\subsection{Bounded-Output Certification of the Random Forest Model}
+\label{sec:vorf}
+
+In addition to predictive evaluation and empirical risk analysis, we performed \textbf{formal bounded-output certification} of the trained Random Forest model using the VoRF framework~\cite{Tornblom2018FormalRF}. VoRF provides deterministic guarantees for tree-ensemble models by encoding the model as a mixed-integer linear program (MILP) and optimizing its worst-case output over a constrained input region.
+
+\paragraph{Certification objective.}
+Let $f(\mathbf{x})$ denote the Random Forest regressor that predicts the continuous Fast Motion Sickness (FMS) score from feature vector $\mathbf{x}$. Given specified lower and upper bounds defining an admissible input region $\mathcal{R}$, certification computes the worst-case model output
+\begin{equation}
+y_{\max} = \max_{\mathbf{x}\in\mathcal{R}} f(\mathbf{x}).
+\end{equation}
+A safety guarantee with threshold $\tau$ is satisfied if
+\begin{equation}
+y_{\max} \le \tau.
+\end{equation}
+In this paper, we use $\tau = 4$ as the primary operational threshold for moderate cybersickness onset and $\tau = 6$ as a secondary threshold for more severe symptom levels, consistent with the empirical threshold-based analyses above.
+
+\paragraph{MILP encoding of Random Forests.}
+Each decision tree in the forest is converted into a set of linear constraints. For a split node testing feature $x_j$ against threshold $\theta$, the decision
+\begin{equation}
+x_j \le \theta
+\end{equation}
+is represented through a binary branch-activation variable. Leaf nodes are encoded as constant prediction values, and the final forest output is the average of the selected leaf predictions across trees. Let $T$ denote the number of trees and $l_t$ the selected leaf output of tree $t$. The forest prediction is therefore
+\begin{equation}
+f(\mathbf{x}) = \frac{1}{T}\sum_{t=1}^{T} l_t.
+\end{equation}
+Combining all tree constraints yields a single optimization problem whose solution corresponds to the worst-case FMS prediction achievable within the admissible region.
+
+\paragraph{Certified model artifact.}
+Because exact certification applies to a single fixed model instance, certification was performed on one exported deployment Random Forest after the feature set, preprocessing transformations, and split thresholds were frozen. Predictive generalization was assessed separately through cross-validation, whereas certification was carried out on this single deployment artifact under explicitly specified input bounds. The certified Random Forest contained 600 trees with a maximum depth of 14 and an average depth of approximately 9.4; across the ensemble, the model contained 53{,}278 decision nodes. The resulting MILP remains tractable within the VoRF framework because decision trees induce a piecewise-constant predictor that admits an exact optimization-based encoding.
+
+\paragraph{Certification workflow.}
+The certification procedure follows five steps:
+\begin{enumerate}[leftmargin=*, nosep]
+    \item Define admissible bounds for selected input variables.
+    \item Encode the entire forest as MILP constraints.
+    \item Solve an optimization problem that maximizes the predicted FMS value.
+    \item If the maximum output does not exceed the safety threshold, certify the region as safe.
+    \item Otherwise, return a counterexample input demonstrating a violation of the safety constraint.
+\end{enumerate}
+This procedure yields an exact model-conditional worst-case output bound for the exported Random Forest over the specified bounded input region. In the later safety-guarantee analysis, we therefore interpret the certified region as a condition on susceptibility and pre-perturbation baseline state together with bounded operating conditions, rather than as a purely pre-session guarantee independent of early-session observations.
+
+
+\paragraph{Verification workflow.}
+Formal bounded-output verification of the exported Random Forest proceeds as follows:
+\begin{enumerate}
+\item Specify lower and upper bounds for selected input variables together with admissible ranges for the remaining variables in the exported verification instance.
+\item Encode the fixed Random Forest as mixed-integer linear constraints.
+\item Solve an optimization problem that maximizes the predicted FMS value over the bounded input region.
+\item If the maximum predicted output does not exceed the threshold, the region is certified for that model with respect to the specified output bound.
+\item Otherwise, the solver returns a counterexample input demonstrating violation of the output constraint.
+\end{enumerate}
+
+This procedure yields an exact worst-case output bound for the exported Random Forest over the specified bounded input region.
+
+\subsection{Empirical Safety Assessment Framework}\label{sec:verification}
+
+Complementing the formal bounded-output analysis above, we also evaluate whether the model's out-of-fold predictions support \emph{threshold-based empirical risk assessment} of cybersickness over observed session trajectories. Our formulation is inspired by the probabilistic verification perspective introduced for Bayesian Networks by Wu~et~al.~\cite{Wu2025BN}, in which a Boolean property $\phi(\mathbf{X})$ is defined over model variables (e.g., FMS $> \tau$) and queried under evidence conditions. Unlike that Bayesian setting, however, our Random Forest analysis does not perform posterior inference under hard or soft evidence. Instead, it summarizes threshold-exceedance behavior directly over out-of-fold predictions grouped by observed covariates.
+
+Motivated by this verification-oriented perspective, we define three empirical analyses over the out-of-fold predictions.
+
+\textbf{Property 1 --- Temporal exceedance risk:} For each session minute $t$ and threshold $\tau$, we compute the empirical exceedance probability
+\begin{equation}
+  \hat{P}(\text{FMS} > \tau \mid \text{minute} = t)
+  =
+  \frac{1}{n_t}
+  \sum_{i: t_i = t}
+  \mathbf{1}[\hat{y}_i > \tau],
+  \label{eq:temporal}
+\end{equation}
+where $n_t$ is the number of samples at minute $t$ and $\hat{y}_i$ is the predicted FMS. This quantity indicates how predicted threshold-crossing risk evolves across session time in the observed dataset.
+
+\textbf{Property 2 --- Intensity-conditioned exceedance risk:} For each perturbation level $k \in \{\text{Low, Med, High}\}$ and threshold $\tau$, we compute
+\begin{equation}
+  \hat{P}(\text{FMS} > \tau \mid \text{intensity} = k)
+  =
+  \frac{1}{n_k}
+  \sum_{i: k_i = k}
+  \mathbf{1}[\hat{y}_i > \tau],
+  \label{eq:intensity}
+\end{equation}
+which summarizes how predicted threshold-crossing risk changes with perturbation intensity.
+
+\textbf{Property 3 --- Prediction error reliability:} For an error tolerance $\epsilon$, we quantify the fraction of out-of-fold predictions that fall within an acceptable error bound:
+\begin{equation}
+  \hat{P}(|\hat{y} - y| \leq \epsilon)
+  =
+  \frac{1}{N}
+  \sum_{i=1}^{N}
+  \mathbf{1}[|y_i - \hat{y}_i| \leq \epsilon].
+  \label{eq:errorbound}
+\end{equation}
+Unlike Properties~1 and~2, this quantity measures predictive reliability rather than threshold-crossing risk directly.
+
+We also evaluate \textbf{safety-critical detection}. Treating FMS $> \tau$ as a binary event, we compute sensitivity, specificity, and precision for threshold-crossing predictions. For comparability with prior verification-oriented cybersickness work~\cite{Wu2025BN}, we use $\tau = 4$ as the primary threshold, corresponding to moderate cybersickness onset, and $\tau = 6$ as a secondary threshold for severe symptoms. In contrast to the formal VoRF analysis, these empirical results summarize model behavior over observed held-out samples rather than certifying all admissible inputs in a bounded region.
+
+%========================================================================
+\section{Prediction and Safety Assessment Results}\label{sec:results}
+%========================================================================
+
+We first evaluate whether the Random Forest has sufficient predictive fidelity to support the downstream empirical analyses. We then justify why it is the model selected for formal verification, present the formal VoRF certificate, and finally report empirical threshold-based analyses that characterize how threshold-crossing risk evolves across severity bands, session time, and perturbation intensity. Unless otherwise stated, all empirical analyses below are computed from out-of-fold predictions under the adopted cross-validation protocol.
+
+\subsection{Overall Prediction Performance}\label{sec:overall}
+
+We first evaluate whether the Random Forest is sufficiently accurate to support the downstream empirical analyses. \cref{tab:overall} reports the cross-validated performance of the model. It achieves MAE $= 1.005 \pm 0.040$, indicating that predictions are typically within approximately one FMS unit of participant-reported scores on the 0--10 scale. The model also achieves $R^2 = 0.812 \pm 0.027$, showing that it explains more than 80\% of the variance in reported discomfort.
+
+\begin{table}[tb]
+\centering
+\caption{Overall cross-validated performance on FMS prediction (0--10 scale) under the adopted evaluation protocol.}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{MAE} & \textbf{RMSE} & $\mathbf{R^2}$ \\
+\midrule
+Mean $\pm$ Std & $1.005 \pm 0.040$ & $1.327 \pm 0.066$ & $0.812 \pm 0.027$ \\
+\bottomrule
+\end{tabular}
+\label{tab:overall}
+\end{table}
+
+\textbf{Cross-validation stability.}
+\cref{tab:folds} reports per-fold results. MAE ranges from 0.940 to 1.052 across folds with balanced validation sample counts (51--61), indicating low fold-to-fold variation under the adopted band-balanced split. These values should therefore be interpreted as stability under the adopted evaluation protocol, not as a formal guarantee of subject-independent generalization.
+
+\begin{table}[tb]
+\centering
+\caption{Per-fold MAE and validation sample counts under the adopted 5-fold band-balanced cross-validation split.}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Fold} & \textbf{Samples} & \textbf{MAE} & \textbf{RMSE} & $\mathbf{R^2}$ \\
+\midrule
+1 & 61 & 1.008 & 1.312 & 0.811 \\
+2 & 56 & 1.052 & 1.371 & 0.817 \\
+3 & 61 & 1.041 & 1.367 & 0.798 \\
+4 & 56 & 0.940 & 1.204 & 0.860 \\
+5 & 51 & 0.983 & 1.379 & 0.777 \\
+\bottomrule
+\end{tabular}
+\label{tab:folds}
+\end{table}
+
+\textbf{Prediction error reliability.}
+\cref{tab:errorbound} reports the fraction of out-of-fold predictions that fall within error tolerances $\epsilon = 1.0$, 1.5, and 2.0 FMS units. More than 85\% of predictions lie within $\pm 2$ FMS units, indicating adequate predictive fidelity for the downstream exploratory analyses.
+
+\begin{table}[tb]
+\centering
+\caption{Prediction error reliability: fraction of predictions within error tolerance $\epsilon$.}
+\begin{tabular}{lccc}
+\toprule
+$\epsilon$ (FMS units) & 1.0 & 1.5 & 2.0 \\
+\midrule
+$\hat{P}(|\hat{y}-y| \leq \epsilon)$ & 60.7\% & 77.5\% & 85.6\% \\
+\bottomrule
+\end{tabular}
+\label{tab:errorbound}
+\end{table}
+
+\subsection{Model Selection for Formal Verification}\label{sec:baselines}
+
+To justify using Random Forest as the formally verified model, we benchmark nine regression algorithms under identical conditions: the same 24 features, the same 5-fold band-balanced cross-validation splits, and fold-internal preprocessing (median imputation and standardization). \cref{tab:regression_baselines} reports the results.
+
+\input{tables/regression_baselines.tex}
+
+Tree-ensemble methods occupy the top of the ranking. XGBoost achieves the lowest MAE ($0.908 \pm 0.113$) and the highest $R^2$ ($0.828$), while Random Forest and Gradient Boosting perform comparably (MAE $\approx 1.01$, $R^2 \approx 0.81$). Among the evaluated neural baselines, the LSTM and DNN also achieve competitive point metrics (MAE $= 0.960$ and $0.993$, respectively), although conclusions about neural architectures remain limited by the small sample size ($n = 285$). Linear models and SVR trail the nonlinear methods by roughly 0.5 MAE units, indicating that nonlinear interactions are important for this task.
+
+Although XGBoost attains the best point metrics, we retain Random Forest as the primary model for verification for three reasons. First, it delivers strong predictive performance with low fold-to-fold variation under the adopted split. Second, its tree-ensemble structure is directly compatible with exact VoRF verification. Third, its impurity-based importance scores provide a coarse but useful feature ranking that helps interpret the certified region. The baseline study therefore serves as a \emph{model-selection step for verification}, not as the main contribution of the paper.
+
+Having established why Random Forest is the verified model of interest, we next turn to the paper's main technical result: a formal bounded-output certificate for a certified input region.
+
+\subsection{Formal Bounded-Output Certification Results}
+\label{sec:formal_results}
+
+Applying the VoRF procedure described in Section~\ref{sec:vorf} to the exported Random Forest instance yields a certified low-output region for the primary threshold $\tau = 4$. The certified bounds are listed in \cref{tab:formal_certificate}, while all remaining variables are allowed to vary over the observed admissible ranges specified for the exported verification instance.
+
+\begin{equation}
+\max_{\mathbf{x} \in \mathcal{R}} f(\mathbf{x}) \le 4 .
+\end{equation}
+
+Thus, for every admissible input in $\mathcal{R}$, the verified Random Forest cannot produce a prediction above the threshold $\tau = 4$.
+
+\begin{table}[tb]
+\centering
+\caption{Certified bounds defining the formally verified low-output region $\mathcal{R}$ for $\tau = 4$.}
+\scriptsize
+\begin{tabular}{lcc}
+\toprule
+\textbf{Variable} & \textbf{Certified bound} & \textbf{Role} \\
+\midrule
+hours\_of\_sleep   & $\ge 7$  & Pre-exposure rest \\
+msq\_score         & $\le 2$  & Motion-sickness susceptibility \\
+fms\_pre\_min\_4   & $\le 2$  & Baseline discomfort \\
+mhq\_score         & $\le 11$ & Migraine-related susceptibility \\
+intensity\_numeric & $\le 2$  & Low-to-moderate perturbation \\
+\bottomrule
+\end{tabular}
+\label{tab:formal_certificate}
+\end{table}
+
+The certified region corresponds to users with low baseline susceptibility, adequate rest, low early-session discomfort, and low-to-moderate perturbation intensity. Operationally, this result suggests a model-conditional screening criterion: users whose baseline profile and planned perturbation level fall inside the verified region can be flagged by the model as lying within a certified low-output region under the stated bounded conditions. Importantly, this is a guarantee about the model output, not a direct guarantee about the true physiological outcome. Outside this region, VoRF provides no certificate; this does not imply unsafe exposure, only that the current model-conditional guarantee no longer applies.
+
+Whereas the formal result above certifies what the model cannot predict inside a bounded region, the next analyses examine how the same predictor behaves over held-out samples encountered during realistic session trajectories.
+
+\subsection{Empirical Threshold-Based Assessment of Safety-Critical States}
+
+\cref{tab:bands} reports MAE stratified by FMS severity band. The model is most accurate in the Low (MAE $= 0.824$) and Mid (MAE $= 0.832$) bands, with larger error in High-severity samples (MAE $= 1.720$). The High band contains fewer samples ($n = 57$) and exhibits greater inter-individual variability, which makes precise prediction more difficult. From a safety perspective, this concentration of error in the high-FMS band is important because under-prediction at extreme discomfort can obscure safety-critical states.
+
+\begin{table}[tb]
+\centering
+\caption{MAE by FMS severity band.}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Band} & \textbf{Range} & \textbf{Count} & \textbf{MAE} \\
+\midrule
+Low  & 0--2  & 141 & 0.824 \\
+Mid  & 3--5  & 87  & 0.832 \\
+High & 6--10 & 57  & 1.720 \\
+\bottomrule
+\end{tabular}
+\label{tab:bands}
+\end{table}
+
+\textbf{Safety-critical detection.}
+Treating FMS $> \tau$ as a binary safety flag, we evaluate how well the model's continuous predictions identify true threshold-crossing events (\cref{tab:detection}).
+
+\begin{table}[tb]
+\centering
+\caption{Safety-critical detection performance at thresholds $\tau = 4$ and $\tau = 6$.}
+\scriptsize
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Threshold} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{Precision} & \textbf{TP/FP/FN/TN} \\
+\midrule
+$\tau = 4$ & 0.822 & 0.841 & 0.705 & 74 / 31 / 16 / 164 \\
+$\tau = 6$ & 0.821 & 0.980 & 0.902 & 46 / 5 / 10 / 224 \\
+\bottomrule
+\end{tabular}
+\label{tab:detection}
+\end{table}
+
+At $\tau = 4$, the model correctly identifies 82.2\% of threshold-crossing episodes while maintaining 84.1\% specificity, indicating a promising detection tradeoff under the current evaluation protocol. At the more severe threshold $\tau = 6$, specificity rises to 98.0\%, indicating a low false-positive rate for severe-symptom detection.
+
+These binary safety-critical detection results provide a useful bridge between the global formal certificate and the more structured empirical analyses below. We next examine how threshold-crossing risk evolves over session duration and perturbation intensity.
+
+\subsection{Temporal Risk Analysis}\label{sec:temporal}
+
+\textbf{FMS progression over time.}
+True FMS increases with session duration (Pearson $r \approx 0.265$), reflecting cumulative sensory load in this dataset. The model captures the overall upward trend (\cref{fig:fmstime}), although it underestimates part of the late-session escalation.
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\columnwidth]{fms_true_pred_by_minute_se}
+  \caption{True vs.\ predicted FMS by session minute (mean $\pm$ SE across participants). The model captures the overall upward trend in discomfort, although the predicted trajectory is flatter at later time points.}
+  \label{fig:fmstime}
+\end{figure}
+
+\textbf{Per-minute prediction accuracy.}
+\cref{tab:minute_mae} reports per-minute MAE. Accuracy is highest mid-session (minutes 13--19, MAE $\leq 0.80$) and degrades near session boundaries (minute 5: 1.19; minute 30: 1.79). Early-session errors likely reflect the transition from baseline into perturbation exposure, whereas late-session errors likely arise from increasingly divergent individual responses under cumulative load, compounded by reduced late-session sample counts.
+
+\begin{table}[tb]
+\centering
+\caption{Per-minute mean absolute error (MAE) with standard deviation. Accuracy is highest between minutes 13--19.}
+\scriptsize
+\setlength{\tabcolsep}{3pt}  % default is 6pt
+\begin{tabular}{c|cccccccccc}
+\toprule
+\textbf{Min.} & 5 & 7 & 10 & 13 & 16 & 19 & 22 & 25 & 28 & 30 \\
+\midrule
+\textbf{MAE}  & 1.19 & 0.90 & 1.02 & 0.80 & 0.74 & 0.79 & 0.97 & 1.08 & 1.27 & 1.79 \\
+\textbf{SD}   & 1.02 & 0.86 & 0.97 & 0.57 & 0.57 & 0.82 & 0.67 & 0.78 & 1.03 & 1.19 \\
+\bottomrule
+\end{tabular}
+\label{tab:minute_mae}
+\end{table}
+
+\textbf{Temporal exceedance risk (Property~1).}
+\cref{fig:temporal_verify} shows the empirical exceedance probability $\hat{P}(\text{FMS} > 4)$ at each session minute, computed from both observed and predicted FMS values. Observed exceedance rises from 12.5\% at minute~5 to 56.2\% at minute~30, crossing the 50\% level near minutes~28--30. The model's predicted exceedance probabilities broadly track the observed values across the session timeline and recover the overall escalation of threshold-crossing risk.
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\columnwidth]{verification_temporal_curve}
+  \caption{Temporal exceedance risk: observed and predicted $P(\text{FMS} > 4)$ by session minute. The dashed line marks the 0.5 exceedance level for visual reference only. The model captures the overall increase in threshold-crossing risk over time, although discrepancies remain at later time points.}
+  \label{fig:temporal_verify}
+\end{figure}
+
+These results show that the model can characterize how threshold-crossing risk evolves over session time in the observed dataset. In this dataset and scenario, observed and predicted risk both become appreciably higher after approximately minute~22 and approach a regime in which more than half of samples exceed the threshold near minute~30. These trends suggest that an adaptive MR system could use such evolving risk estimates to trigger mitigation, such as reducing perturbation intensity or inserting a rest break, before discomfort escalates further.
+
+\subsection{Intensity-Conditioned Risk Analysis}\label{sec:intensity}
+
+\textbf{Perturbation-level FMS response.}
+The model preserves the expected monotonic ordering of FMS across perturbation intensities ($r \approx 0.124$): Low, Medium, and High conditions produce progressively higher mean FMS in both observed and predicted responses (\cref{fig:intensity_verify}).
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.85\columnwidth]{verification_intensity_tau4}
+  \caption{Intensity-conditioned exceedance risk: observed and predicted $P(\text{FMS} > 4)$ by perturbation level. Observed threshold-crossing risk increases from Low to High, while predicted risk overestimates the Medium condition and aligns most closely in the High condition.}
+  \label{fig:intensity_verify}
+\end{figure}
+
+\textbf{Intensity-conditioned exceedance risk (Property~2).}
+\cref{tab:intensity_exc} reports threshold exceedance probabilities by perturbation intensity. The model captures the pattern that Low-intensity perturbations pose the least risk ($\hat{P} = 0.267$), whereas High-intensity perturbations carry the greatest risk ($\hat{P} = 0.359$). Agreement is close for the High-intensity condition, moderate for Low intensity, and substantially weaker for the Medium-intensity condition.
+
+\begin{table}[tb]
+\centering
+\caption{Intensity-conditioned exceedance risk: $P(\text{FMS} > 4)$ by perturbation level.}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Intensity} & \textbf{$n$} & \textbf{Observed} & \textbf{Predicted} \\
+\midrule
+Low    & 45  & 0.222 & 0.267 \\
+Medium & 59  & 0.288 & 0.475 \\
+High   & 181 & 0.348 & 0.359 \\
+\bottomrule
+\end{tabular}
+\label{tab:intensity_exc}
+\end{table}
+
+The Medium-intensity condition shows the largest discrepancy between observed (28.8\%) and predicted (47.5\%) exceedance, indicating weak calibration for this ambiguous middle regime. This mismatch should therefore be interpreted as an important limitation of the current model rather than as evidence of reliable conservatism. By contrast, for the High-intensity condition, which comprises the majority of samples, predicted and observed exceedance rates are closely aligned (35.9\% vs.\ 34.8\%).
+
+
+
+
+
+\subsection{Feature Importance and Safety Interpretation}\label{sec:importance}
+
+\cref{fig:importance} shows the highest-ranked features in the trained Random Forest model, measured by impurity reduction and averaged across the five folds of the current evaluation protocol. \cref{tab:importance} reports the corresponding per-fold values, which suggest that the ordering of the leading features is broadly stable across folds. Here, \texttt{scl} denotes skin conductance level (SCL).
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\columnwidth]{rf_feature_importance_top}
+  \caption{Top features by Random Forest impurity-based importance (mean across five folds). Baseline susceptibility and early-session calibration features dominate the model's impurity-based ranking, while session minute contributes temporal discrimination.}
+  \label{fig:importance}
+\end{figure}
+
+\begin{table}[tb]
+\centering
+\caption{Top-10 features by mean importance across five folds, with per-fold values indicating broad ordering stability.}
+\scriptsize
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Feature} & \textbf{Mean} & \textbf{F1} & \textbf{F2} & \textbf{F3} & \textbf{F4} & \textbf{F5} \\
+\midrule
+fms\_pre\_min\_4    & 0.240 & 0.270 & 0.208 & 0.245 & 0.238 & 0.237 \\
+hours\_of\_sleep    & 0.178 & 0.173 & 0.211 & 0.179 & 0.164 & 0.162 \\
+msq\_score          & 0.122 & 0.120 & 0.135 & 0.124 & 0.098 & 0.133 \\
+mhq\_score          & 0.080 & 0.075 & 0.068 & 0.082 & 0.099 & 0.076 \\
+minute              & 0.055 & 0.045 & 0.052 & 0.049 & 0.070 & 0.062 \\
+spatial\_freq\_mean & 0.036 & 0.039 & 0.037 & 0.036 & 0.033 & 0.036 \\
+GazeOriginX\_std    & 0.034 & 0.032 & 0.035 & 0.028 & 0.042 & 0.031 \\
+HeadPositionX\_mean & 0.034 & 0.027 & 0.036 & 0.026 & 0.034 & 0.045 \\
+scl                 & 0.029 & 0.024 & 0.029 & 0.030 & 0.030 & 0.033 \\
+HeadGazeDirY\_std   & 0.020 & 0.022 & 0.024 & 0.017 & 0.018 & 0.020 \\
+\bottomrule
+\end{tabular}
+\label{tab:importance}
+\end{table}
+
+Because impurity-based importance is model-specific rather than causal, we interpret these results as showing which inputs the trained Random Forest relies on most heavily when producing FMS estimates. The resulting ranking suggests a layered structure that is relevant to safety interpretation and possible deployment logic. Baseline susceptibility and early-session calibration variables (\texttt{fms\_pre\_min\_4}, \texttt{hours\_of\_sleep}, \texttt{msq\_score}, and \texttt{mhq\_score}) account for approximately 62\% of the total importance, indicating that these variables contribute most strongly to the model output under this importance measure. Importantly, \texttt{fms\_pre\_min\_4} is not a purely pre-exposure variable; it is collected during the baseline period before perturbation onset, after immersion has already begun. Accordingly, the importance profile supports a combination of pre-session screening and early-session calibration: questionnaires and sleep history provide an initial estimate of risk, while baseline FMS refines that estimate after immersion begins.
+
+Session minute (importance $= 0.055$, rank 5) provides the temporal discrimination needed for within-session risk tracking, with elapsed time acting as a proxy for cumulative exposure. Runtime gaze and scene features, including \texttt{GazeOriginX\_std}, \texttt{spatial\_freq\_mean}, and \texttt{HeadPositionX\_mean}, collectively contribute roughly 10\% of the total importance. These features are observable during exposure and may support online monitoring in a deployed system. By contrast, perturbation intensity has low marginal importance when considered alongside the full feature set (importance $= 0.005$, rank 22), suggesting that much of its predictive contribution may overlap with correlated runtime measurements rather than arising from the intensity label alone. Overall, this importance profile supports a screening-plus-monitoring interpretation of the model: baseline susceptibility and early-session calibration establish initial risk, while temporal and runtime features refine risk estimates as exposure unfolds.
+
+%========================================================================
+\section{Discussion}\label{sec:discussion}
+%========================================================================
+
+\textbf{Formal certification and empirical risk analysis as complementary safety tools.}
+A central contribution of this paper is a safety-oriented cybersickness framework operating at two complementary levels. First, formal VoRF analysis provides an exact model-conditional certificate that the trained Random Forest's predicted FMS output remains below the moderate-symptom threshold over a bounded input region. In the present model, that certified region is defined primarily by sleep, susceptibility scores, early-session baseline FMS, and low-to-moderate perturbation intensity. The resulting guarantee should therefore be interpreted as conditioning on screening variables together with an initial calibration window, rather than as a purely pre-session guarantee. Second, cross-validated out-of-fold threshold-risk analysis characterizes how risk evolves over time and perturbation intensity during realistic session trajectories. Together, these analyses connect screening and early-session certification with within-session safety monitoring.
+
+\textbf{Predictive accuracy as an enabler rather than the endpoint.}
+Under the current band-balanced cross-validation protocol, the Random Forest model achieves MAE $\approx 1.0$ on a 0--10 FMS scale, with low fold-to-fold variation under the current split and 85.6\% of predictions within $\pm 2$ FMS units. This predictive fidelity is important because it supports exploratory downstream safety analyses under the current evaluation protocol. At $\tau = 4$, the model achieves 82.2\% sensitivity and 84.1\% specificity for detecting safety-critical episodes, while reproducing the overall temporal rise in cybersickness risk. Across perturbation levels, the model differentiates lower from higher conditions, although calibration is weakest for the medium-intensity group.
+
+\textbf{Temporal safety patterns.}
+In the present dataset, the temporal risk curve (\cref{fig:temporal_verify}) shows that $P(\mathrm{FMS} > 4)$ remains below 35\% through minute~16, then rises substantially after minute~22 and approaches 50\% by minutes~28--30. This pattern suggests a candidate intervention window in the present dataset rather than a universal operating limit: risk is lower through mid-session and increases markedly in the later portion of exposure. An adaptive MR system could respond by reducing perturbation intensity, inserting rest periods, or otherwise modifying the experience when the predicted exceedance probability approaches a chosen operational threshold. The acceptable risk threshold itself, however, must be specified by the target application rather than assumed to be universal.
+
+\textbf{Boundary effects and prediction limitations.}
+The model achieves its best per-minute accuracy in the middle of the session (minutes~13--19, MAE $\leq 0.80$) and its worst at the session boundaries (minute~5: 1.19; minute~30: 1.79). Early-session errors likely reflect the transition from baseline to perturbation onset, whereas later errors likely reflect both more heterogeneous individual responses under prolonged exposure and reduced sample support (only 16 participants contribute data at minute~30). Predictions near session boundaries should therefore be interpreted more cautiously, and any deployment threshold in these regions should include larger safety margins.
+
+\textbf{High-FMS band difficulty.}
+The High-FMS band (6--10) has the largest MAE (1.720), likely due to fewer training samples and greater heterogeneity in participant responses at extreme discomfort. From a safety perspective, this indicates that the model is less reliable in the highest-discomfort regime and that supplementary monitoring---for example, additional physiological sensing---would be especially valuable for high-risk users.
+
+\textbf{Connection to BN verification.}
+Prior work on Bayesian Network verification~\cite{Wu2025BN} introduced formal probabilistic verification for cybersickness in a 15-minute VR walking task. The present study addresses a materially different setting: (i)~an operational military MR training scenario rather than VR maze walking, (ii)~30-minute exposure rather than 15-minute exposure, (iii)~continuous FMS regression rather than discrete classification, and (iv)~tree-ensemble bounded-output certification together with held-out threshold-risk analysis rather than BN posterior inference. The contribution is therefore not a stronger predictor alone; rather, it is a safety-oriented analysis showing how model certification and empirical threshold-risk auditing can be adapted to extended-duration MR under a different model class and a different guarantee structure. Future work will explore integrating BN causal structure with RF-based prediction to enable richer and more explicit formal safety guarantees for real-time cybersickness monitoring.
+
+\textbf{Limitations.}
+This study has several important limitations. First, the dataset is modest in size (32 participants) and is drawn from a single testbed and scenario. Second, the current cross-validation protocol does not enforce leave-one-subject-out splits, so samples from the same participant may appear across training and test folds. Accordingly, the reported results should be interpreted as within-cohort performance rather than participant-independent generalization. Third, most physiological channels were not integrated into the present model, although skin conductance level was included as one physiological feature. Fourth, although we evaluated nine baseline models including deep learning architectures (\cref{tab:regression_baselines}), the limited sample size restricts how strongly we can interpret conclusions about neural-network scalability. Finally, the paper combines exact bounded-output verification for one fixed Random Forest artifact with empirical threshold-risk analyses across cross-validated predictions; it does not yet provide full posterior-probability guarantees of the BN type, nor formal certification for every fold-specific model.
+
+%========================================================================
+\section{Conclusion}\label{sec:conclusion}
+%========================================================================
+
+This paper presents a safety-oriented framework for prediction, certification, and empirical risk assessment of cybersickness during extended mixed-reality exposure. Under the current band-balanced cross-validation protocol, a Random Forest model trained on multimodal features from 32 participants across 30-minute TCCC training sessions achieves MAE $\approx 1.0$ ($R^2 = 0.81$) for continuous FMS prediction. These results should be interpreted as within-cohort performance under band-balanced cross-validation rather than participant-independent generalization. The resulting safety analyses suggest that the model reflects the temporal escalation of cybersickness risk, differentiates lower from higher perturbation conditions, and achieves 82.2\% sensitivity for detecting safety-critical episodes at $\tau = 4$ under the current evaluation protocol. Baseline susceptibility features, together with early-session baseline FMS, provide the strongest risk signal, while session timing and runtime gaze/scene features refine within-session monitoring.
+
+Taken together, the results support a screening-plus-monitoring view of cybersickness management. Formal VoRF analysis certifies a model-conditional safe region defined by screening variables and early-session baseline constraints for a trained Random Forest model, while empirical threshold-risk analysis characterizes when safety-critical cybersickness becomes likely during exposure. Relative to prior BN-based verification studies~\cite{Wu2025BN}, the present work shows that safety-oriented verification ideas can be adapted from short VR tasks to extended operational MR training under a different model class and analysis mechanism. Future work will incorporate additional physiological signals, evaluate leave-one-subject-out validation, and test generalization across multiple MR scenarios and perturbation modalities, while exploring the integration of Bayesian Network causal structure with RF-based prediction to obtain richer formal guarantees.
+
+
+
+
+
+
+
+% \newpage
+
+
+% %========================================================================
+% \section{Testbed, Data, Prediction, and Verification}\label{sec:method}
+% %========================================================================
+
+% \subsection{TCCC Mixed-Reality Testbed}\label{sec:testbed}
+
+% Data were collected using a Tactical Combat Casualty Care (TCCC) mixed-reality testbed~\cite{Harper2021AR, Stanney2022AUGMED, Laxton2025MobileXR}. The TCCC scenario follows a \textit{Tell--Show--Do} instructional sequence: structured presentation of injury signs and treatment steps (Tell), immersive demonstrations through overlay animations (Show), and guided user execution on a manikin with casualty-care tools (Do). The testbed uses standardized TCCC materials from Deployed Medicine~\cite{DeployedMedicine2025}.
+
+% Structured activities include \textit{Discovery} (exploring 3D markers), \textit{Question \& Answer} (knowledge checks), \textit{Locate \& Select} (spatial awareness), \textit{Navigate} (audiovisual prompts), \textit{Timer} (timed practice), and \textit{Action Plan} (procedural sequencing). These activities follow a fixed schedule to ensure exposure consistency across participants.
+
+% Thirty-two participants completed approximately 30-minute sessions with usable data for the modeling and verification analyses reported in this paper. After an initial baseline period (minutes 0--4), the system injects controlled \textbf{cognitive attacks} in the form of camera jitter at one of three intensity levels (\textit{Low}, \textit{Medium}, \textit{High}). Perturbations persist for the remainder of the session with subtle within-level variation to prevent adaptation. Participants verbally report Fast Motion Sickness (FMS) scores at twelve fixed timepoints: two pre-attack baseline reports (minutes 3 and 4) and ten post-attack reports (minutes 5, 7, 10, 13, 16, 19, 22, 25, 28, and 30) on a 0--10 scale. These post-attack timepoints were chosen to capture both fast onset and delayed onset of cybersickness. Only post-attack timepoints (minutes 5--30), yielding 285 aligned samples, are used for modeling and verification analysis.
+
+% Sensor data include 1~Hz gaze and head kinematics from a HoloLens~2 headset and application-logged visual scene statistics (optical flow, contrast, spectral entropy, spatial frequency). Before immersion, participants completed screening questionnaires capturing motion-sickness susceptibility (MHQ~\cite{Reason1975MotionSickness, Golding1998MSSQ}), migraine risk (MSQ), baseline simulator sickness (SSQ~\cite{Kennedy1993SSQ}), and demographics including hours of sleep.
+
+% \subsection{Participant Details}
+
+% Participants ($N = 35$) included 18 females and 17 males. Participants
+% self-identified as Asian (13), White (12), Hispanic/Latino (5), American
+% Indian or Alaskan Native (2), Black or African American (1), multiracial (1),
+% or prefer not to answer (1). Education levels were Master's (10), Bachelor's
+% (7), some college/no degree (6), high school/GED (6), Associate (5), and
+% Doctoral (1). Most participants reported no corrective lenses (24), while 8
+% reported using both contacts and glasses and 3 reported using contacts.
+% Participants' average age was $22.94 \pm 8.53$ years, and inter-pupillary
+% distance (IPD) was $63.23 \pm 2.94$ mm. Of the 35 participants, 28 reported
+% previous AR exposure while 7 reported no previous AR exposure.
+
+% \subsection{Feature Engineering and Preprocessing}\label{sec:features}
+
+% Features are organized into four complementary families:
+
+% \begin{itemize}[nosep, leftmargin=*]
+%   \item \textbf{Pre-exposure state:} Subject-level covariates---hours of sleep, MSQ score, MHQ score, baseline SSQ subscales (oculomotor, disorientation, total), and baseline FMS at minutes 3--4---capturing between-participant susceptibility differences.
+%   \item \textbf{Exposure context:} Session minute (5--30) and attack intensity (Low$=1$, Medium$=2$, High$=3$), encoding cumulative exposure and degradation level.
+%   \item \textbf{Gaze and head dynamics:} Per-minute window statistics (mean, standard deviation) of 3D gaze origin, gaze direction, head position, and derived angular velocities from HoloLens~2 telemetry.
+%   \item \textbf{System/visual motion:} Window-aggregated optical flow (mean, std), contrast, spectral entropy, and spatial frequency from the MR application stream.
+% \end{itemize}
+
+% Candidate features are ranked by absolute Pearson correlation with FMS. The top-20 by $|r|$ are retained, supplemented by forced inclusion of \texttt{intensity\_numeric}, \texttt{minute}, and key scene-motion descriptors regardless of rank. This yields 24 selected features (\cref{tab:features}).
+
+% \begin{table}[tb]
+% \centering
+% \caption{Selected features grouped by category with Pearson $|r|$ with FMS. Pre-exposure features have the strongest marginal correlations.}
+% \label{tab:features}
+% \scriptsize
+% \begin{tabular}{llc}
+% \toprule
+% \textbf{Category} & \textbf{Feature} & $|r|$ \\
+% \midrule
+% \multirow{7}{*}{Pre-exposure}
+%   & hours\_of\_sleep & 0.575 \\
+%   & msq\_score & 0.563 \\
+%   & fms\_pre\_min\_4 & 0.351 \\
+%   & mhq\_score & 0.350 \\
+%   & bl\_ssq\_oculomotor & 0.246 \\
+%   & bl\_ssq\_disorientation & 0.192 \\
+%   & bl\_ssq\_total & 0.168 \\
+% \midrule
+% \multirow{2}{*}{Context}
+%   & minute & 0.265 \\
+%   & intensity\_numeric & 0.124 \\
+% \midrule
+% \multirow{9}{*}{Gaze/Head}
+%   & GazeOriginX\_std & 0.327 \\
+%   & fms\_pre\_min\_3 & 0.317 \\
+%   & HeadGazeDirectionY\_std & 0.242 \\
+%   & HeadPositionX\_mean & 0.239 \\
+%   & GazeOriginX\_mean & 0.236 \\
+%   & GazeDirectionZ\_mean & 0.232 \\
+%   & gaze\_pitch\_deg\_mean & 0.229 \\
+%   & head\_yaw\_deg\_mean & 0.157 \\
+%   & GazeDirectionX\_std & 0.150 \\
+% \midrule
+% \multirow{6}{*}{System}
+%   & spatial\_frequency\_mean & 0.197 \\
+%   & scl & 0.169 \\
+%   & spectral\_entropy\_mean & 0.152 \\
+%   & gaze\_ang\_speed\_dps\_mean & 0.142 \\
+%   & optical\_flow\_mean & 0.124$^*$ \\
+%   & contrast\_mean & 0.109$^*$ \\
+% \bottomrule
+% \end{tabular}
+% \vspace{2pt}
+% \begin{flushleft}
+% \scriptsize $^*$Forced inclusion based on domain knowledge.
+% \end{flushleft}
+% \end{table}
+
+% \textbf{Preprocessing and cross-validation.}
+% Numeric features are median-imputed and standardized; categorical features are one-hot encoded. All preprocessing is performed strictly \emph{within each training fold} to prevent information leakage. Evaluation uses a \textbf{5-fold band-balanced} scheme: FMS scores are binned into Low (0--2), Mid (3--5), and High (6--10) bands, and each participant's samples within each band are distributed evenly across folds before combining. This ensures every fold contains representative samples from all discomfort levels.
+
+% The distribution of FMS scores across all participant-minute samples is shown in \cref{fig:fmsdist}. Lower scores predominate early in exposure, consistent with progressive symptom development.
+
+% \begin{figure}[tb]
+%   \centering
+%   \includegraphics[width=\columnwidth]{fms_distribution}
+%   \caption{Distribution of FMS scores (0--10) across all 285 participant-minute samples. Lower scores predominate, reflecting progressive symptom onset.}
+%   \label{fig:fmsdist}
+% \end{figure}
+
+
+% \subsection{Random Forest Prediction Model}\label{sec:rf}
+
+% We train a \textbf{Random Forest Regressor}~\cite{Breiman2001RF} to predict continuous FMS scores from the 24-feature multimodal input. The model uses 600 trees with a minimum of two samples per leaf. Regression preserves participant-level granularity and avoids information loss from discretizing FMS into severity categories. We report three standard metrics: mean absolute error (MAE), root mean squared error (RMSE), and coefficient of determination ($R^2$). The Random Forest is used here not only as a predictive model, but also as the artifact subjected to formal safety verification.
+
+% \cref{fig:pipeline} summarizes the end-to-end framework, showing how multimodal MR data are transformed into continuous FMS predictions and then used in two complementary verification branches: formal bounded-output certification and empirical risk analysis.
+
+% \begin{figure*}[t]
+%   \centering
+%   \includegraphics[width=0.92\textwidth]{duration_framework}
+%   \caption{Framework for cybersickness prediction and verification during extended MR exposure. Multimodal pre-exposure, contextual, gaze/head, and visual scene features are fused into minute-level samples and processed within a fold-isolated pipeline to train a Random Forest regressor for continuous FMS prediction. The trained model then supports two complementary verification paths: formal bounded-output verification of an exported model via VoRF over a bounded input region, and empirical verification on out-of-fold predictions to assess temporal risk, intensity-dependent risk, and safety-critical detection. Together, these branches support proactive MR safety decisions through pre-session certification and in-session monitoring.}
+%   \label{fig:pipeline}
+% \end{figure*}
+
+
+% \subsection{Formal Verification of the Random Forest Model}
+% \label{sec:vorf}
+
+% In addition to predictive evaluation, we perform \textbf{formal bounded-output verification}
+% of the trained Random Forest model using the VoRF framework~\cite{Tornblom2018FormalRF}. VoRF provides deterministic safety guarantees for
+% tree ensemble models by encoding the model structure as a mixed-integer linear
+% program (MILP) and computing the worst-case output over a constrained input
+% region.
+
+% \paragraph{Verification objective.}
+% Let $f(\mathbf{x})$ denote the Random Forest regressor that predicts the
+% continuous Fast Motion Sickness (FMS) score from feature vector
+% $\mathbf{x}$. Given a set of admissible input bounds
+% $\mathbf{x} \in \mathcal{R}$, verification computes the worst-case model output
+
+% \begin{equation}
+% y_{\max} = \max_{\mathbf{x} \in \mathcal{R}} f(\mathbf{x}).
+% \end{equation}
+
+% A safety guarantee with threshold $\tau$ is satisfied if
+
+% \begin{equation}
+% y_{\max} \le \tau .
+% \end{equation}
+
+% In this paper we consider $\tau = 4$ as the primary safety threshold
+% corresponding to moderate cybersickness onset, and $\tau = 6$ for severe
+% symptom levels.
+
+% \paragraph{MILP encoding of Random Forests.}
+% Each decision tree in the forest is converted into a set of linear constraints.
+% For a split node testing feature $x_j$ against threshold $\theta$,
+
+% \begin{equation}
+% x_j \le \theta
+% \end{equation}
+
+% is encoded using a binary variable that activates the corresponding branch.
+% Leaf nodes are represented by constant prediction values, and the final forest
+% output is the average of all tree outputs.
+
+% Let $T$ denote the number of trees and $l_t$ the selected leaf output of tree
+% $t$. The forest prediction can then be expressed as
+
+% \begin{equation}
+% f(\mathbf{x}) = \frac{1}{T} \sum_{t=1}^{T} l_t .
+% \end{equation}
+
+% Combining all tree constraints yields a single optimization problem whose
+% solution corresponds to the worst-case prediction achievable within the input
+% region. Because formal certification applies to a single fixed model artifact,
+% we verify one exported fold-specific Random Forest deployment model and use
+% 5-fold cross-validation separately to assess predictive generalization.
+% The trained Random Forest model contains 600 trees with a maximum depth of 14
+% and an average depth of approximately 9.4. Across the ensemble the model
+% contains 53{,}278 decision nodes. Despite the size of the ensemble, the model
+% remains tractable for MILP-based verification through VoRF due to the piecewise-constant
+% structure of decision trees.
+
+% \paragraph{Verification workflow.}
+% Verification proceeds as follows:
+
+% \begin{enumerate}
+% \item Define admissible bounds for selected input variables.
+% \item Encode the entire forest as MILP constraints.
+% \item Solve an optimization problem that maximizes the predicted FMS value.
+% \item If the maximum output does not exceed the safety threshold,
+%   the region is certified safe.
+% \item Otherwise the solver returns a counterexample input demonstrating
+%   a violation of the safety constraint.
+% \end{enumerate}
+
+% This procedure produces an \emph{exact worst-case guarantee} for the Random
+% Forest predictor over the specified input region.
+
+
+% \subsection{Empirical Verification Framework}\label{sec:verification}
+
+% Complementing the formal bounded-output guarantees above, we also evaluate whether the model's predictions support \emph{empirical verification} of cybersickness safety constraints over observed session trajectories---following the probabilistic verification paradigm introduced for Bayesian Networks by Wu~et~al.~\cite{Wu2025BN}. In that framework, a Boolean property $\phi(\mathbf{X})$ is defined over model variables (e.g., FMS $> \tau$), and verification computes $P(\phi(\mathbf{X}) = 1 \mid \mathcal{C})$ under evidence conditions $\mathcal{C}$ (hard or soft).
+
+% We adapt this verification perspective to Random Forest predictions by defining three empirical analyses over the out-of-fold predictions:
+
+% \textbf{Property 1 --- Temporal safety:} For each session minute $t$ and threshold $\tau$, compute the empirical exceedance probability:
+% \begin{equation}
+%   \hat{P}(\text{FMS} > \tau \mid \text{minute} = t) = \frac{1}{n_t} \sum_{i: t_i = t} \mathbf{1}[\hat{y}_i > \tau],
+%   \label{eq:temporal}
+% \end{equation}
+% where $n_t$ is the number of samples at minute $t$ and $\hat{y}_i$ is the predicted FMS. This identifies at which minutes cybersickness risk crosses an unacceptable level.
+
+% \textbf{Property 2 --- Intensity safety:} For each attack level $k \in \{\text{Low, Med, High}\}$ and threshold $\tau$:
+% \begin{equation}
+%   \hat{P}(\text{FMS} > \tau \mid \text{intensity} = k) = \frac{1}{n_k} \sum_{i: k_i = k} \mathbf{1}[\hat{y}_i > \tau].
+%   \label{eq:intensity}
+% \end{equation}
+
+% \textbf{Property 3 --- Prediction reliability:} For an error tolerance $\epsilon$, verify the fraction of predictions within the acceptable bound:
+% \begin{equation}
+%   \hat{P}(|\hat{y} - y| \leq \epsilon) = \frac{1}{N} \sum_{i=1}^{N} \mathbf{1}[|y_i - \hat{y}_i| \leq \epsilon].
+%   \label{eq:errorbound}
+% \end{equation}
+
+% We also evaluate \textbf{safety-critical detection}: treating FMS $> \tau$ as a binary event, we compute sensitivity (recall of true safety violations), specificity (correct identification of safe states), and precision of the model's threshold-crossing predictions. Following Wu~et~al.~\cite{Wu2025BN}, we use $\tau = 4$ as the primary safety threshold (corresponding to moderate cybersickness onset) and $\tau = 6$ for severe symptoms. In contrast to the formal VoRF analysis, these empirical verification results summarize model behavior over observed test samples rather than certifying all admissible inputs in a region.
+
+
+% %========================================================================
+% \section{Prediction and Verification Results}\label{sec:results}
+% %========================================================================
+
+% This section is organized to mirror the paper's verification-first narrative.
+% We first show that the Random Forest is accurate enough to support downstream
+% safety analysis, then justify why it is the model selected for formal
+% verification, next present the formal VoRF safety certificate, and finally
+% report empirical verification results that characterize how safety-critical
+% risk evolves across severity bands, session time, and attack intensity.
+
+% \subsection{Overall Prediction Performance}\label{sec:overall}
+
+% We first establish that the Random Forest is accurate enough to support downstream verification. \cref{tab:overall} reports the cross-validated performance of the model. It achieves MAE $= 1.005 \pm 0.040$, meaning predictions are typically within one FMS unit of participant-reported scores on the 0--10 scale. The $R^2 = 0.812$ indicates the model explains over 80\% of the variance in discomfort ratings.
+
+% \begin{table}[tb]
+% \centering
+% \caption{Overall 5-fold cross-validated performance on FMS prediction (0--10 scale).}
+% \begin{tabular}{lccc}
+% \toprule
+% \textbf{Metric} & \textbf{MAE} & \textbf{RMSE} & $\mathbf{R^2}$ \\
+% \midrule
+% Mean $\pm$ Std & $1.005 \pm 0.040$ & $1.327 \pm 0.066$ & $0.812 \pm 0.027$ \\
+% \bottomrule
+% \end{tabular}
+% \label{tab:overall}
+% \end{table}
+
+% \textbf{Cross-validation stability.}
+% \cref{tab:folds} shows per-fold results. MAE ranges from 0.940 to 1.052 across folds with balanced sample sizes (51--61), confirming stable generalization. No single participant group or symptom band dominates the error.
+
+% \begin{table}[tb]
+% \centering
+% \caption{Per-fold MAE and validation sample counts (5-fold band-balanced CV).}
+% \begin{tabular}{lcccc}
+% \toprule
+% \textbf{Fold} & \textbf{Samples} & \textbf{MAE} & \textbf{RMSE} & $\mathbf{R^2}$ \\
+% \midrule
+% 1 & 61 & 1.008 & 1.312 & 0.811 \\
+% 2 & 56 & 1.052 & 1.371 & 0.817 \\
+% 3 & 61 & 1.041 & 1.367 & 0.798 \\
+% 4 & 56 & 0.940 & 1.204 & 0.860 \\
+% 5 & 51 & 0.983 & 1.379 & 0.777 \\
+% \bottomrule
+% \end{tabular}
+% \label{tab:folds}
+% \end{table}
+
+% \textbf{Prediction reliability verification (Property~3).}
+% \cref{tab:errorbound} reports the fraction of out-of-fold predictions falling within error tolerances $\epsilon = 1.0$, 1.5, and 2.0 FMS units. Over 85\% of predictions lie within $\pm 2$ FMS units, validating the model's reliability for downstream safety analysis.
+
+% \begin{table}[tb]
+% \centering
+% \caption{Prediction reliability verification: fraction of predictions within error tolerance $\epsilon$.}
+% \begin{tabular}{lccc}
+% \toprule
+% $\epsilon$ (FMS units) & 1.0 & 1.5 & 2.0 \\
+% \midrule
+% $\hat{P}(|\hat{y}-y| \leq \epsilon)$ & 60.7\% & 77.5\% & 85.6\% \\
+% \bottomrule
+% \end{tabular}
+% \label{tab:errorbound}
+% \end{table}
+
+
+% \subsection{Model Selection for Verification}\label{sec:baselines}
+
+% To justify using Random Forest as the formally verified model, we benchmarked nine regression algorithms under identical conditions: the same 24 features, 5-fold band-balanced cross-validation splits, and fold-internal preprocessing (median imputation and standardization). \cref{tab:regression_baselines} reports the results.
+
+% \input{tables/regression_baselines.tex}
+
+% Tree-ensemble methods dominate the ranking. XGBoost achieves the lowest MAE ($0.908 \pm 0.113$) and highest $R^2$ ($0.828$), while Random Forest and Gradient Boosting perform comparably (MAE $\approx 1.01$, $R^2 \approx 0.81$). Among deep learning baselines, the LSTM and DNN models achieve competitive performance (MAE $0.960$ and $0.993$, respectively) despite the small sample size ($n = 285$), indicating that neural architectures can learn meaningful representations even in low-data regimes. Linear models (Linear Regression, Ridge) and SVR lag behind by $\sim$0.5 MAE units ($R^2 \approx 0.6$), confirming that nonlinear interactions are important for this task.
+
+% Although XGBoost achieves the best point metrics, we retain Random Forest as the primary verification model for three reasons. First, it delivers strong and stable predictive performance. Second, its tree-ensemble structure is directly compatible with exact VoRF verification. Third, its impurity-based importance scores support a transparent interpretation of the certified regions. Thus, the baseline study is used here as a \emph{model-selection step for verification}, not as the main contribution of the paper.
+
+% Having established why Random Forest is the verified model of interest, we next
+% turn from model selection to the main technical contribution of the paper: a
+% formal bounded-output safety guarantee for a certified input region.
+
+
+% \subsection{Formal Safety Guarantee Verification}
+% \label{sec:formal_results}
+
+% Applying the VoRF procedure described in Section~\ref{sec:vorf} to the
+% exported fold-specific Random Forest yields a certified safe region for the
+% primary threshold $\tau = 4$. The certified bounds are listed in
+% \cref{tab:formal_certificate}, while all remaining variables are allowed to
+% vary over their admissible observed ranges.
+
+% \begin{equation}
+% \max_{\mathbf{x} \in \mathcal{R}} f(\mathbf{x}) \le 4 .
+% \end{equation}
+
+% Thus, for every admissible input in $\mathcal{R}$, the verified Random Forest
+% cannot predict moderate-or-higher cybersickness.
+
+% \begin{table}[tb]
+% \centering
+% \caption{Certified bounds defining the formally verified safe region $\mathcal{R}$ for $\tau = 4$.}
+% \scriptsize
+% \begin{tabular}{lcc}
+% \toprule
+% \textbf{Variable} & \textbf{Certified bound} & \textbf{Role} \\
+% \midrule
+% hours\_of\_sleep & $\ge 7$ & Pre-exposure rest \\
+% msq\_score & $\le 2$ & Motion-sickness susceptibility \\
+% fms\_pre\_min\_4 & $\le 2$ & Baseline discomfort \\
+% mhq\_score & $\le 11$ & Migraine-related susceptibility \\
+% intensity\_numeric & $\le 2$ & Low-to-moderate perturbation \\
+% \bottomrule
+% \end{tabular}
+% \label{tab:formal_certificate}
+% \end{table}
+
+% The certified region corresponds to participants with low baseline
+% susceptibility, adequate rest, and low-to-moderate perturbation intensity.
+% Operationally, this result supports pre-session screening: users whose
+% pre-exposure profile falls inside the verified bounds can be cleared with a
+% deterministic guarantee that the model output will remain below the moderate
+% cybersickness threshold. Outside this region, VoRF returns a counterexample
+% rather than a certificate, indicating that additional mitigation or screening
+% is required.
+
+% Whereas the formal result above certifies what the model \emph{cannot} do
+% inside a bounded region, the next set of analyses asks how the same predictor
+% behaves over held-out samples encountered during realistic exposure
+% trajectories.
+
+
+% \subsection{Empirical Verification of Safety-Critical States}
+
+% \cref{tab:bands} reports MAE stratified by FMS band. The model is most accurate for Low (MAE $= 0.824$) and Mid (MAE $= 0.832$) bands, with larger error for High-severity samples (MAE $= 1.720$). The High band contains fewer samples ($n = 57$) and greater inter-individual variability, making precise prediction harder. From a safety perspective, this conservatism is informative: partial under-prediction at extreme FMS levels means the model is less likely to \emph{miss} a safety-critical state entirely.
+
+% \begin{table}[tb]
+% \centering
+% \caption{MAE by FMS severity band.}
+% \begin{tabular}{lccc}
+% \toprule
+% \textbf{Band} & \textbf{Range} & \textbf{Count} & \textbf{MAE} \\
+% \midrule
+% Low  & 0--2  & 141 & 0.824 \\
+% Mid  & 3--5  & 87  & 0.832 \\
+% High & 6--10 & 57  & 1.720 \\
+% \bottomrule
+% \end{tabular}
+% \label{tab:bands}
+% \end{table}
+
+% \textbf{Safety-critical detection.} Treating FMS $> 4$ as a binary safety flag, we evaluate how well the model's continuous predictions identify true safety violations (\cref{tab:detection}).
+
+% \begin{table}[tb]
+% \centering
+% \caption{Safety-critical detection performance at thresholds $\tau = 4$ and $\tau = 6$.}
+% \scriptsize
+% \begin{tabular}{lcccc}
+% \toprule
+% \textbf{Threshold} & \textbf{Sensitivity} & \textbf{Specificity} & \textbf{Precision} & \textbf{TP/FP/FN/TN} \\
+% \midrule
+% $\tau = 4$ & 0.822 & 0.841 & 0.705 & 74 / 31 / 16 / 164 \\
+% $\tau = 6$ & 0.821 & 0.980 & --- & 46 / 5 / 10 / 224 \\
+% \bottomrule
+% \end{tabular}
+% \label{tab:detection}
+% \end{table}
+
+% At $\tau = 4$, the model correctly identifies 82.2\% of safety-critical episodes while maintaining 84.1\% specificity, producing a favorable balance for operational use. At the severe threshold $\tau = 6$, specificity rises to 98.0\%, indicating that the model very rarely falsely assigns severe sickness when participants are actually comfortable.
+
+% These binary safety-critical detection results provide a bridge between the
+% global formal certificate and the more structured empirical analyses below.
+% We next examine how the same thresholded risk unfolds over session duration
+% and attack intensity.
+
+
+% \subsection{Temporal Verification}\label{sec:temporal}
+
+% \textbf{FMS progression over time.}
+% True FMS rises steadily with session duration (Pearson $r \approx 0.265$), reflecting cumulative sensory load. The model tracks this increasing trend (\cref{fig:fmstime}).
+
+% \begin{figure}[tb]
+%   \centering
+%   \includegraphics[width=\columnwidth]{fms_true_pred_by_minute_se}
+%   \caption{True vs.\ predicted FMS by session minute (mean $\pm$ SE across participants). The model tracks the progressive increase in discomfort.}
+%   \label{fig:fmstime}
+% \end{figure}
+
+% \textbf{Per-minute prediction accuracy.}
+% \cref{tab:minute_mae} reports per-minute MAE. Accuracy is highest mid-session (minutes 13--19, MAE $\leq 0.80$) and degrades near session boundaries (minute 5: 1.19; minute 30: 1.79). Early-session errors reflect the transition from baseline to attack onset, while late-session errors stem from divergent individual responses at high cumulative exposure.
+
+% \begin{table}[tb]
+% \centering
+% \caption{Per-minute mean absolute error (MAE) with standard deviation. Accuracy is highest between minutes 13--19.}
+% \scriptsize
+% \begin{tabular}{c|cccccccccc}
+% \toprule
+% \textbf{Min.} & 5 & 7 & 10 & 13 & 16 & 19 & 22 & 25 & 28 & 30 \\
+% \midrule
+% \textbf{MAE}  & 1.19 & 0.90 & 1.02 & 0.80 & 0.74 & 0.79 & 0.97 & 1.08 & 1.27 & 1.79 \\
+% \textbf{SD}   & 1.02 & 0.86 & 0.97 & 0.57 & 0.57 & 0.82 & 0.67 & 0.78 & 1.03 & 1.19 \\
+% \bottomrule
+% \end{tabular}
+% \label{tab:minute_mae}
+% \end{table}
+
+% \textbf{Temporal safety verification (Property~1).}
+% \cref{fig:temporal_verify} shows the empirical exceedance probability $\hat{P}(\text{FMS} > 4)$ at each session minute, computed from both observed and predicted FMS values. Observed exceedance rises from 12.5\% at minute~5 to 56.2\% at minute~30, crossing the 50\% threshold near minute~28--30. The model's predicted exceedance probabilities closely track the observed values across the entire session timeline, correctly identifying the escalation of risk.
+
+% \begin{figure}[tb]
+%   \centering
+%   \includegraphics[width=\columnwidth]{verification_temporal_curve}
+%   \caption{Temporal safety verification: observed and predicted $P(\text{FMS} > 4)$ by session minute. The model tracks the progressive increase in cybersickness risk, correctly identifying when the exceedance probability approaches the 50\% safety threshold. The green zone ($P < 0.5$) represents acceptable risk; the red zone represents elevated risk.}
+%   \label{fig:temporal_verify}
+% \end{figure}
+
+% This result demonstrates that the model can \emph{verify} temporal safety: it identifies that sessions become increasingly risky after minute~22, reaching majority-exceeding discomfort near minute~30. An adaptive MR system could use this verification to trigger mitigation (e.g., reducing attack intensity or inserting a rest break) before the safety threshold is breached.
+
+
+% \subsection{Intensity Verification}\label{sec:intensity}
+
+% \textbf{Attack-level FMS response.}
+% The model preserves the expected monotonic ordering of FMS across attack intensities ($r \approx 0.124$): Low, Medium, and High attacks produce progressively higher mean FMS, both observed and predicted (\cref{fig:intensity_verify}).
+
+% \begin{figure}[tb]
+%   \centering
+%   \includegraphics[width=0.85\columnwidth]{verification_intensity_tau4}
+%   \caption{Intensity verification: observed and predicted $P(\text{FMS} > 4)$ by attack level. The model preserves the monotonic Low $\rightarrow$ Medium $\rightarrow$ High ordering of cybersickness risk.}
+%   \label{fig:intensity_verify}
+% \end{figure}
+
+% \textbf{Intensity safety verification (Property~2).}
+% \cref{tab:intensity_exc} reports the threshold exceedance probabilities by intensity. The model correctly predicts that Low-intensity attacks pose the least risk ($\hat{P} = 0.267$) while High-intensity attacks carry the greatest risk ($\hat{P} = 0.359$). The observed and predicted exceedance probabilities are within 2--19 percentage points across all levels.
+
+% \begin{table}[tb]
+% \centering
+% \caption{Intensity safety verification: $P(\text{FMS} > 4)$ by attack level.}
+% \begin{tabular}{lccc}
+% \toprule
+% \textbf{Intensity} & \textbf{$n$} & \textbf{Observed} & \textbf{Predicted} \\
+% \midrule
+% Low    & 45  & 0.222 & 0.267 \\
+% Medium & 59  & 0.288 & 0.475 \\
+% High   & 181 & 0.348 & 0.359 \\
+% \bottomrule
+% \end{tabular}
+% \label{tab:intensity_exc}
+% \end{table}
+
+% The Medium-intensity group shows the largest discrepancy between observed (28.8\%) and predicted (47.5\%) exceedance. This over-estimation is conservative from a safety perspective---the model errs on the side of caution for this ambiguous middle condition. For the High-intensity condition, which comprises the majority of samples, predicted and observed rates are closely aligned (35.9\% vs.\ 34.8\%).
+
+
+% \subsection{Feature Importance and Verification Drivers}\label{sec:importance}
+
+% \cref{fig:importance} shows the top-ranked features by Random Forest impurity-based importance, averaged across 5 folds. \cref{tab:importance} reports per-fold values for the top features.
+
+% \begin{figure}[tb]
+%   \centering
+%   \includegraphics[width=\columnwidth]{rf_feature_importance_top}
+%   \caption{Top features by RF impurity-based importance (mean across 5 folds). Pre-exposure susceptibility features dominate, with session minute providing critical temporal discrimination.}
+%   \label{fig:importance}
+% \end{figure}
+
+% \begin{table}[tb]
+% \centering
+% \caption{Top-10 features by mean importance across 5 folds, with per-fold values showing stability.}
+% \scriptsize
+% \begin{tabular}{lcccccc}
+% \toprule
+% \textbf{Feature} & \textbf{Mean} & \textbf{F1} & \textbf{F2} & \textbf{F3} & \textbf{F4} & \textbf{F5} \\
+% \midrule
+% fms\_pre\_min\_4    & 0.240 & 0.270 & 0.208 & 0.245 & 0.238 & 0.237 \\
+% hours\_of\_sleep     & 0.178 & 0.173 & 0.211 & 0.179 & 0.164 & 0.162 \\
+% msq\_score           & 0.122 & 0.120 & 0.135 & 0.124 & 0.098 & 0.133 \\
+% mhq\_score           & 0.080 & 0.075 & 0.068 & 0.082 & 0.099 & 0.076 \\
+% minute               & 0.055 & 0.045 & 0.052 & 0.049 & 0.070 & 0.062 \\
+% spatial\_freq\_mean  & 0.036 & 0.039 & 0.037 & 0.036 & 0.033 & 0.036 \\
+% GazeOriginX\_std     & 0.034 & 0.032 & 0.035 & 0.028 & 0.042 & 0.031 \\
+% HeadPositionX\_mean  & 0.034 & 0.027 & 0.036 & 0.026 & 0.034 & 0.045 \\
+% scl                  & 0.029 & 0.024 & 0.029 & 0.030 & 0.030 & 0.033 \\
+% HeadGazeDirY\_std    & 0.020 & 0.022 & 0.024 & 0.017 & 0.018 & 0.020 \\
+% \bottomrule
+% \end{tabular}
+% \label{tab:importance}
+% \end{table}
+
+% \textbf{Interpretation for verification.} The importance ranking reveals a layered structure relevant to safety verification:
+
+% \begin{itemize}[nosep, leftmargin=*]
+%   \item \textbf{Pre-exposure susceptibility} (fms\_pre\_min\_4, hours\_of\_sleep, msq\_score, mhq\_score) accounts for $\sim$62\% of total importance. These features set the baseline risk level and are available \emph{before} MR exposure begins, enabling \textbf{pre-session screening} to identify high-risk users for whom safety thresholds may be reached earlier.
+%   \item \textbf{Session minute} (importance $= 0.055$, rank 5) provides the temporal discrimination needed for \textbf{within-session verification}: the model uses elapsed time as a proxy for cumulative exposure to predict when safety thresholds will be crossed.
+%   \item \textbf{Runtime gaze and scene features} (GazeOriginX\_std, spatial\_frequency\_mean, HeadPositionX\_mean) collectively contribute $\sim$10\% of importance. These are \textbf{observable during exposure} and could support real-time verification in a deployed system.
+%   \item \textbf{Attack intensity} (importance $= 0.005$, rank 22) contributes minimally in isolation, suggesting that its effect on FMS is largely mediated through the sensor-level features it influences.
+% \end{itemize}
+
+% This layered structure implies that effective verification requires \emph{both} pre-exposure screening (to set baseline risk) and runtime monitoring (to track evolving state), supporting a two-stage verification architecture for adaptive MR systems.
+
+
+% %========================================================================
+% \section{Discussion}\label{sec:discussion}
+% %========================================================================
+
+% \textbf{Formal and empirical verification as complementary safety tools.}
+% The central contribution of this paper is that cybersickness verification in extended MR exposure can be addressed at two levels. First, formal VoRF analysis provides an exact model-conditional certificate that a bounded region of the input space remains below the moderate-symptom threshold. In practice, the certified region is defined largely by pre-exposure susceptibility variables because these features dominate the predictive behavior of the model and are available before immersion begins. Second, empirical verification over out-of-fold predictions shows how risk evolves over time and attack intensity during realistic session trajectories. Together, these two views connect pre-session safety certification with within-session safety monitoring.
+
+% \textbf{Predictive accuracy as an enabler rather than the endpoint.}
+% The Random Forest model achieves MAE $\approx 1.0$ on a 0--10 FMS scale, with strong cross-fold stability and 85.6\% of predictions within $\pm 2$ FMS units. This predictive fidelity is important because it makes the downstream verification analyses credible: at $\tau = 4$, the model achieves 82.2\% sensitivity and 84.1\% specificity for detecting safety-critical episodes while preserving the temporal escalation of cybersickness and the expected intensity ordering.
+
+% \textbf{Temporal safety patterns.}
+% The temporal verification curve (\cref{fig:temporal_verify}) reveals that $P(\text{FMS} > 4)$ remains below 35\% through minute~16 but rises sharply after minute~22, approaching 50\% at minute~28--30. This identifies a natural \emph{safety window}: MR training sessions up to $\sim$20 minutes carry acceptably low cybersickness risk for most participants, while sessions beyond 25 minutes require active monitoring or mitigation. An adaptive system could reduce attack intensity or insert rest periods when the predicted exceedance probability approaches a configured threshold.
+
+% \textbf{Boundary effects and prediction limitations.}
+% The model achieves its best per-minute accuracy mid-session (minutes 13--19, MAE $\leq 0.80$) and its worst at session boundaries (minute 5: 1.19; minute 30: 1.79). Early errors reflect the transition from baseline to attack onset, while late errors stem from divergent individual responses at high cumulative exposure and smaller sample sizes (only 16 participants have data at minute 30). Verification at session boundaries is therefore less reliable, and safety margins should be more conservative.
+
+% \textbf{High-FMS band difficulty.}
+% The High-FMS band (6--10) has the largest MAE (1.720) due to fewer training samples and heterogeneous individual responses at extreme discomfort. From a verification perspective, this means the model may \emph{underestimate} severity for the most affected users, requiring supplementary monitoring (e.g., physiological signals) for high-risk individuals.
+
+% \textbf{Connection to BN verification.}
+% Prior work on Bayesian Network verification~\cite{Wu2025BN} introduced formal probabilistic verification for cybersickness in a 15-minute VR walking task. The present study considers a fundamentally different setting: (i)~an operational military MR training scenario (vs.\ VR maze walking), (ii)~30-minute exposure (vs.\ 15 minutes), (iii)~continuous FMS regression (vs.\ discrete classification), and (iv)~tree-ensemble bounded-output certification plus empirical threshold verification (vs.\ BN posterior inference). The novelty is therefore not simply a stronger predictor; it is the demonstration that verification can be carried over to extended-duration MR using a different model class and a different notion of guarantee. Future work will integrate BN causal structure with RF prediction accuracy to enable real-time, formally verified cybersickness monitoring.
+
+% \textbf{Limitations.}
+% The study is limited by a modest sample size (32 participants) and a single testbed/scenario. The cross-validation scheme does not enforce leave-one-subject-out splits, so some data from the same participant may appear across folds (though stratified by band). Most physiological channels were not integrated into the current model, although skin conductance level was included as one physiological feature. While we evaluated nine baseline models including deep learning architectures (\cref{tab:regression_baselines}), the small sample size limits the conclusions that can be drawn about neural network scalability. Finally, the paper combines exact bounded-output verification for one fixed Random Forest artifact with empirical threshold analyses across cross-validated predictions; it does not yet provide full posterior-probability guarantees of the BN type, nor formal certification for every fold-specific model.
+
+
+% %========================================================================
+% \section{Conclusion}\label{sec:conclusion}
+% %========================================================================
+
+% This paper presents a prediction and verification framework for cybersickness over extended mixed-reality exposure. A Random Forest model trained on multimodal features from 32 participants across 30-minute TCCC training sessions achieves MAE $\approx 1.0$ ($R^2 = 0.81$) for continuous FMS prediction. The verification analysis demonstrates that the model correctly identifies temporal escalation of cybersickness risk, preserves intensity-dependent safety ordering, and achieves 82\% sensitivity for detecting safety-critical episodes at $\tau = 4$. Pre-exposure susceptibility features (MSQ, sleep, MHQ) provide the strongest baseline risk signal, while session timing and runtime gaze/scene features enable within-session safety monitoring.
+
+% These results show that verification is the central contribution of the framework: formal VoRF analysis certifies a pre-session safe region for a trained Random Forest, while empirical verification characterizes when safety-critical cybersickness becomes likely during exposure. In this sense, the paper extends prior verification studies~\cite{Wu2025BN} from short VR tasks to extended operational MR training under a different model class and a different verification mechanism. Future work will integrate Bayesian Network causal structure with RF prediction for richer formal guarantees, incorporate additional physiological signals, evaluate leave-one-subject-out validation, and generalize across multiple MR scenarios and attack modalities.
+
+
+%========================================================================
+\acknowledgments{%
+  The authors wish to thank the participants and the data collection team. %
+}
+
+
+\bibliographystyle{abbrv-doi-hyperref}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,1524 @@
+% $Id: template.tex 11 2007-04-03 22:25:53Z jpeltier $
+
+\documentclass{vgtc}                          % final (conference style)
+% \documentclass[review]{vgtc}                 % review
+%\documentclass[widereview]{vgtc}             % wide-spaced review
+%\documentclass[preprint]{vgtc}               % preprint
+%\documentclass[electronic]{vgtc}             % electronic version
+
+%% Uncomment one of the lines above depending on where your paper is
+%% in the conference process. ``review'' and ``wide review'' are for review
+%% submission, ``preprint'' is for pre-publication and the final version
+%% doesn't use a specific qualifier. Further, ``electronic'' includes
+%% hyperreferences for more convenient online viewing.
+
+%% Please use one of the ``review'' options in combination with the
+%% assigned online ID (see below) ONLY if your paper uses a double-blind
+%% review process. Some conferences, like IEEE Vis and InfoVis, have NOT
+%% in the past.
+
+%% Figures should be in CMYK or Grey scale format, otherwise, color 
+%% shifting may occur during the printing process.
+
+%% it is recomended to use ``\cref{sec:bla}'' instead of ``Fig.~\ref{sec:bla}''
+\graphicspath{{figures/}{pictures/}{images/}{./}} % where to search for the images
+
+\usepackage{xcolor}
+\usepackage{times}                     % we use Times as the main font
+\renewcommand*\ttdefault{txtt}         % a nicer typewriter font
+\usepackage{multirow}
+\usepackage{enumitem}
+
+%% Only used in the template examples. You can remove these lines.
+\usepackage{tabu}                      % only used for the table example
+\usepackage{booktabs}                  % only used for the table example
+\usepackage{lipsum}                    % used to generate placeholder text
+\usepackage{mwe}                       % used to generate placeholder figures
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% \usepackage{natbib}
+%% We encourage the use of mathptmx for consistent usage of times font
+%% throughout the proceedings. However, if you encounter conflicts
+%% with other math-related packages, you may want to disable it.
+\usepackage{mathptmx}          \usepackage{graphicx}
+\usepackage{float}
+\usepackage[nounderscore]{syntax}
+\usepackage{framed}                     % for frame around configs
+\usepackage{caption}      
+\usepackage{subcaption}% captioning frames
+\captionsetup{font=scriptsize}
+\usepackage{listings}                   % for code
+\usepackage{tcolorbox}
+\newtcolorbox{mybox}{colback=gray!15, colframe=gray!80, coltitle=black, rounded corners,
+boxrule=1pt,arc=5pt,boxsep=2pt,left=5pt,right=5pt,leftrule=1pt}
+
+
+%% If you are submitting a paper to a conference for review with a double
+%% blind reviewing process, please replace the value ``0'' below with your
+%% OnlineID. Otherwise, you may safely leave it at ``0''.
+\onlineid{1542}
+
+%% declare the category of your paper, only shown in preview mode
+\vgtccategory{Research}
+
+%% allow for this line if you want the electronic option to work properly
+\vgtcinsertpkg
+
+\newcommand{\kaiming}[1]{
+        \textcolor{red}{{\em\bf Kaiming:} #1}}
+
+\newcommand{\gtan}[1]{
+        \textcolor{red}{{\em\bf GT:} #1}}
+        
+
+%% In preprint mode you may define your own headline. If not, the default IEEE copyright message will appear in preprint mode.
+%\preprinttext{To appear in an IEEE VGTC sponsored conference.}
+
+%% This adds a link to the version of the paper on IEEEXplore
+%% Uncomment this line when you produce a preprint version of the article 
+%% after the article receives a DOI for the paper from IEEE
+%\ieeedoi{xx.xxxx/TVCG.201x.xxxxxxx}
+
+
+%% Paper title.
+\title{Probabilistic Verification of Cybersickness in Virtual Reality Through Bayesian Networks}
+%Bayesian Insights: Enhancing VR Cybersickness Prediction and Verification}
+
+% \title{Bayesian Networks for Cybersickness: Advancing Modeling and Verification in Virtual Reality}
+
+% Breaking Barriers in VR: Bayesian Networks for Cybersickness Modeling and Verification
+
+
+%% This is how authors are specified in the conference style
+
+%% Author and Affiliation (single author).
+%%\author{Roy G. Biv\thanks{e-mail: roy.g.biv@aol.com}}
+%%\affiliation{\scriptsize Allied Widgets Research}
+
+%% Author and Affiliation (multiple authors with single affiliations).
+%%\author{Roy G. Biv\thanks{e-mail: roy.g.biv@aol.com} %
+%%\and Ed Grimley\thanks{e-mail:ed.grimley@aol.com} %
+%%\and Martha Stewart\thanks{e-mail:martha.stewart@marthastewart.com}}
+%%\affiliation{\scriptsize Martha Stewart Enterprises \\ Microsoft Research}
+
+%% Author and Affiliation (multiple authors with multiple affiliations)
+
+
+% \author{Peng Wu}
+
+
+\author{Peng Wu\thanks{e-mail: wu.p@northeastern.com}\\ %
+        \scriptsize Northeastern University %
+\and Nasim Ahmed\thanks{e-mail: nahmed25@students.kennesaw.edu}\\ %
+     \scriptsize Kennesaw State University %
+\and Abhiram Sarma\thanks{e-mail: abv5402@psu.edu}\\ %
+     \scriptsize  Pennsylvania State University
+\and Kaiming Huang\thanks{e-mail: kzh529@psu.edu}\\ %
+     \scriptsize  Pennsylvania State University
+\and Rifatul Islam\thanks{e-mail: rislam11@kennesaw.edu}\\ %
+     \scriptsize  Kennesaw State University
+\and Bin Li\thanks{e-mail: binli@psu.edu}\\ %
+     \scriptsize  Pennsylvania State University
+\and Tian Lan\thanks{e-mail: tlan@gwu.edu}\\ %
+     \scriptsize  George Washington University%
+\and Gang Tan\thanks{e-mail: gtan@psu.edu}\\ %
+     \scriptsize  Pennsylvania State University
+\and Mahdi Imani\thanks{e-mail: m.imani@northeastern.edu}\\ %
+        \scriptsize Northeastern University %
+}
+
+% \author{
+% Peng Wu\thanks{e-mail: wu.p@northeastern.edu}\textsuperscript{1} \and
+% Nasim Ahmed\thanks{e-mail: nahmed25@students.kennesaw.edu}\textsuperscript{2} \and
+% Abhiram Sarma\thanks{e-mail: abv5402@psu.edu}\textsuperscript{3} \and
+% Kaiming Huang\thanks{e-mail: kzh529@psu.edu}\textsuperscript{3} \and
+% Rifatul Islam\thanks{e-mail: rislam11@kennesaw.edu}\textsuperscript{2} \and
+% Bin Li\thanks{e-mail: binli@psu.edu}\textsuperscript{3} \and
+% Tian Lan\thanks{e-mail: tlan@gwu.edu}\textsuperscript{4} \and
+% Gang Tan\thanks{e-mail: gtan@psu.edu}\textsuperscript{3} \and
+% Mahdi Imani\thanks{e-mail: m.imani@northeastern.edu}\textsuperscript{1}
+% }
+% \affiliation{
+% \scriptsize
+% \textsuperscript{1}Northeastern University \quad
+% \textsuperscript{2}Kennesaw State University \quad
+% \textsuperscript{3}Pennsylvania State University \quad
+% \textsuperscript{4}George Washington University
+% }
+
+\teaser{
+ \includegraphics[width=\linewidth]{figures/Teaser.pdf}\vspace{-1ex}
+ \caption{\scriptsize Overview of the proposed verification framework for cybersickness in VR. Bayesian Network, structured hierarchically, models how adversarial, system, and environmental factors influence system parameters, which in turn affect physiological responses and ultimately determine Fast Motion Sickness (FMS). The model enables probabilistic verification of safety constraints under observed or hypothetical conditions.}
+}
+
+
+%% Abstract section.
+\abstract{
+%{\color{red}You need to emphasize that the existing cybersickness approaches aim to predict or estimate cybersickness elements. By contrast, this paper's goal is to introduce probabilistic verification of cybersickness against cognitive attacks, which provides guarantees for the user to experience cybersickness and mitigation to alleviate such symptoms. Then, despite several attempts to find the relationship between human parameters (heart rate, GSR) with cybersickness, this paper focuses on manipulation or disruptions on the system parameters that could influence cybersickness. Our framework models the cascading impact of the system parameters (latency, scene parameters, resolutions) to human parameters and their impacts on cybersickness. Such relationship is modeled through Bthe ayuesian network, which ...}
+Cybersickness remains a major challenge in virtual and mixed reality (VR/MR), yet existing methods primarily focus on predicting its onset without offering formal guarantees regarding its occurrence or effective mitigation. As VR/MR applications expand into safety-critical domains like healthcare, defense, verifiable safety assurances become essential to protect users from adverse physiological and psychological effects. This paper introduces a probabilistic verification framework leveraging Bayesian Networks (BN) to explicitly model the interactions among system parameters, human physiological responses, and cybersickness severity. Unlike deep learning approaches that lack interpretability and formal verification capabilities, the proposed BN model explicitly captures how environmental and system-level factors (e.g., luminance, spectral entropy, and image gradient complexity via HoG features) influence physiological responses (e.g., heart rate, reaction time, eye tracking), ultimately affecting cybersickness severity. By learning the joint probability distribution of these factors, our approach provides rigorous formal guarantees on cybersickness risk under specified operational conditions. If these guarantees are not met, automated adaptive adjustments are recommended to restore safe conditions. Experimental validation involving physiological and system-level data demonstrates that Bayesian Networks provide an interpretable and efficient framework, uniquely enabling formal probabilistic verification of cybersickness risks. This capability makes the proposed approach particularly suitable for designing and deploying VR/MR systems with explicitly verified safety constraints.
+
+%Cybersickness remains a major challenge in virtual and mixed reality (VR/MR), yet existing methods focus on predicting its onset without offering formal guarantees on its occurrence or mitigation. This paper introduces a probabilistic verification framework leveraging Bayesian Networks (BN) to explicitly model the interactions among system parameters, human physiological responses, and cybersickness severity. Unlike deep learning approaches that lack interpretability and verification capabilities, the proposed BN model captures how environmental and system-level factors (e.g., luminance, spectral entropy, HoG features) influence physiological responses (e.g., heart rate, reaction time, eye tracking), which in turn affect cybersickness severity. By learning the joint probability distribution of these factors, our approach provides formal probabilistic guarantees on cybersickness risk under specified operational conditions.  If these safety guarantees are not met, automated adaptive system adjustments are recommended to restore safe conditions. Experimental validation involving physiological and system-level data from 32 participants demonstrates that Bayesian Networks provide an interpretable and efficient framework specifically enabling rigorous formal probabilistic verification of cybersickness risks. This verification capability facilitates explicit safety guarantees and automated adaptive mitigation, thus making the proposed approach a powerful tool for the safe design and reliable deployment of VR/MR systems under formally verified safety constraints.
+
+
+% With the recent emergence of virtual reality (VR) technologies, cybersickness (CS) has become a concern. It creates various discomforts, such as nausea, dizziness, headache, etc., similar to those caused by simulator sickness. Researchers employed multiple techniques to predict the level in real-time based on the user's physiological or system data. Systems are also developed to detect the CS level and adjust the system parameters according to the detection result. However, most are based on deep neural networks (DNN). They are black-box approaches, which cannot explain the interrelationship among the parameters associated with the CS prediction, specifically when it raises to a higher order of the correlation. To address this research gap, and verify the prediction result, we propose a novel statistical approach of Bayesian Inference to enhance the outcome of CS prediction along with its result verification. This methodology involves simulating the Bayesian Network to find the most weighted correlation between the level of CS, and factors that impact the CS. Our proposed architecture gained an overall accuracy of \textcolor{red}{modified data} for predicting the level of CS, and a \textcolor{red}{certain measures} for result verification.
+
+
+    % \lipsum[1] % filler text. Replace with your abstract.
+} % end of abstract
+
+%% Keywords that describe your work. Will show as 'Index Terms' in journal
+%% please capitalize the first letter and insert punctuation after last keyword.
+\keywords{Virtual Reality, Cybersickness, Bayesian Network, Probabilistic Verification}
+
+%% Copyright space is enabled by default as required by guidelines.
+%% It is disabled by the 'review' option or via the following command:
+% \nocopyrightspace
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%% START OF THE PAPER %%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%% The ``\maketitle'' command must be the first command after the
+%% ``\begin{document}'' command. It prepares and prints the title block.
+
+%% the only exception to this rule is the \firstsection command
+% \firstsection{Introduction}
+
+\maketitle
+
+% \begin{figure*}[h]
+%     \centering
+% \includegraphics[width=0.7\textwidth]{figures/video_demo.png} % Adjust width
+%     \caption{(put under the title.) Snapshots of our experiment illustrate the impact of system factors on cybersickness. In the figure, HOG represents the Histogram of Oriented Gradients features, and SE denotes spectral entropy. The different HOG and SE features impact varying levels of Fast Motion Sickness (FMS). The left image depicts a normal environment, while the right image shows a high-brightness scenario, where the FMS level is typically higher compared to the normal situation.}
+%     \label{fig:demo_video}
+% \end{figure*}
+
+
+
+% Virtual Reality (VR) technologies are gaining popularity nowadays\cite{javaid2020virtual}. Practical and theoretical fields of education, entertainment, defense, medical, and training are moving towards these technologies for numerous purposes\cite{wedel2020virtual}. User engagement and comfort are thus essential considerations for VR applications. However, cybersickness (CS) is a common phenomenon that negatively impacts user comfort and engagement across VR applications\cite{Tian2022}. This is a critical challenge for VR technologies which creates common simulator sickness discomforts such as dizziness, nausea, headache, etc during the simulation\cite{10.1145/333329.333344}. A study reported that almost 20-80\% VR users experience cybersickness during VR simulation\cite{kim2021clinical}, making it crucial to detect and take mitigation actions for it. However, the actual reason for CS remains unknown as such requires computational approaches to predict the level of cybersickness during a VR simulation\cite{}. Previous research identified several physiological, and system parameters that contribute to cybersickness when they reach certain independent degrees such as the field of View (FoV)\cite{996519Lin}, frame rate\cite{Zhang9236907}, frequency of motion stimuli\cite{PALMISANO20171}, refresh rates of the display\cite{Wang10049694}, brightness and contrast\cite{Campos2021}, etc. Based on these parameters, researchers developed systems to predict CS level, and to deploy mitigation techniques\cite{9419155Groth}. However, most of them are deep learning-based approaches and require sufficient data for training, and testing, which is not feasible all the time. Additionally, these approaches cannot describe the interrelationship between the CS level and its factors\cite{}. Unlike these approaches, our statistical model employs a Bayesian Network (BN) to model the probabilistic dependencies among the parameters that influence cybersickness. A Bayesian Network is a directed acyclic graph (DAG) where nodes represent random variables, and edges encode conditional dependencies between these variables\cite{}. This framework provides a structured and interpretable way to analyze how different systems and physiological parameters contribute to CS levels. By incorporating prior knowledge and observed data, the Bayesian Network can infer the likelihood of cybersickness occurrence under different conditions. \textcolor{red}{Add sentences about the verification here}. By capturing the complex architecture of BN, our key objectives in this research were:
+% \begin{itemize}
+%     \item \textbf{Objective 1:} Finding correlation among the system parameters, physiological parameters, and the level of CS
+%     \item \textbf{Objective 2:} Choosing the most impactful parameters for network training and validating the result
+%     \item \textbf{Objective 3:} Verification of the result observing the path loss data
+    
+% \end{itemize}
+\section{Introduction}
+Virtual Reality (VR) technologies have gained significant traction in fields ranging from education and entertainment to defense and healthcare \cite{javaid2020virtual, wedel2020virtual}. With the rise of immersive applications, ensuring user comfort and engagement is a crucial prerequisite. However, a widespread challenge that undermines VR’s user experience is cybersickness (CS) 
+% \textcolor{blue}{
+\cite{Tian2022, 10.1145/333329.333344,szpak2019beyond,stanney2020identifying}
+% }
+, which manifests as a collection of discomforts, such as dizziness, nausea, and headaches. Surveys indicate that between 20\% and 80\% of VR users report experiencing cybersickness \cite{kim2021clinical}, underscoring the pressing need for approaches that can detect and, importantly, mitigate cybersickness.
+
+Most existing efforts to address cybersickness revolve around predicting its onset using physiological signals (e.g., heart rate, galvanic skin response), along with VR system parameters like frame rate, field of view (FoV), or refresh rate \cite{996519Lin, Zhang9236907, PALMISANO20171, Wang10049694, Campos2021, 9419155Groth}. These data-driven techniques—often leveraging deep learning—offer insights into cybersickness triggers, but they typically require substantial training data and tend to function as “black-box” models that provide little interpretability regarding how these various factors interact. Moreover, they do not offer guarantees that a user will remain free from cybersickness or that a mitigation strategy will reliably protect against it. %Similarly, statistical models, though interpretable, lack explicit formal verification capabilities, failing to systematically capture causal relationships that ensure safety-critical constraints are met.
+
+
+This paper investigates the joint influence of system conditions and physiological responses on cybersickness, constructing a model that captures user experience across varying VR conditions and enables formal safety guarantees.
+%This paper studies how both external system-level factors and internal physiological responses jointly influence cybersickness severity. By capturing their interplay, we build a probabilistic model that not only reflects user experience across diverse VR conditions but also provides formal guarantees on when these experiences remain within safe limits.
+%
+%While existing cybersickness models primarily focus on predicting discomfort based on physiological signals or system parameters, they often neglect their complex interplay in contributing to cybersickness.
+Table~\ref{tab:cybersickness_factors} categorizes three key contributors to perceptual disruption and cybersickness in VR environments: {\em (i) adversarial manipulations}, where adversaries manipulate system parameters (e.g., brightness, latency, or field of view) to exploit perceptual vulnerabilities, inducing disorientation. {\em (ii) System limitations}, including tracking drift, sensor noise, rendering instabilities, and network latency, create inconsistencies between virtual stimuli and human perception, amplifying discomfort. {\em (iii) Environmental factors}, such as overcrowding, rapid motion, abrupt contrast gradients, and depth perception conflicts, which overload sensory processing and exacerbate cybersickness. While some applications may tolerate these risks, the growing use of MR/VR in safety-critical domains necessitates formal guarantees on user safety. As VR/MR are increasingly used in safety-critical domains such as surgery, aviation, and defense, formally verifying cybersickness-related safety constraints becomes imperative. 
+% \gtan{Maybe we should match the order of the above three kinds of factors with the order in the table.}
+
+%As VR/MR increasingly supports safety-critical operations such as surgical procedures, aviation training, and military simulations, explicitly verifying safety constraints related to cybersickness is no longer optional but essential.
+%Providing such assurances is essential for designing safer MR/VR systems and ensuring reliable user experiences across diverse applications.
+\begin{table*}[t]
+\centering
+\tiny
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{5pt}
+\caption{Categorization of factors influencing system dynamics and contributing to cybersickness in MR/VR environments, motivating the need for probabilistic safety verification. \textit{Adversarial manipulations} are defined as deliberate modifications designed to degrade user experience, contrasted with benign system or environmental limitations.\protect\footnotemark}
+\label{tab:cybersickness_factors}
+\begin{tabular}{p{2cm} p{3.4cm} p{11.cm}}
+\hline
+\textbf{Category} & \textbf{Factor} & \textbf{Impact on Cybersickness} \\
+\hline
+\multirow{4}{*}{\shortstack[l]{Adversarial \\ Manipulations}} 
+ & Brightness Manipulation & Deliberate, rapid brightness shifts cause visual discomfort, ocular fatigue, and spatial disorientation. \\
+ & Latency \& Frame Drops & Intentionally induced lag or skipped frames disrupt motion synchronization, significantly exacerbating motion sickness symptoms. \\
+ & Field of View Distortion & Purposeful alterations to FoV parameters create perceptual confusion and exacerbate spatial disorientation. \\
+ & Scene Complexity Attacks & Intentionally overloading rendering pipelines increases frame pacing instability, causing perceptual confusion and visual discomfort. \\
+ \hline
+\multirow{4}{*}{\shortstack[l]{System Limitations}}  
+ & Tracking Drift & Inaccurate or jittery tracking causes perceptual mismatches and increased susceptibility to motion sickness. \\
+ & Positional Calibration Errors & Misalignment between real-world and virtual depth cues disrupts spatial perception, causing discomfort. \\
+ & Rendering Instability & Dynamic fluctuations in frame rate lead to visual instability, perceptual confusion, and potential nausea. \\
+ & Network Latency & Delays in cloud-rendered environments produce asynchronous visual-physical feedback, inducing sensory mismatch and motion sickness. \\
+\hline
+\multirow{4}{*}{\shortstack[l]{Environmental \\ Scene Factors}}  
+ & Overcrowding \& Motion Density & High-density visuals and rapid simultaneous motions overload perceptual processing, causing fatigue and spatial disorientation. \\
+ & High Object Gradients & Abrupt texture changes and high contrast gradients result in excessive visual stress and perceptual discomfort. \\
+ & Rapid Scene Motion & Sudden, high-speed virtual movements disrupt vestibular balance, inducing dizziness and nausea. \\
+ & Depth Perception Conflicts & Incorrect scaling or mismatched depth cues distort spatial awareness, increasing nausea and disorientation risks. \\
+\hline
+\end{tabular}
+\end{table*}
+\footnotetext{While factors such as latency or rendering instability can occur due to either benign technical limitations or deliberate adversarial actions, this categorization emphasizes their origin for clarity in safety analysis.}
+
+This paper introduces
+% \textcolor{blue}{
+an offline
+% }
+probabilistic verification framework
+% \textcolor{blue}{
+, trained on real-world dataset,
+% }
+that provides both formal guarantees and mitigation strategies for cybersickness. The approach models the joint impact of system parameters, human physiological responses, and cybersickness severity using a Bayesian Network (BN) model. The schematic diagram of the BN's hierarchical structure is shown in the middle of Figure~\ref{fig:System Architecture}, where system parameters act as external nodes influenced by three key contributing factors: adversarial manipulations, system limitations, and environmental conditions. These variations propagate to human physiological responses, such as eye tracking, heart rate, galvanic skin response (GSR), and pupil dilation, ultimately influencing cybersickness severity. Unlike purely statistical or deep learning models, a Bayesian Network offers an interpretable and structured representation of how system and physiological variables influence cybersickness, encoding the probabilistic interdependencies among them.
+
+%Unlike purely statistical or deep learning models, a BN offers an interpretable and structured representation of how various factors propagate through the network, encoding the probabilistic interdependencies among system parameters, physiological signals, and cybersickness indicators.
+
+The Bayesian Network framework enables formal guarantees on cybersickness risk under varying conditions by reasoning over probabilistic dependencies among system and human factors. We develop a probabilistic verification framework based on Bayesian inference to evaluate whether a given configuration of system and physiological parameters satisfies a predefined cybersickness probability threshold. This allows designers to define safe operational conditions and obtain exact probabilistic assurances that these constraints will be met. If constraints are violated, the framework identifies parameter adjustments that can restore compliance. This verification capability lays the foundation for data-driven, safety-aware design workflows in immersive system development.
+
+%This capability supports the reliable design of immersive MR/VR systems for mission-critical and safety-sensitive applications, where user well-being is non-negotiable.
+
+%Leveraging the probabilistic nature of the Bayesian Network, this paper establishes formal guarantees on cybersickness risk under varying conditions. A probabilistic verification framework, built on 
+% Markov Chain Monte Carlo (MCMC)
+%Bayesian inference is developed to assess whether an arbitrary set of system and human parameters satisfies a desired cybersickness probability threshold. This approach allows designers to define conditions under which cybersickness remains within acceptable limits, providing exact probabilistic assurances on whether these conditions hold. If the guarantee is not met, the framework explores potential mitigation strategies that could restore compliance with the predefined thresholds. By enabling formal verification of cybersickness risk, this method ensures the safe and effective design of immersive MR/VR systems, particularly in mission-critical and safety-sensitive applications, where user well-being is paramount.
+
+
+The VR-Walking dataset\cite{setu2024mazedconfuseddatasetcybersickness}, which includes system-level features and physiological responses from 36 participants engaged in a structured VR walking task, is used to develop and verify the probabilistic cybersickness model. Key features include luminance, spectral entropy, and motion smoothness, along with eye tracking, heart rate, and galvanic skin response. The dataset also contains fast motion sickness (FMS) scores\cite{keshavarz2011validating}, a validated proxy for cybersickness severity. A Bayesian Network with a hierarchical structure is constructed to explicitly capture causal relationships among these variables influencing FMS. The model supports the formal verification of safety conditions and identifies parameter settings that can reduce the likelihood of mild to severe cybersickness symptoms.
+
+%To build and verify the proposed probabilistic cybersickness model, this study utilizes the VR-Walking dataset, which includes system parameters and physiological responses from 32 participants performing a VR walking task. The dataset provides key system-level features (e.g., luminance, spectral entropy, motion smoothness) and human physiological signals (e.g., eye tracking, heart rate, galvanic skin response). Fast motion sickness, a key cybersickness factor, is recorded in this dataset. A Bayesian Network model with a cascading structure was constructed to effectively capture the distribution of fast motion sickness across a wide range of values. The probabilistic verification results provide safety guarantees and mitigation strategies for reducing mild to severe motion sickness symptoms.
+
+
+
+%This approach enables formal verification of whether specific system configurations remain safe, even under adversarial conditions. By shifting from traditional prediction-based models to probabilistic guarantees, the framework ensures a more reliable and interpretable method for assessing cybersickness risk.
+
+%In contrast, this paper introduces a novel probabilistic verification framework aimed at providing robust assurances for cybersickness mitigation. We draw particular attention to cognitive attacks—malicious or disruptive manipulations of system parameters (e.g., abrupt changes in latency, scene complexity, or resolution) designed to induce or worsen cybersickness. By modeling the cascading impact of these manipulated system parameters on physiological responses and, eventually, on users’ cybersickness levels, as shown in figure \ref{fig:System Architecure}. Our framework makes it possible to formally verify whether certain configurations remain safe—even in the presence of adversarial conditions. In essence, we shift from pure prediction to offering probabilistic guarantees about cybersickness outcomes.
+
+%The backbone of our approach is a Bayesian Network (BN) that encodes the interdependencies among system parameters, human physiological signals, and cybersickness indicators. Unlike purely statistical or deep learning models, a BN provides an interpretable structure that clarifies how specific factors propagate through the network to affect the likelihood of cybersickness. We then leverage probabilistic verification techniques to check whether, under various scenarios (including cognitive attacks), the probability of inducing severe cybersickness surpasses acceptable thresholds. This unified framework of Bayesian modeling and formal verification provides robust means to assure VR user comfort and paves the way for adaptive mitigation strategies that proactively defend against adversarial disruptions.
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=\linewidth]{figures/System Diagram Modified.pdf}
+%     \caption{The system diagram shows the hierarchical structure of the different features, the attack can manipulate the system features, while ...}
+%     \label{fig:system_diagram}
+% \end{figure}
+
+% \begin{itemize}
+%     \item VR intro
+%     \item BNs intro
+%     \item Why using BNs for VR, benefits
+%     \item Verification intro and why
+% \end{itemize}
+
+
+
+% \begin{table*}[t]
+% \centering
+% \small
+% \renewcommand{\arraystretch}{1.1}
+% \setlength{\tabcolsep}{6pt}
+% \caption{Examples of factors impacting system parameters and contributing to cybersickness in MR/VR environments}
+% \label{tab:cybersickness_factors}
+% \begin{tabular}{p{2.8cm} p{3.5cm} p{9.2cm}}
+% \hline
+% \textbf{Category} & \textbf{Factor} & \textbf{Impact on Cybersickness} \\
+% \hline
+% \multirow{4}{*}{\shortstack[l]{Adversarial  Manipulations}} 
+%  & Brightness Manipulation & Sudden changes in brightness cause visual strain, discomfort, and disorientation. \\
+%  & Latency \& Frame Drops & Input lag or frame skipping disrupts motion synchronization, increasing motion sickness. \\
+%  & Field of View Distortion & Altering FoV constraints leads to spatial disorientation and visual stress. \\
+%  & Scene Complexity Attacks & Overloading the rendering system with excessive detail causes motion instability. \\
+% \hline
+% \multirow{4}{*}{\shortstack[l]{System Limitations}}  
+%  & Tracking Drift & Jittery or inaccurate tracking creates perceptual mismatches, inducing sickness. \\
+%  & Positional Calibration Errors & Misalignment between virtual and real-world depth disrupts spatial perception. \\
+%  & Rendering Instability & Dynamic frame rate variations create visual instability and discomfort. \\
+%  & Network Latency & Communication delays in cloud-based VR induce sensory mismatch. \\
+% \hline
+% \multirow{4}{*}{\shortstack[l]{Environmental Scene Factors}}  
+%  & Overcrowding \& Motion Density & High-density visuals overload perception, causing fatigue and disorientation. \\
+%  & High Object Gradients & Abrupt texture and contrast changes create excessive visual strain. \\
+%  & Rapid Scene Motion & High-speed motion and sudden shifts disrupt vestibular balance. \\
+%  & Depth Perception Conflicts & Incorrect depth scaling distorts spatial awareness, increasing nausea risk. \\
+% \hline
+% \end{tabular}
+% \end{table*}
+
+
+
+\section{Related works}
+In this section, we provide a comprehensive overview of prior research on cybersickness, with a focus on diverse modeling approaches. We examine both predictive and verification-oriented methods, outlining their respective contributions to understanding cybersickness in VR/MR environments. This survey also identifies critical gaps in the current literature, which motivate the need for more robust and generalizable models.
+
+% Cybersickness can be characterized by a range of symptoms such as dizziness, nausea, headache, eye strain, etc. much similar to motion sickness, which usually happens during or after an immersive experience. These discomforts may persist for a long time after the immersion, and make users feel disoriented\cite{Stanney1997CybersicknessIN}. Despite extensive research in this domain, the main reason for CS is still unknown. However, several prominent theories have been proposed to formalize its reason for occurrence. These include sensory-conflict, poison, and postural instability theory\cite{LaVoila10.1145/333329.333344}. Among them, the most acceptable theory is the sensory-conflict theory, which states that the main cause of cybersickness is the mismatch between the visual and vestibular inputs, which are responsible for balance and spatial orientation\cite{Cobb6788197, LaVoila10.1145/333329.333344}. 
+
+% Since cybersickness is a critical concern in VR applications which challenges the widespread usability of this technology, plenty of research investigated various ways of its modeling. Research also identifies several factors that contribute to this issue.  Among the cybersickness prediction models, deep learning-based approaches are the most prevalent, and they particularly focus on capturing the complex, nonlinear relationships between system parameters (such as frame rate, latency, and field of view) as well as physiological responses (e.g. nausea, eye strain, and disorientation), and the level of cybersickness. Changes in the user's bio-physiological signals such as heart rate, eye blink, pupil diameter, galvanic skin response (GSR), etc can indicate the level of cybersickenss\cite{kim2021clinical}. Based on these relationships, researchers developed deep-learning models for predicting the level of cybersickness. A recent study developed a real-time capable cybersickness detection method by using deep learning of augmented physiological data collected from consumer-grade sensors\cite{Yalcin2024}. The researchers found that a four-layered bidirectional long short-term memory network combined with a conditional generative adversarial network-based data augmentation technique delivered superior performance for real-time cybersickness detection\cite{Yalcin2024}. Research also showed that cybersickness can be accurately predicted using only eye-tracking and head-tracking data from integrated sensors in head-mounted displays (HMDs)\cite{Islam9583838}. In addition to these findings, Jasper et al. explored participant demographics, task characteristics, virtual environment design, and VR hardware as factors contributing to cybersickness, constructing hierarchical multiple regression models based on a user study\cite{jasper2023predicting}. However, the most critical challenge that these deep learning-based systems face is the complex maintenance mechanisms, and they cannot describe the ubiquity of the interrelationships among the variables.
+
+% Instead of depending solely on the bio-physiological data collected from the users during the simulation, researchers also investigated the way to model the level of cybersickness using the combination of both the physiological parameters and the system parameters. A recent study introduced the VRWalking dataset\cite{setu2024mazedconfuseddatasetcybersickness}, which includes eye tracking, physiological readings, and self-reported measures of cybersickness from participants navigating mazes via real walking. Deep learning models trained on this dataset to classify cybersickness achieved 95\% accuracy, and analysis of the models revealed that eye tracking and physiological measures were the most important features for the prediction.
+
+% Apart from the deep learning models, recent studies employ statistical models to generalize the relationships between cybersickness and its factors. In \cite{Smith10453565},  Shamus P. Smith investigates cybersickness in virtual reality (VR) through the application of a Markov chain model designed to predict user experiences. The research addresses the limitations of traditional user studies by offering a formal approach to modeling cybersickness states and transitions. However, the model's customization relies on representative data for populating the Markov chain, potentially necessitating initial user studies to acquire probabilities. 
+\textbf{Cybersickness Models and Contributing Factors:}
+Cybersickness symptoms closely mirror those of motion sickness and often persist after VR exposure \textcolor{blue}{\cite{Stanney1997CybersicknessIN,stanney2020identifying,mazloumi2018comparative}}. Among various explanations, sensory conflict theory remains predominant, attributing cybersickness to discrepancies between visual stimuli and vestibular inputs \cite{LaVoila10.1145/333329.333344, Cobb6788197}. Researchers have identified key VR system parameters (e.g., display latency, mismatched frame rates, large fields of view, excessive brightness, and high scene complexity) as primary contributors to sensory conflicts~\cite{cobb1999vrise, laviola2000discussion}. Physiological signals, including heart rate and galvanic skin response, reliably track discomfort levels, serving as proximate indicators for cybersickness \cite{kim2021clinical}.
+
+\textbf{Deep Learning Approaches:}
+Recent studies widely adopt deep learning methods to predict cybersickness from physiological and system-level data. Utilizing complex models like convolutional neural networks and LSTMs trained on eye-tracking, head-tracking, and biosignal datasets, these methods achieve robust prediction performance \cite{Yalcin2024, Islam9583838}. Islam et al. focused on forecasting the onset of cybersickness by introducing a multimodal deep fusion network that combines physiological, head-tracking, and eye-tracking data, achieving early prediction of cybersickness severity\cite{Islam9583838}. Complementarily, Zhu et al. presented a lightweight model for real-time individual cybersickness prediction by creating a video-aware bio-signal representation through cross-modal fusion of video features and bio-signal data (head/eye tracking, physiological signals), achieving high accuracy even with VR video inputs alone, thus addressing computational efficiency for real-time applications\cite{zhu2025realtimecrossmodalcybersicknessprediction}. 
+
+While deep learning models offer high predictive accuracy, they often lack formal safety assurances, rely on large datasets, and suffer from limited interpretability due to their black-box nature. These limitations are particularly critical in VR environments, where cybersickness risks arise under partially observed or uncertain conditions \cite{Kundu9995115}. Recent efforts, such as LiteVR \cite{Kundu10108450}, address interpretability using explainable-AI (XAI) techniques like SHAP with LSTM, GRU, and MLP models to enhance transparency and reduce computational overhead. However, a key research gap remains: current approaches focus on post-hoc explanation and do not integrate safety constraints or dynamic uncertainty into the model training process, limiting their effectiveness in real-world, evolving VR scenarios.
+
+\textbf{Statistical Models:}
+Statistical approaches, including linear regression, logistic regression, and Markov chain models, explicitly identify significant factors influencing cybersickness severity, such as refresh rate and FoV \cite{Campos2021, Smith10453565}. These models provide clear interpretability and highlight factor importance. However, they typically lack explicit causal modeling capabilities and, importantly, cannot rigorously verify whether cybersickness risks remain within acceptable thresholds under partial or uncertain observational conditions.
+
+\textbf{Bayesian Networks in Cybersickness Research:}
+Bayesian Networks have emerged as a compelling approach, combining interpretability and probabilistic modeling of causal relationships among different factors. Widely applied in fields like medical diagnosis and reliability engineering \cite{yang2022machine}, BNs incorporate expert knowledge and empirical data to capture complex interdependencies effectively. Prior BN studies on cybersickness have primarily modeled symptom likelihood under clearly defined conditions\cite{Smith10453565}; notably absent is their utilization for formal probabilistic verification of safety thresholds—an essential requirement in safety-sensitive VR/MR applications where partial data, adversarial manipulations, and uncertain operational conditions frequently arise.
+
+\textbf{Probabilistic Verification and Cognitive Attacks:}
+Formal verification has been employed to guarantee correctness properties of software and hardware systems \cite{murray2013sel4, leroy2009formal, jiang2012cyber, kern1999formal}, recently extending into probabilistic verification for stochastic systems \cite{junges2016probabilistic}. Within VR, where outcomes are highly sensitive to human cognitive states and adversarial manipulations, probabilistic verification uniquely provides rigorous assurances of user safety under partially known or hypothetical conditions. While adversarial and cybersecurity literature extensively addresses attacks on system integrity \cite{li2024comprehensive}, existing VR cybersickness research lacks formal verification frameworks to guarantee user comfort and safety against adversarially induced sensory manipulations and environmental uncertainties.
+
+\begin{mybox}
+\textbf{Our Contribution:} The current literature predominantly offers predictive cybersickness models—deep learning methods optimize predictive accuracy at the cost of interpretability and formal assurances, while statistical models provide interpretability without causal clarity or verification capabilities. Bayesian Networks, despite their ability to model rich causal relationships and uncertainty, have not yet been integrated with formal probabilistic verification methods to ensure cybersickness risks remain acceptably low under uncertain, partially observable, or adversarially manipulated conditions. This paper addresses this critical gap explicitly. Instead of seeking superior predictive performance or interpretability alone, this paper proposes a comprehensive BN-based probabilistic verification framework that rigorously guarantees cybersickness safety thresholds, even under incomplete information or hypothetical operational scenarios. This distinct focus enables formal assurances of safety-critical constraints, fundamentally advancing cybersickness modeling beyond mere prediction towards robust, formally verified VR/MR system design.
+\end{mybox}
+
+
+
+% \textbf{Cybersickness Models and Contributing Factors:}
+% Cybersickness symptoms closely mirror those of motion sickness and can linger even after VR exposure \cite{Stanney1997CybersicknessIN}. Several theoretical underpinnings have been proposed, with sensory conflict theory emerging as the most influential explanation for cybersickness \cite{LaVoila10.1145/333329.333344, Cobb6788197}. According to this theory, the mismatch between visual and vestibular inputs drives the onset of symptoms. Over the years, researchers have pinpointed specific system parameters that escalate sensory conflicts: display latency, mismatched frame rates, large FoVs, high brightness or contrast, and scene complexity. In parallel, physiological factors—such as heart rate and galvanic skin response—have been repeatedly shown to track user discomfort levels \cite{kim2021clinical}, indicating that they can serve as proximate signals for cybersickness prediction.
+
+% \textbf{Deep Learning Approaches:}
+% A growing body of literature employs deep learning to forecast cybersickness from physiological and system data. Recent works use eye tracking, head tracking, and biosignals to train complex architectures, including convolutional neural networks and LSTMs \cite{Yalcin2024, Islam9583838}. Despite their predictive success, these methods often require large annotated datasets to capture the diverse ways cybersickness can manifest. Furthermore, the black-box nature of these models restricts their interpretability, raising challenges in understanding how or why certain parameters—such as a sudden spike in latency—heighten cybersickness risks.
+
+% \textbf{Statistical Models:}
+% In contrast to data-hungry deep learning frameworks, statistical approaches like linear and logistic regression have been used to identify which independent factors (e.g., refresh rate, FoV) contribute significantly to cybersickness \cite{Campos2021}. More advanced methods, such as the Markov chain model\cite{Smith10453565}, have been developed as flexible means to represent state transitions among sickness levels. However, these methods lack causal interpretability, as they do not model how changes in system parameters influence physiological responses and lead to varying levels of sickness.
+
+% \textbf{Bayesian Networks in Cybersickness Research:}
+% Bayesian Networks offer an attractive middle ground, marrying the interpretability of statistical modeling with the ability to capture complex probabilistic dependencies among variables. Although BNs have been widely applied in other fields \cite{...} -such as medical diagnosis and reliability engineering—they are only beginning to gain traction in VR research \cite{yang2022machine}. BNs can incorporate domain knowledge (e.g., known connections between visual-vestibular mismatch and nausea) and learn conditional probability distributions from empirical data, enabling both interpretability and adaptability. Previous efforts to use BNs in cybersickness have primarily focused on modeling the likelihood of discomfort under specific conditions, but few, if any, address the verification aspect—ensuring certain thresholds of comfort are met or that specific adversarial manipulations do not escalate sickness risk beyond acceptable bounds.
+
+% \textbf{Probabilistic Verification and Cognitive Attacks:}
+% Traditionally, verification techniques have been used for software and hardware systems to rigorously check correctness properties \cite{murray2013sel4, leroy2009formal, jiang2012cyber, kern1999formal}. More recently, they have been extended to probabilistic model checking of systems that exhibit stochastic behaviors \cite{junges2016probabilistic}. Within VR, where human-in-the-loop factors and adversarial manipulations can heavily influence outcomes, probabilistic verification provides a rigorous means to evaluate the safety and reliability of user experiences. This is especially relevant under manipulations or varying user’s sensory or cognitive load that can lead to producing undesired outcomes (e.g., disorientation or sickness). While cybersecurity literature extensively covers adversarial attacks on software systems \cite{li2024comprehensive}, current attempts lack formal frameworks that guarantee user safety from cybersickness under adversarial, system and environmental factors.
+
+% \textbf{Research Gap:}
+% Despite the abundance of predictive models for cybersickness, there remains a clear deficit in methods that can guarantee user safety. Deep learning approaches excel at identifying patterns but often at the expense of interpretability. Conventional statistical methods facilitate some level of interpretability but do not inherently provide robust safety guarantees. Bayesian Networks, in principle, can encode rich interdependencies, yet existing BN-based cybersickness studies rarely integrate verification techniques to ensure safe VR experiences. By linking BN modeling with probabilistic verification, we can formally prove whether specific parameter manipulations and variability exceed tolerable cybersickness risk levels. This paper aims to fill that gap, thereby moving beyond mere prediction to a comprehensive framework offering probabilistic guarantees and insights into the causal pathways of cybersickness.
+
+% \begin{itemize}
+%     \item Other papers for modeling cybersickness in VR 
+%     \item Measures of CS
+%     \item BNs papers for VR or similar areas;
+%     \item Verification related works for VR or similar areas;
+%     \item The advantage of our works compare with others: 
+% To our knowledge, this is the first study to comprehensively analyze the correlations between physiological parameters, system parameters, and their combined effects on cybersickness in virtual reality environments, addressing a significant gap in the current literature.
+% \end{itemize}
+
+\section{Methodology}
+In this section, we present our methodology for modeling cybersickness risk. Section~\ref{sec:BN} outlines the Bayesian Network construction and learning process, while Section~\ref{sec:prob_veri} details the formal probabilistic verification of cybersickness safety thresholds.
+% \textcolor{red}{[not a major thing, but it would be good to add 1-2 lines intro of the methodology here. ]} 
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\linewidth]{figures/Bayesian Process.pdf}
+    \caption{\scriptsize Overview of the hierarchical Bayesian Network modeling and probabilistic verification framework. The process involves constructing an optimized BN structure from system parameters and physiological responses, followed by posterior inference and formal verification of cybersickness safety conditions.}
+    \label{fig:System Architecture}
+\end{figure*}
+
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=\linewidth]{figures/system_diagram.pdf}
+%     \caption{combine with \ref{fig:System Architecture}, and \ref{fig:system_diagram}}
+%     \label{fig: system-dia}
+% \end{figure}
+
+
+% \begin{itemize}
+%     \item 3.1 BNs explain
+%     \begin{itemize}
+%         \item 1. General intro with text, network structure, and probability distribution.
+%         \item 2. Structure learning explain
+%         \item 3. Combined prior knowledge with structure learning, explained in this paper, we have some constraints, that assume system parameters have no incoming connection (no parents), and FMS have no outcoming connection (no children). some other situations could be applied too, such as forcing the Heart rate to the fms (domain expert knowledge). 
+%         \item 4. Node reduction, Simplify the Bayesian network by removing nodes that do not influence the output node (directly or indirectly):
+%         Steps:  Z <– X → Y(output)
+% Identify the Output Node: Define the node for which you want to reduce irrelevant influences.
+% Find Ancestors and Descendants:
+% Ancestors: Nodes that directly or indirectly influence the output node.
+% Descendants: Nodes that are directly or indirectly influenced by the output node.
+% Prune Irrelevant Nodes:
+% Remove nodes that are neither ancestors nor descendants of the output node.
+%     \end{itemize}
+%     \item 3.2 Verification explain
+% \end{itemize}
+
+
+\subsection{Bayesian Networks for Cybersickness} \label{sec:BN}
+Bayesian Networks provide a structured probabilistic framework for modeling uncertainty, making them particularly suitable for modeling causal relationships among system parameters (e.g., hog\_features, luminance, temporal smoothness), human physiological responses (e.g., HR, GSR), and cybersickness severity in virtual reality environments, a detailed explanation is provided in Table \ref{tab:feature_summary}. In this paper, cybersickness severity, denoted as \(X_q\), is the primary variable of interest, while system parameters (\(S\)) and human physiological responses (\(H\)) serve as explanatory variables.
+
+To explicitly capture causal relationships, we impose a hierarchical structure within the Bayesian Network. System parameters are treated as exogenous variables without incoming edges, initiating the causal relationships. Human physiological responses act as intermediate variables that reflect reactions to system parameters and potentially interact with each other. Finally, cybersickness severity are the outcome node, influenced solely by physiological responses.  Formally, a Bayesian Network is represented by a directed acyclic graph (DAG) \(G = (V, E)\), with nodes representing random variables and directed edges encoding conditional dependencies. In our BN:
+\begin{itemize}
+    \item \textbf{System parameters} \(S = \{ S_1, S_2, \dots, S_m \}\) include features such as latency, brightness, spectral entropy, and motion smoothness.
+    \item \textbf{Human physiological responses} \(H = \{ H_1, H_2, \dots, H_k \}\) encompass heart rate, galvanic skin response, eye tracking, and pupil dilation.
+    \item \textbf{Cybersickness severity} \(X_q\) represents a probabilistic distribution over intensity levels (e.g., none to severe).
+\end{itemize}
+The joint probability distribution over these variables is factorized according to the conditional independence assumptions defined explicitly by the learned hierarchical structure:
+\begin{equation}\label{eq-BN}
+    P(S,H,X_q) = \prod_{i}P(S_i) \prod_{j}P(H_j \mid Pa(H_j)) P(X_q \mid Pa(X_q)),
+\end{equation}
+where \(Pa(H_j)\) and \(Pa(X_q)\) indicate subsets of variables (parent nodes) directly influencing each physiological response and cybersickness severity, respectively. This structured factorization ensures computational efficiency and interpretability.
+The BN facilitates inference about cybersickness severity even under partial observability (e.g., missing physiological signals or unavailable system logs) or uncertain conditions. Given observed values for system and physiological parameters, the posterior over cybersickness severity is inferred as:
+\[
+    P(X_q \mid S = s, H = h) \propto P(X_q \mid Pa(X_q)) \prod_{j}P(H_j \mid Pa(H_j)) \prod_{i}P(S_i).
+\]
+Here, the terms $P(S_i)$ denote prior distributions of system parameters, which reflect their exogenous nature and assumed independence. Unlike traditional models trained solely to predict cybersickness severity from observed data, our Bayesian Network explicitly models the joint posterior distribution of all relevant variables, providing a rigorous foundation for formal reasoning and probabilistic safety guarantees, as detailed in the subsequent verification framework.
+
+\subsubsection{Constructing and Learning the BN Structure}
+Constructing the BN involves identifying causal dependencies among system parameters, physiological responses, and cybersickness severity. Structure learning seeks the optimal DAG representation, balancing data-driven insights and domain-specific causal assumptions. Specifically, the hierarchical constraints are enforced:
+\[
+\textit{System Parameters} \rightarrow \textit{Human Responses} \rightarrow \textit{Cybersickness Severity}
+\]
+% To maintain interpretability and reduce complexity, each node is limited to at most three parents, preventing excessive connectivity and overfitting.
+
+Given the hierarchical constraints, the BN structure is learned using the Hill Climbing (HC) algorithm\cite{tsamardinos2006max}, which iteratively refines the DAG by adding, removing, or reversing edges. The optimization seeks to maximize a scoring function \(S(G,D)\), quantifying how well a network structure \(G\) explains observed data \(D\). Formally:
+\[
+G^{(t+1)} = \arg\max_{G'} S(G',D), \quad \text{subject to hierarchical constraints.}
+\]
+The hierarchical constraint significantly reduces the search space, making structure learning both efficient and aligned explicitly with causal assumptions underlying cybersickness.
+
+\subsubsection{Node Reduction for Efficiency and Clarity}
+Following structure learning, node reduction is performed to remove variables that do not directly or indirectly affect cybersickness severity. Retaining only nodes in the ancestor set \(\mathcal{A}(X_q)\) of \(X_q\), the BN graph reduces to \(G'=(V',E')\) with:
+\[
+V' = \mathcal{A}(X_q) \cup \{X_q\}, \quad
+E' = \{(X_i,X_j) \in E \mid X_i,X_j \in V'\}.
+\]
+This pruning step eliminates irrelevant nodes, ensuring computational efficiency, interpretability, and a clear focus on causal pathways that directly affect cybersickness severity.
+
+Figure~\ref{fig-predict} provides an example Bayesian Network inference, showing the posterior probability distribution of cybersickness severity given observed conditions. Unlike deterministic predictions, the BN quantifies uncertainty explicitly, providing the probability that a user might experience each cybersickness severity level. Such probabilistic outputs are critical for formally verifying whether operational conditions satisfy predefined safety thresholds, as detailed in Section~\ref{sec:prob_veri}.
+
+The left and middle boxes in Figure~\ref{fig:System Architecture} summarize the hierarchical Bayesian Network modeling process, illustrating how adversarial manipulations, environmental factors, and system limitations influence system-level properties and physiological conditions, leading to variations in cybersickness severity, as measured by FMS. The structure learning refines an initially random DAG to an optimized, reduced network used explicitly to infer posterior probabilities, enabling formal verification of cybersickness safety conditions.
+
+
+% \iffalse
+
+% \subsection{Bayesian Networks}
+% Bayesian Networks provide a structured probabilistic framework for modeling uncertainty, making them well-suited for capturing the causal relationships between system parameters, human physiological responses, and cybersickness severity in virtual reality environments. In this paper, we model cybersickness severity as the target variable, denoted as \(X_q\), while system and human parameters form the set of explanatory variables, denoted as \(S\) and \(H\), respectively.
+
+% To accurately capture the cascading impact of system parameters on cybersickness, we impose a hierarchical structure within the Bayesian Network. This structure ensures that system parameters, meaning they are external influences. Human physiological responses serve as intermediate elements, which may or may not have direct influences from system parameters or each other, capturing their reaction to VR conditions. Finally, cybersickness severity is the output, influenced solely by human physiological responses. Figure~\ref{fig:System Architecture} illustrates this cascading effect, which effectively models the impact of attacks, environmental variability, and system noise, alongside human responses, on cybersickness.
+
+% A Bayesian Network is defined as a directed acyclic graph (DAG) \(G = (V, E)\), where each node represents a random variable, and each directed edge encodes a probabilistic dependency between variables. Specifically, in our model, {\em system parameters} (\(S = \{ S_1, S_2, ..., S_m \}\)) include features such as latency, brightness, spectral entropy, and motion smoothness, which influence cybersickness risk. {\em Human physiological responses} (\(H = \{ H_1, H_2, ..., H_k \}\)) include heart rate, galvanic skin response, eye tracking, and pupil dilation, which reflect the body's reaction to VR stimuli. {\em Cybersickness severity} (\(X_q\)) is the outcome variable, representing the probability distribution over cybersickness intensity levels (e.g., from no symptoms to severe discomfort). The joint probability distribution over these variables is factorized as:
+
+% \begin{align}
+%     P(S, H, X_q) = \prod_{i} P(S_i) \prod_{j} P(H_j \mid S) P(X_q \mid H)
+% \end{align} \label{eq:joint_probability}
+
+% where the conditional dependencies capture how system parameters influence human responses, which in turn affect cybersickness severity.
+
+% Given observed system and human parameters, the goal is to build a BN model that can accurately infer the posterior probability of cybersickness severity \(X_q\):
+% $$
+% P(X_q \mid S = s, H = h) = \frac{P(X_q, S = s, H = h)}{P(S = s, H = h)},
+% $$
+% where the numerator expands as:
+% $$
+% P(X_q, S = s, H = h) = \sum_{X \setminus \{X_q, S, H\}} \prod_{i} P(S_i) \prod_{j} P(H_j \mid S) P(X_q \mid H).
+% $$
+% This formulation enables computing the likelihood of experiencing a given cybersickness severity under specific VR conditions. The model explicitly accounts for the joint impact of system parameters and human responses on cybersickness severity. Instead of a black-box prediction, our Bayesian Network’s hierarchical structure effectively models how system disturbances propagate through human physiological responses to affect cybersickness.
+
+
+% \subsubsection{Constructing the Bayesian Network Model}
+% Constructing a Bayesian Network for cybersickness prediction requires identifying how system parameters, human physiological responses, and cybersickness severity interact. The goal of structure learning is to determine which factors influence each other, how their dependencies propagate, and ultimately, how cybersickness is affected by both system variations and human responses. This process involves optimizing the network structure to best represent the dependencies observed in the available data while ensuring that the relationships reflect the causal mechanisms underlying cybersickness.
+
+% To impose a structured and interpretable model, the relationships between variables follow a directed hierarchy:
+% \[
+%     \textit{System Parameters} \rightarrow \textit{Human Responses} \rightarrow \textit{Cybersickness Severity}
+% \]
+% System parameters function as exogenous variables, meaning they have no incoming edges and only influence other variables. These parameters affect human physiological responses, which may or may not be directly influenced by system factors. Cybersickness severity is treated as the terminal node, meaning it has only incoming edges and no outgoing connections. To prevent excessive connectivity and ensure a well-defined causal structure, each node is restricted to a maximum of three parents, reducing the likelihood of capturing spurious correlations.
+
+% \subsubsection{Learning the Bayesian Network Under Structural Constraints}
+% With the hierarchical structure defined, the next step is to learn a set of conditional dependencies between the variables (i.e., structure of BN) while ensuring that the imposed constraints are satisfied. Structure learning in Bayesian Networks involves identifying the most suitable graph topology that explains the observed data while maintaining probabilistic meaning. To achieve this, the Hill Climbing (HC) algorithm\cite{tsamardinos2006max} is used as a search method to iteratively refine the network structure. The algorithm starts with an initial random directed acyclic graph and modifies it by adding, removing, or reversing edges to maximize a predefined scoring function \( S(G, D) \), which evaluates how well the network structure \( G \) explains the observed dataset \( D \). The optimization process follows:
+% \[
+% G^{(t+1)} = \arg\max_{G'} S(G', D) \quad \text{such that } G' \text{ adheres to imposed hierarchy.}
+% \]
+% where \( G' \) represents the current Bayesian Network structure, \( D \) is the observed dataset, and \( S(G', D) \) is the scoring function, which measures the likelihood of the predicting the cybersickness factor in the observed data given a specific Bayesian Network configuration.
+
+% The Hill Climbing search is restricted to modifying edges only within the hierarchical constraints. This significantly reduces the search space, making structure learning computationally efficient while ensuring that the final network topology remains aligned with the causal mechanisms underlying cybersickness.
+
+% \subsubsection{Node Reduction for Computational Efficiency}
+% Once the structure is learned, a node reduction process is applied to eliminate variables that do not contribute to cybersickness severity. This step ensures that the Bayesian Network retains only elements that are directly or indirectly correlated with cybersickness severity. Any node that does not influence cybersickness severity—either directly or through intermediate variables—is removed from the structure.
+% Mathematically, the pruned Bayesian Network is represented as a reduced graph \( G' = (V', E') \), where the retained node set is:
+% \[
+% V' = \mathcal{A}(X_q) \cup \{X_q\}
+% \]
+% where \( \mathcal{A}(X_q) \) represents the ancestor set of cybersickness severity, containing all variables that have a directed path leading to \( X_q \). Since \( X_q \) is the terminal node, descendant pruning is unnecessary, and only causal ancestors of cybersickness severity are retained. The corresponding updated edge set is:
+% \[
+% E' = \{(X_i, X_j) \in E \mid X_i, X_j \in V'\}.
+% \]
+% Applying this node reduction step ensures that the Bayesian Network remains focused on the most critical factors influencing cybersickness severity, removing statistical artifacts that do not contribute to its predictive or explanatory power.
+
+% An example of a Bayesian Network prediction is shown in Figure~\ref{fig-predict}. Upon observing any given features—whether a complete or partial set—the Bayesian Network provides a probabilistic estimate of cybersickness severity. Unlike conventional machine learning approaches that yield a single deterministic prediction, the Bayesian Network infers a posterior distribution over cybersickness severity levels. This allows for the quantification of uncertainty, where the model predicts the probability of experiencing low, moderate, or severe cybersickness given the available evidence. Such probabilistic reasoning is crucial for verification and risk assessment, as described in the following section.
+
+
+% \fi
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/cybersickness_prediction.png}
+    % {figures/Prediction.png}\vspace{-3ex}
+    \caption{\scriptsize Example of posterior prediction using the learned Bayesian Network. Given observed system and physiological conditions, the model infers the probability distribution over cybersickness severity levels, enabling uncertainty-aware risk assessment for verification.}
+    \label{fig-predict}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% 
+% \subsection{Bayesian Networks}
+
+% Bayesian networks provide a structured probabilistic framework for modeling uncertainty by combining graph and probability theory principles\cite{}. Their ability to represent complex dependencies among variables makes them ideal for analyzing the interplay of multiple factors influencing cybersickness in virtual reality.
+
+% A Bayesian network is defined as a directed acyclic graph (DAG) \( G = (V, E) \), where each node \( X_i \in V \) represents a random variable, and each directed edge \( (X_i, X_j) \in E \) encodes a probabilistic dependency between the variables. The joint probability distribution over a set of \( n \) variables, \( \{X_1, X_2, \dots, X_n\} \), is factorized as:
+% \[
+% P(X_1, X_2, \dots, X_n) = \prod_{i=1}^{n} P(X_i \mid \mathrm{Pa}(X_i)),
+% \]
+% where \( \mathrm{Pa}(X_i) \) denotes the set of parent nodes of \( X_i \). This factorization allows efficient computation by leveraging conditional independence assumptions to decompose the global probability distribution into a product of local conditional distributions.
+
+% In practice, inference in Bayesian networks involves computing conditional probabilities given observed evidence. Given a set of observed variables \( \mathbf{E} \subseteq \{X_1, X_2, \dots, X_n\} \) with specific values \( \mathbf{e} \), the goal is to compute the posterior probability of a target variable \( X_q \):
+
+% \[
+% P(X_q \mid \mathbf{E} = \mathbf{e}) = \frac{P(X_q, \mathbf{E} = \mathbf{e})}{P(\mathbf{E} = \mathbf{e})}.
+% \]
+
+% The numerator can be expanded using the chain rule:
+
+% \[
+% P(X_q, \mathbf{E} = \mathbf{e}) = \sum_{\mathbf{X} \setminus \{X_q, \mathbf{E}\}} \prod_{i=1}^{n} P(X_i \mid \mathrm{Pa}(X_i)),
+% \]
+
+% where the summation marginalizes out all unobserved variables except \( X_q \). The denominator, \( P(\mathbf{E} = \mathbf{e}) \), serves as a normalization factor:
+
+% \[
+% P(\mathbf{E} = \mathbf{e}) = \sum_{X_q} P(X_q, \mathbf{E} = \mathbf{e}).
+% \]
+
+% Inference in Bayesian Networks can be performed using exact methods such as variable elimination and junction tree algorithms, or approximate methods like Markov Chain Monte Carlo (MCMC) sampling and variational inference, depending on the network complexity. In this study, we leverage these inference techniques to estimate cybersickness levels based on observed system parameters and physiological factors, ensuring an interpretable and probabilistically rigorous analysis.
+
+
+
+
+
+
+% \subsubsection{Structure learning with domain knowledge}
+% The process of determining the network topology that best represents the underlying relationships among the variables is referred to as structure learning. There exist three principal approaches: constraint-based methods, score-based methods, and hybrid methods. Constraint-based methods rely on conditional independence tests to infer the underlying structure, whereas score-based methods optimize a scoring function to determine the most probable network given the data. A widely used score-based method employs the Bayesian Information Criterion (BIC) or Akaike Information Criterion (AIC) to evaluate candidate structures.
+
+% In this study, we utilize the Hill Climbing (HC) algorithm \cite{tsamardinos2006max}, a widely adopted heuristic search technique in structure learning. Hill Climbing is an iterative optimization method that starts with an initial DAG and incrementally modifies the structure by adding, removing, or reversing edges. The algorithm aims to maximize a predefined scoring function $S(G,D)$, where 
+% $G$ is the network structure and $D$ is the dataset. The structure is updated iteratively according to:
+% \[
+%     G^{t+1} = \arg\max_{G'} S(G', D)
+% \]
+
+% In many practical applications, incorporating domain expertise into the structure learning process enhances both interpretability and performance. In this study, we introduce specific constraints to guide the BN construction:
+% Assume system parameters have no incoming edges (i.e., no parents), reflecting their role as exogenous variables that influence other factors without being influenced themselves. Treat cybersickness as terminal nodes with no outgoing edges (i.e., no children), ensuring that they represent observable outcomes. Apply Domain-Specific Relationships, 
+%  for instance, expert knowledge may dictate that the heart rate directly affects certain feature measures. Such constraints are explicitly imposed by adding directed edges accordingly.
+
+% These constraints effectively reduce the search space during structure learning and ensure that the network conforms to established domain insights.
+
+
+% \subsubsection{Node Reduction for Computational Efficiency}
+
+% To simplify the Bayesian Network and improve computational efficiency, we perform \textit{node reduction} by eliminating variables that do not influence the output, either directly or indirectly. Let \( Y \) denote the target variable, which in our case represents the \textit{cybersickness (CS) level}. A node \( X_i \) is retained in the network if it lies on a causal pathway leading to \( Y \), meaning it is either an \textit{ancestor} or a \textit{descendant} of \( Y \). Formally, we define:
+
+% \begin{itemize}
+%     \item The \textbf{ancestor set} of \( Y \), denoted \( \mathcal{A}(Y) \), consists of all nodes that have a directed path leading to \( Y \).
+%     \item The \textbf{descendant set} of \( Y \), denoted \( \mathcal{D}(Y) \), includes all nodes for which \( Y \) lies on a directed path toward them.
+% \end{itemize}
+
+% A node \( X_i \) is considered \textit{irrelevant} if it does not belong to either of these sets, i.e.,
+
+% \[
+% X_i \notin \mathcal{A}(Y) \cup \mathcal{D}(Y).
+% \]
+
+% Such nodes do not participate in any causal pathway affecting or being affected by the cybersickness level and can thus be pruned without altering the essential probabilistic structure of the model.
+
+% To formally construct the reduced Bayesian Network \( G' = (V', E') \) from the original graph \( G = (V, E) \), we define:
+
+% \[
+% V' = \mathcal{A}(Y) \cup \mathcal{D}(Y) \cup \{Y\}.
+% \]
+
+% In our case, applied the domain knowledge, we don't have the $\mathcal{D}(Y)$, which results in $V' = \mathcal{A}(Y) \cup \{Y\}$.
+% The edge set \( E' \) is then derived by retaining only those edges that exist between nodes in \( V' \):
+
+% \[
+% E' = \{(X_i, X_j) \in E \mid X_i, X_j \in V'\}.
+% \]
+
+% This node reduction process ensures that the Bayesian Network remains focused on the causal mechanisms influencing cybersickness while minimizing computational overhead.
+
+% By applying this reduction technique, we retain only the variables that contribute to the explanatory and predictive power of the model, ensuring that the structure remains interpretable while improving inference efficiency.
+
+
+
+% \subsection{Verification}
+
+% To evaluate the predictive performance of our Bayesian Network (BN) model and verify its ability to capture the influence of VR scene characteristics on cybersickness, we employ a probabilistic verification methodology. This approach centers around probabilistic inference conditioned on different VR configurations, allowing us to quantify the likelihood of cybersickness under various scenarios.
+
+% Our approach uses a \emph{probabilistic program} to represent and analyze the Bayesian Network model of cybersickness. A probabilistic program represents a probabilistic model and has two capabilities: drawing a random sample from a distribution, and conditioning values of random variables based on observations. These capabilities, which constitute the \emph{inference} process, allow us to evaluate our model under different scenarios.
+
+% Conditioning is used to update distributions of random variables as we get additional information about other variables in the probabilistic model. As the information is processed, the initial \emph{prior} distributions for the random variables is updated to generate resulting \emph{posterior} distributions. We use the two standard kinds of conditioning in probabilistic programs: hard and soft conditions. In our framework, the conditions are used to simulate different scenarios involving the features in the model. For instance, a scenario where luminance is known to be elevated could be represented with the condition $luminance > 3$. Hard conditions refer to observing a random variable taking a constant value or a range of values\cite{gordon2014probabilistic}. This has the effect of discarding all executions of the program where the variable takes a different value. Soft conditions refer to an observation that a variable is sampled from a particular probability distribution\cite{conditioningSemantics}. In general, hard conditioning is employed when we get concrete knowledge about the values a variable can take, whereas soft conditioning is used to represent the knowledge that the variable follows a probability distribution.
+
+% \kaiming{Need one more sentence to express the difference between soft conditioning and hard conditioning. Need separate references for both hard and soft conditioning.} 
+
+% Our verification approach relies on the programming language to support conditioning and perform inference. Contemporary languages can be split into two categories based on the inference algorithm: languages such as STAN\cite{carpenter2017stan} and BUGS\cite{...} perform inference through sampling, whereas languages such as Dice\cite{dice} and PSI\cite{psi} use exact techniques to solve for the posterior. Sampling based approaches sacrifice accuracy guarantees on the results to offer better performance than exact approaches. We employ Dice in our approach as it is optimized for discrete probabilistic models, which results in exact results for our model while still offering good performance. 
+
+% The verification methodology can be summarized as follows. We start with encoding the Bayesian Network as a probabilistic program in Dice \kaiming{Why do we use Dice instead of other tools? Should discuss the challenge and why Dice is a perfect fit for resolving the challenge, this should serve as the opening statement of this paragraph.}. We then perform conditioning on the program to simulate different scenarios of interest. While encoding the source network, we perform two modifications: the random variables are constrained as per the conditions specified, and we add additional boolean nodes that correspond to each of the properties to be verified. We then run inference on the generated code to obtain posterior distributions on each property. Finally, we analyze the resulting posterior distributions to probabilistically verify properties of interest. \kaiming{Again, why do we want to setup in this way? What are the problem that we are trying to solve? Why in this way the problem can be solved?}
+
+% \subsubsection{Property Specification}
+% Our framework supports verifying boolean properties on the Bayesian Network, subject to conditions on the random variables. \kaiming{What are the potential gains by supporting this?} The syntax of the configuration supported is shown in Figure \ref{fig:syntaxProps}. \kaiming{The syntax is a bit informal IMO, you can refer to the Figure 1 of the paper named "CCured: Type-Safe Retrofitting of
+% Legacy Software".}
+
+% \begin{framed}
+% \begin{grammar}
+% <property> ::= <var> $\Delta$ <const>
+
+% <condition> ::= <var>`:' <cond>\\
+% <cond> ::= <var> | <var> $\Delta$ <const> | <cond> `or' <cond> | <cond> `and' <cond>
+
+% <observe\_dist> ::= <var>`:' `['<cond>``,' <dist>`]'\\
+% <dist> ::= `bernoulli'(prob)
+% \end{grammar}
+
+% $\Delta \in  \{>=,>,<,<=,==\} $
+% \end{framed}
+% \captionof{figure}{Syntax for conditions and properties}
+% \label{fig:syntaxProps}
+% \vspace{1em}
+% Figure \ref{fig:config} shows an example configuration. The $properties$ refer to the variable of which we would like to compute the posterior distribution. Such variables can be nodes in the Bayesian Network or boolean expressions involving them. $Conditions$ represent hard conditioning, and $observe\_dists$ are soft conditioning. 
+
+% In the example, $luminance > 3$ imposes a hard condition on luminance. The soft condition on HOG features implies that the property $hog\_features \ge 4$, which is a boolean random variable, is sampled from the Bernoulli distribution with probability parameter 0.9. 
+
+% In this example, the property is $FMS > 3$. The framework generates the inferred posterior distribution for this random variable, which corresponds to $P(FMS > 3)$ after processing the conditions. \kaiming{It would be nice to add one or two sentence to illustrate what does this above means in natural language.}
+
+% \begin{framed}
+% \begin{lstlisting}[    basicstyle=\small]
+% properties:
+%     - FMS > 3
+% conditions:
+%     - luminance: luminance > 3
+% observe_dists:
+%      hog_features: [hog_features>=4, bernoulli(0.9)]
+% \end{lstlisting}
+% \end{framed}
+% \captionof{figure}{Example config file for verification}
+% \label{fig:config}
+
+% \subsubsection{Code generation and inference}
+% We encode the source Bayesian Network \kaiming{Though I understand what is DBN, if it is the first time it is mentioned in this paper, we should define it clearly.} along with the properties into a Dice program. The process involves the following stages:
+% \begin{itemize}
+% \itemsep -0.3em
+%     \item Encoding the Bayesian Network
+%     \item Specifying conditions on the variables
+%     \item Adding nodes for output
+% \end{itemize}
+
+% In the first phase, we generate Dice code that represents the source Bayesian Network exactly. This involves representing the nodes (random variables) and edges (directed dependencies) in the program. We first perform a topological sorting on the nodes to obtain the order of processing. The Dice program encodes the relationships between the random variables using the conditional probability distributions from the Bayesian Network, which form the prior distributions for each variable.
+
+% We model each random variable with a corresponding probability distribution. For source nodes in the Bayesian Network, the distribution is simply the conditional probability distribution, which is a row vector. For nodes having one or more parents, the distribution is the conditional probability matrix, which is indexed by its parent nodes.
+
+% As Dice supports both hard and soft conditioning through observations, we make use of observes to express both kinds of conditions. For instance, the conditions in Figure \ref{fig:config} would be encoded as $observe(luminance > int(3,3))$ and $observe((hog\_features >= int(3,4)) <=> (flip \; 0.9))$ respectively. Note that as per Dice syntax, integers are represented by the pair (size, value), where the size corresponds to the number of bits. Also, Dice represents a Bernoulli distribution using the keyword $flip$.
+
+% Properties are modeled by adding additional random variables in the source code. This is equivalent to adding additional nodes in the Bayesian network which depend on the nodes on which the property is applied. The property variables are boolean, and represent whether the property holds (or not). The posterior distribution of the property enables us to give probabilistic guarantees on the property being satisfied.
+% \kaiming{It may be easier to understand the process by incorporating a figure representing the network.}
+
+%%%%%%%%%%%%%%%
+% interpreted by Peng for easy understanding may have mistakes.
+
+
+\subsection{Probabilistic Verification}\label{sec:prob_veri}
+While Bayesian Networks effectively model causal and probabilistic dependencies among VR system parameters, physiological responses, and cybersickness severity, modeling alone does not inherently yield rigorous guarantees about system behavior under uncertainty, partial observations, or adversarial manipulations. Therefore, our verification framework evaluates whether specific configurations of system and human parameters satisfy critical safety constraints (e.g.,  keep severity below a defined threshold) with quantifiable certainty, which is essential for safety-critical VR applications.
+
+Our verification process builds on the hierarchical Bayesian Network, where system parameters ($S$), human physiological responses ($H$), and cybersickness severity ($X_q$) were introduced. We define the full set of {\em random variables} as \(\mathbf{X} = S \cup H \cup \{X_q\}\), where each variable \(X_i \in \mathbf{X}\) is associated with a {\em conditional probability table} (CPT) of the form \(P(X_i \mid \mathrm{Pa}(X_i))\), with \(\mathrm{Pa}(X_i)\) denoting the {\em parent nodes} as defined by our hierarchical structure (i.e., system parameters influence physiological responses, which in turn influence cybersickness severity). The BN thereby defines a joint probability distribution that factorizes as shown in Equation~\ref{eq-BN}.
+
+
+To formalize verification, {\em Boolean properties} \(\phi(\mathbf{X})\) are defined over the variable set \(\mathbf{X}\), representing safety conditions of interest (e.g., \(\mathrm{FMS} > 4\) captures severe cybersickness). The objective is to compute the probability \(P(\phi(\mathbf{X}) = 1 \mid C)\), where \(C\) denotes a set of {\em evidence conditions} reflecting observed or hypothetical constraints on system or physiological variables. This is achieved through Bayesian conditioning, where the joint distribution specified by the BN is updated in light of the evidence \(C\). The resulting posterior distribution supports the evaluation of whether the specified property holds with high (or low) probability, enabling formal reasoning about cybersickness under uncertainty and partial observability.
+
+
+%In this section, we present the theoretical foundation of our verification methodology. After training a Bayesian Network (BN) to model the relationship between VR scene features and cybersickness outcomes, our goal is to formally evaluate whether the network satisfies certain behavioral properties under specified conditions. 
+
+
+% As previous sections introduced, Bayesian networks (BNs) provide a structured way to capture conditional dependencies among a set of random variables 
+% \(\mathbf{X} = \{X_1, X_2, \dots, X_n\}\). Each node \(X_i\) in a BN has a conditional probability table (CPT) that defines
+% \(\mathbb{P}(X_i \mid \mathrm{Pa}(X_i))\), where \(\mathrm{Pa}(X_i)\) denotes the set of parent nodes of \(X_i\). The joint 
+% distribution of all variables as defined in equation \ref{eq:joint_probability}
+
+
+
+% We aim to \emph{verify} whether certain \emph{Boolean properties} hold with high (or low) probability under specified conditions on the BN. Let \(\phi(\mathbf{X})\) denote a property, e.g., \(\phi(\mathbf{X}) = [\mathrm{FMS} > 3]\). We seek \(\mathbb{P}(\phi(\mathbf{X}) = 1 \mid C)\), where \(C\) is a set of evidence conditions encoding particular VR scene characteristics or observed data. Bayesian \emph{conditioning} can be used to represent the evidence conditions in the BN. The process involves updating the initial \emph{prior} distributions for the random variables  to generate resulting \emph{posterior} distributions.
+
+
+\textbf{Hard vs. Soft Conditioning.} %\subsubsection{Hard vs. Soft Conditioning}
+% In our verification setting, Boolean properties \(\phi(\mathbf{x})\) represent threshold-based safety constraints on cybersickness severity—for example, \(\phi(\mathbf{x}) = [\mathrm{FMS} > 3]\). 
+Evaluating these properties $\phi(\mathbf{X})$ usually requires reasoning under various forms of evidence, which fall into two categories: \emph{hard} and \emph{soft} conditioning. Hard conditioning applies when variable values are known precisely (e.g., \(\texttt{luminance} = 5\) or \(\texttt{luminance} \geq 3\)). This is formalized via indicator function \(C(\mathbf{x})\):
+\[
+C(\mathbf{x}) = \begin{cases}
+1 & \text{if state } \mathbf{x} \text{ satisfies the condition,} \\
+0 & \text{otherwise.}
+\end{cases}
+\]
+Only those states consistent with the hard evidence contribute to the conditioned distribution, yielding:
+\[
+P(\phi = 1 \mid C) = 
+\frac{\sum_{\mathbf{x}} \phi(\mathbf{x}) C(\mathbf{x}) P(\mathbf{x})}
+{\sum_{\mathbf{x}} C(\mathbf{x}) P(\mathbf{x})}.
+\]
+Soft conditioning captures uncertain or noisy information, such as \(\texttt{luminance} \sim \mathcal{N}(5,1)\). This is modeled via a likelihood function \(\ell(\mathbf{x})\), which reweights each outcome by its likelihood:
+\[
+P_\ell(\mathbf{x}) = 
+\frac{\ell(\mathbf{x}) P(\mathbf{x})}{\sum_{\mathbf{x}} \ell(\mathbf{x}) P(\mathbf{x})}, \quad
+P(\phi = 1 \mid \ell) = 
+\frac{\sum_{\mathbf{x}} \phi(\mathbf{x}) \ell(\mathbf{x}) P(\mathbf{x})}
+{\sum_{\mathbf{x}} \ell(\mathbf{x}) P(\mathbf{x})}.
+\]
+In practice, VR scenarios involve both types of evidence. For instance, latency may be fixed (hard condition), while physiological measures (e.g., GSR) are subject to noise (soft condition). The combined evidence is represented using unified weighting function:
+\[
+\!\!\!w(\mathbf{x})\! =\! \left(\! \prod_{j} C_j(\mathbf{x})\! \right)\! \cdot \!\left(\! \prod_{k} \ell_k(\mathbf{x})\! \right),
+P(\phi = 1 \mid C,\ell) = 
+\frac{\sum_{\mathbf{x}} \phi(\mathbf{x}) w(\mathbf{x}) P(\mathbf{x})}
+{\sum_{\mathbf{x}} w(\mathbf{x}) P(\mathbf{x})}.
+\]
+This general formulation supports the rigorous evaluation of safety properties under partial, noisy, or adversarial conditions. Its integration within a structured Bayesian Network trained from VR data enables formal verification of cybersickness risk—a core contribution of this paper.
+This verification process is depicted in Figure~\ref{fig:System Architecture}, which illustrates the flow from hierarchical BN construction through structure learning, node reduction, and posterior inference under hard and soft evidence. Boolean properties, such as \([\mathrm{FMS} > 4]\), representing encountering cybersickness in this work, are verified by computing posterior probabilities under these conditions, enabling probabilistic safety guarantees to be established.
+
+% \iffalse
+% \subsubsection{Hard vs. Soft Conditioning}
+% We use the two standard kinds of conditioning in probabilistic models: hard and soft conditions. In our framework, the conditions are used to simulate different scenarios involving the features in the model. For instance, a scenario where luminance is known to be elevated could be represented with the condition ${luminance} > 3$. Hard conditions refer to observing a random variable taking a constant value or a range of values\cite{gordon2014probabilistic} (e.g. ${luminance} = 5$). Soft conditions refer to an observation that a variable is sampled from a particular probability distribution\cite{conditioningSemantics} (e.g. luminance follows a Gaussian distribution with mean 5 and standard deviation 1).
+
+% Formally, represented by an indicator function $C(\mathbf{x})$:
+ 
+%  \begin{equation}
+%     C(\mathbf{x}) = \begin{cases}
+%     1 & \text{if state } \mathbf{x} \text{ satisfies the condition,} \\
+%     0 & \text{otherwise.}
+%     \end{cases}
+% \end{equation}
+
+% Hard conditions refer to observing a random variable take a constant value or a range of values\cite{gordon2014probabilistic} (e.g., $speed \geq 30$). This has the effect of discarding all executions of the program where the variable takes a different value (i.e., scenarios where $speed \leq 30$ are assigned probability 0). Under hard conditioning, the conditional probability of property $\phi$ is:
+% \begin{equation}
+%     \mathbb{P}(\phi = 1 \mid C) = 
+%     \frac{\sum_{\mathbf{x}} \phi(\mathbf{x}) C(\mathbf{x}) \mathbb{P}(\mathbf{x})}
+%     {\sum_{\mathbf{x}} C(\mathbf{x}) \mathbb{P}(\mathbf{x})}.
+% \end{equation}
+
+
+
+% Soft conditioning refers to an observation that a variable is sampled from a particular probability distribution\cite{conditioningSemantics}, which captures uncertain evidence through a likelihood function $\ell(\mathbf{x})$ that reweights outcomes based on probabilistic observations (e.g., $speed \sim \mathcal{N}(30, 4)$). Formally, posterior under soft conditioning is:
+% \begin{equation}
+%     \mathbb{P}_\ell(\mathbf{x}) = 
+%     \frac{\ell(\mathbf{x}) \mathbb{P}(\mathbf{x})}{\sum_{\mathbf{x}} \ell(\mathbf{x}) \mathbb{P}(\mathbf{x})},
+% \end{equation}
+% leading to the property probability:
+% \begin{equation}
+%     \mathbb{P}(\phi = 1 \mid \ell) = 
+%     \frac{\sum_{\mathbf{x}} \phi(\mathbf{x}) \ell(\mathbf{x}) \mathbb{P}(\mathbf{x})}
+%     {\sum_{\mathbf{x}} \ell(\mathbf{x}) \mathbb{P}(\mathbf{x})}.
+% \end{equation}
+
+
+% In general, hard conditioning is employed when we get concrete knowledge about the values a variable can take, whereas soft conditioning is used to represent the knowledge that the variable follows a probability distribution. In practice, scenarios often combine both conditions. Defining the overall weighting function:
+% \begin{equation}
+%     w(\mathbf{x}) = \left( \prod_{j} C_j(\mathbf{x}) \right) \cdot \left( \prod_{k} \ell_k(\mathbf{x}) \right),
+% \end{equation}
+% we generalize the conditional probability of the property as:
+% \begin{equation}
+%     \mathbb{P}(\phi = 1 \mid C) = 
+%     \frac{\sum_{\mathbf{x}} \phi(\mathbf{x}) w(\mathbf{x}) \mathbb{P}(\mathbf{x})}
+%     {\sum_{\mathbf{x}} w(\mathbf{x}) \mathbb{P}(\mathbf{x})}.
+% \end{equation}
+
+% This comprehensive formulation enables systematic verification of BN properties under diverse combinations of precise observations (hard conditioning) and uncertain evidence (soft conditioning), extending traditional Bayesian inference to provide formal evaluation of probabilistic properties—a capability essential for robust analysis of cybersickness in VR environments.
+% \fi
+
+\section{Experiment settings}
+In this section, we detail our experimental setup and methodology for evaluating the proposed cybersickness model. Section~\ref{subsec:dataset} covers the dataset collection and labeling process, Section~\ref{sec:data_preprocessing} outlines the data preprocessing and feature selection steps, Section~\ref{subsec:training} describes the training process of the BN, and Section~\ref{sec:Dice} presents implementation of the verification of the BN using Dice~\cite{dice}.
+
+\subsection{Dataset Description}
+\label{subsec:dataset}
+
+\begin{table}[t]
+\centering
+\tiny
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{5pt}
+\caption{Categorization of system-level and human-centered features used in the Bayesian Network model for cybersickness prediction.}
+\label{tab:feature_summary}
+\begin{tabular}{p{1.5cm} p{6.3cm}}
+\toprule
+\textbf{Category} & \textbf{Features} \\
+\midrule
+
+\multirow{4}{*}{\shortstack[l]{System \\ Features}} 
+& \textbf{luminance}: Scene brightness level. \\
+& \textbf{hog\_features}: Histogram of Oriented Gradients, captures motion-related texture. \\
+& \textbf{spectral\_entropy}: Frequency-domain signal complexity in visual input. \\
+& \textbf{temporal\_smoothness}: Measures visual jitter or temporal instability across frames \cite{Nasiri8451613}. \\
+\midrule
+
+\multirow{5}{*}{\shortstack[l]{Human \\ Physiological  \\ Features}} 
+& \textbf{Left\_Openness}, \textbf{Right\_Openness}: Eyelid openness, linked to fatigue and visual strain. \\
+& \textbf{Left\_Diameter}, \textbf{Right\_Diameter}: Pupil size, reflects cognitive load, attention, or stress. \\
+& \textbf{Combined\_Gaze\_Error\_Angle}: Discrepancy between actual and target gaze direction. \\
+& \textbf{GSR}: Galvanic Skin Response, indicator of emotional and physiological arousal. \\
+& \textbf{ReacTime}: Reaction time during tasks, reflects cognitive load and task engagement. \\
+\midrule
+
+\textbf{Outcome Variable} 
+& \textbf{fms}: Fast Motion Sickness score, the target variable indicating cybersickness severity. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+Our Bayesian Network framework requires a dataset containing both system-level parameters and physiological signals to support rigorous probabilistic modeling and verification of cybersickness. To this end, we use the “VRWalking” dataset~\cite{setu2024mazedconfuseddatasetcybersickness}, chosen specifically due to its comprehensive collection of the variables necessary for our analysis. This dataset consists of data collected from 36 participants (23 male, 13 female; mean age = 25.67 years, SD = 7.22) who navigated virtual mazes by physically walking for 15 minutes while simultaneously performing cognitive tasks related to working memory and attention. System parameters—including optical flow and Histogram of Oriented Gradients (HOG)—were captured using an HTC-Vive Pro Eye headset. Physiological signals (e.g., heart rate (HR) and galvanic skin response (GSR)) were measured via external biosensors, a detailed explanation is provided in Table \ref{tab:feature_summary}. Although subjective self-reported metrics (e.g., cybersickness questionnaires, mental load, physical exertion) were also collected, our Bayesian modeling approach relies primarily on objective measures to ensure consistency and rigor within the verification framework. Not all participants provided complete data across the required dimensions. Therefore, we retained data from 32 participants, whose records spanned the complete range of cybersickness severity. This subset provides a robust basis for training, validating, and formally verifying our BN, effectively capturing both system-level and physiological influences on cybersickness.
+
+
+
+
+% \subsection{Dataset description}
+
+% Since our proposed architecture relies on predefined observations and is based on constructive ideas of domain knowledge, it was necessary to infer the Bayesian Network with an appropriate Cybersickness dataset. According to the methodology of our proposed approach, we needed the datasets that have both the system parameters and the physiological parameters. Thus, we used "VRWalking", a dataset primarily focusing on Cybersickness\cite{setu2024mazedconfuseddatasetcybersickness}. This dataset included the data collected from 36 participants (23 male, 13 female, Mean age: 25.67 years with a standard deviation of 7.22) while they were performing a VR walking task. During the VR walking task, participants navigated virtual mazes via real walking for 15 minutes while concurrently performing multiple cognitive tasks. The collected dataset included system parameters such as optical flow, Histogram of Oriented Graidients (HOG) features, etc., alongside physiological parameters such as heart rate (HR) and galvanic skin response (GSR). This dataset also includes self-reported data on cybersickness, mental load, and physical load while users performed working memory and attention tasks. The HTC-Vive Pro Eye headset was used, and external sensors gathered HR and GSR data.
+
+% For the data collection, Pre and post-session Simulator Sickness Questionnaires (SSQs) \cite{kennedy1993simulator} are used to comprehensively assess cybersickness, and a post-session NASA-TLX questionnaire\cite{HART1988139} is employed to evaluate cognitive load. Pass-scale-like questions are also administered during the session to enhance labeling accuracy.
+% \kaiming{enhance the performance of our modeling and reasoning?}
+
+
+
+\subsection{Data Preprocessing}\label{sec:data_preprocessing}
+
+The preprocessing involved comprehensive feature refinement, dataset balancing, and careful partitioning to ensure accurate causal modeling and rigorous formal verification of cybersickness risk.
+
+\noindent\textbf{Features selection:} Initially, the dataset contained 93 features, including objective system-level parameters, physiological signals, and subjective self-reported metrics. Subjective user questionnaire data (e.g., mental load ratings) were explicitly excluded to maintain consistency with an objective verification framework and remove their inherent variability and incomplete coverage across participants. Redundant objective features were identified using correlation analysis (Pearson correlation threshold of 0.8), and domain expertise was applied to guide removal or consolidation. This systematic process reduced the feature set from 93 to 39 variables. Further dimensionality reduction consolidated logically related features, enhancing interpretability and causal plausibility; for instance, gaze error angle was computed from gaze direction and target direction, and optical flow measurements were aggregated into summary motion metrics. Ultimately, the dataset was refined to a concise and interpretable set of 21 relevant features, selected specifically due to their demonstrated relevance to cybersickness severity and suitability for causal inference. These included 10 system-level features (e.g., luminance, spectral entropy, temporal smoothness, optical flow, Histogram of Oriented Gradients, and frame rate) and 11 human-level physiological features (e.g., eye tracking metrics, galvanic skin response, pupil dilation, and heart rate variability).
+
+\noindent\textbf{Class balance enhancement:} Following feature refinement, significant dataset imbalance required attention. The original dataset exhibited severe class imbalance; cybersickness severity level 1 comprised 16,900 data points, whereas severity level 6 contained only 660 data points. Additionally, participant-level data were highly non-independent and identically distributed (non-i.i.d.) since each participant contributed multiple correlated samples. To address this, participant-level selection criteria were implemented: from the original 36 participants, data from 32 participants were explicitly selected based on their coverage across a broad spectrum of cybersickness levels (CS levels 1-7). Each selected participant contributed multiple samples spanning at least five cybersickness severity levels, ensuring balanced representation and reducing bias.
+
+The resulting dataset still presented challenges with class imbalance; thus, the Synthetic Minority Over-sampling Technique (SMOTE) \cite{Chawla_2002} was applied, chosen specifically for its effectiveness in balancing datasets without losing valuable information compared to undersampling methods. Recognizing potential risks of SMOTE generating unrealistic synthetic samples, participant-level 5-fold cross-validation was explicitly implemented, ensuring that samples from the same participant never appeared simultaneously in both training and validation sets, thereby mitigating data leakage and overfitting concerns. Finally, 150 real data points were set aside as an independent test set, specifically drawn from held-out participants excluded entirely from training and SMOTE augmentation procedures. This separation assured rigorous and unbiased evaluation of generalization performance.
+
+
+
+
+% \subsection{Preprocessing strategy and method}
+% To streamline the model and enhance its performance of our modeling and reasoning, we conducted a comprehensive dataset review to identify and eliminate irrelevant and redundant features. This process involved removing subjective user questionnaire data, including self-reported metrics related to mental and physical states, as well as validity checks. We reduced the initial feature set from 93 variables to 39 by eliminating redundant features. Further consolidation of features was performed by combining those with meaningful relationships; this enhanced the interpretability of the Bayesian network from a data perspective—for instance, computing the gaze error angle from gaze direction and target direction. This refinement process resulted in a final feature set of 21 variables, comprising 10 system-level features (e.g., luminance and spectral entropy) and 11 human-level features (e.g., eye tracking and galvanic skin response (GSR)).
+
+% The refined 21 features were incorporated into the Bayesian Network, which subsequently underwent structural learning to optimize the network topology for inference and prediction.
+
+% Beyond feature selection, we also addressed data imbalance to ensure robust model performance. Our analysis revealed that the dataset was non-i.i.d. (non-independent and identically distributed) and highly unbalanced. The dataset consists of 32 participants, with the majority of data points concentrated around cybersickness (CS) level 1. Specifically, CS level 1 accounts for 16,900 data points, while CS level 6 has only 660 points, leading to a severe class imbalance.
+
+% When using the entire dataset for prediction, the model predominantly classified samples as CS level 1, failing to accurately predict higher CS levels. To mitigate this issue, we employed multiple strategies. Given that different participants exhibited varying distributions of features and labels, we selected a subset of participants whose data spanned a broad range of CS levels from 1 to 7. This ensured that the model was trained on a more representative dataset.
+
+% To further balance the dataset, we applied the Synthetic Minority Over-sampling Technique (SMOTE) \cite{Chawla_2002}, an oversampling method that generates synthetic data points for underrepresented classes. This augmentation process improved the model’s ability to distinguish between different CS levels. Finally, we retained 150 real data points as an independent test set to evaluate the model’s generalization performance.
+
+% By integrating feature refinement and data balancing techniques, we enhanced the predictive capabilities of the Bayesian Network, ensuring that it effectively captures the underlying patterns of cybersickness in virtual reality.
+
+\subsection{Training and 
+% \textcolor{blue}{
+inference Settings
+}
+\label{subsec:training}
+% {\color{red}
+% To facilitate the learning process, continuous numerical variables were discretized into categorical bins, allowing the Bayesian Network to operate within a discrete variable framework. Discrete Bayesian Networks enable interpretable inference and simplify exact computation of conditional probabilities, which are critical for precise probabilistic verification of cybersickness conditions. We applied K-means clustering\cite{scikit-learn} with five bins, empirically selected to balance variability retention and computational tractability for exact inference. Throughout this paper, all numerical features correspond to these discrete levels. For example, a reference to \textit{``luminance $> 2$''} indicates values falling in the upper three bins (levels 3, 4, and 5).
+
+To facilitate the learning process, continuous numerical variables were discretized into categorical bins to enable the Bayesian Network (BN) to operate within a discrete variable framework. This approach simplifies the exact computation of conditional probabilities, which is critical for the precise probabilistic verification of cybersickness conditions. Specifically, K-means clustering~\cite{scikit-learn} was applied to categorize each numerical feature into five distinct bins. The number of bins was empirically chosen to balance the retention of variability with computational efficiency for exact inference.
+
+For example, \textit{``luminance''}, representing scene brightness, was divided into five bins based on the clustering results. Lower bins (e.g., levels 1 and 2) correspond to lower luminance values, while higher bins (e.g., levels 4 and 5) represent higher luminance values. The boundaries of these bins were determined by the clustering algorithm, which groups data points with similar values into the same bin. This ensures that each bin captures a meaningful range of the feature's variability.
+%
+Throughout this paper, all numerical features are referenced in terms of these discrete levels, with higher bins generally indicating higher values of the corresponding feature. This discretization enables consistent and interpretable analysis while preserving the relationships between features and their impact on cybersickness conditions.
+
+BN structure learning was conducted using the Hill-Climbing algorithm with domain-specific causal constraints. As described in Section~\ref{sec:BN}, these constraints enforced a hierarchical structure (System parameters $\rightarrow$ Human physiological responses $\rightarrow$ Cybersickness severity),
+% and limited each variable to a maximum of three parent nodes,
+preserving causal interpretability. Candidate structures were scored using the Bayesian Dirichlet equivalent uniform (BDeu) metric\cite{Carvalho2009ScoringFF}, which is well-suited for limited data scenarios.
+% \textcolor{blue}{
+The resulting compact hierarchical structure not only ensures causal interpretability but also yields computational efficiency. While exact inference in general Bayesian Networks is NP-hard \cite{kjaerulff1994reduction}, our constrained structure limits maximum parents per node to $k \leq 3$ and reduces the network to 12 nodes after pruning. This results in inference complexity of $O(12\cdot5^3) \approx  O(1,500)$ operations, enabling real-time queries well within VR frame budgets ($
+<$ 1ms per inference).
+% }
+
+% To ensure robust generalization, participant-level 5-fold cross-validation was employed. The dataset was partitioned such that no participant contributed data to both training and validation sets, preventing data leakage and enabling realistic model assessment. Details on participant filtering and subset construction are provided in previous section. 
+
+The model evaluation used two key metrics.  First, \textit{standard accuracy} measured the proportion of correctly classified FMS severity levels. While informative, this metric alone fails to account for inherent subjectivity and uncertainty in FMS labeling. Therefore, we also used \textit{Extended Label Accuracy ($\pm$1)}, which treats a prediction as correct if it falls within one level of the true label. %This distributional output is essential for the formal verification, where probabilistic safety properties such as $P(\text{FMS} > 3 \mid C) < 0.05$ must be evaluated under conditions of uncertainty.} % We might want to just include one of them. Also, we do not need to justify why, it it can cause confusion!
+% }
+
+
+% \subsection{Other Training Settings and metrics}
+
+% To facilitate the learning process, we discretized continuous numerical values into categorical bins, allowing the Bayesian Network to operate within a discrete variable framework\kaiming{Probably need to emphasize why supporting discrete variable framework is important}. We employed the K-means binning strategy \cite{scikit-learn}, setting the number of bins to five to balance granularity and computational efficiency. For clarity especially in the experiments of verification section, all feature values referenced in this paper correspond to the 5 discrete levels established through K-means binning. For example, when we state "\textit{luminance} $> 2$", this indicates values in the upper three levels (3, 4, or 5) of the discretized luminance scale.
+
+% For Bayesian Network structure learning, we incorporated domain knowledge as described earlier. We applied the Hill-Climbing algorithm with domain-specific constraints to guide the structure formation. The scoring metric used for evaluating candidate structures was the Bayesian Dirichlet equivalent uniform (BDeu) score \cite{Carvalho2009ScoringFF}, which is well-suited for Bayesian Network learning with limited data.  
+
+% To ensure the robustness and generalizability of our model, we implemented 5-fold cross-validation, partitioning the dataset into five subsets. This approach allowed us to iteratively train the model on four folds while using the remaining fold for validation, thereby mitigating overfitting and providing a more reliable estimate of the model's performance.  
+
+% In evaluating the Bayesian Network model, two key performance metrics were employed to assess its predictive accuracy and robustness. The first metric is the standard accuracy, which measures the proportion of correctly classified Fast Motion Sickness (FMS) levels in the dataset. This provides a baseline evaluation of the model’s classification performance.
+
+% However, given the probabilistic nature of Bayesian Networks, a second metric, the Extended Label Accuracy (±1), was introduced. This metric considers a prediction to be correct if it falls within one level of the true FMS score. The rationale behind this is that Bayesian Networks are trained to capture the probability distribution of the FMS levels, rather than minimizing an explicit classification error loss. This key feature makes them particularly suitable for probabilistic verification, as they naturally account for the uncertainty and subjective variability in cybersickness assessments.
+
+
+% {\color{red}
+\subsection{Implementation and Verification using Dice}\label{sec:Dice}
+Having established the Bayesian Network training and evaluation procedures, this section details the implementation and formal verification process using the Dice probabilistic programming language~\cite{dice}. Probabilistic programming languages typically employ either sampling-based inference (e.g., STAN~\cite{carpenter2017stan}) or exact inference (e.g., Dice, PSI~\cite{psi}). Given the need for rigorous probabilistic guarantees in formal verification scenarios, Dice was selected as it efficiently performs exact inference, which is critical for obtaining precise posterior distributions required by the verification framework. The Dice implementation involves four primary steps:
+
+\vspace{1pt}
+\noindent\textbf{Step 1: BN Encoding in Dice.}
+The Bayesian Network is encoded by assigning each node a corresponding conditional probability table. Nodes are defined in topological order to accurately represent causal dependencies established by the learned structure.
+\vspace{1pt}
+
+\noindent\textbf{Step 2: Encoding Conditions (Evidence).}
+Dice encodes evidence conditions using built-in observational statements, enabling verification under various scenarios:
+\begin{itemize}[leftmargin=*, itemsep=0pt, topsep=2pt] 
+    \item \textit{Hard Conditions:} Represent precise constraints on variables. For example, enforcing discretized luminance greater than level 3 (in a 5-bin discretization) is encoded as:
+% \begin{verbatim}
+\textit{observe}(luminance $> 3$);
+% \end{verbatim}
+
+    \item \textit{Soft Conditions:} Represent uncertain evidence. For instance, "hog\_features at least discretized level 4 with 90\% probability":
+% \begin{verbatim}
+\textit{observe}((hog\_features $>= 4$) with $90\%$ probability);
+% \end{verbatim}
+\end{itemize}
+\vspace{1pt}
+\noindent\textbf{Step 3: Property Specification.}
+Verification properties are defined as Boolean nodes in Dice. For example, cybersickness severity exceeding discretized level 4 (indicating significant cybersickness) is represented as: \(\phi(\mathbf{X}) = [\mathrm{FMS} > 4]\).
+% \begin{verbatim}
+% let phi_FMS = (FMS > 4);
+% \end{verbatim}
+
+\vspace{1pt}
+\noindent\textbf{Step 4: Exact Inference and Verification.}
+Dice computes posterior probabilities exactly, as follows:
+\begin{equation}
+    P(\phi_{\text{FMS}} = \text{true} \mid C, \ell) =
+    \frac{\sum_{\mathbf{x}} \phi_{\text{FMS}}(\mathbf{x}) \cdot w(\mathbf{x}) \cdot P(\mathbf{x})}
+    {\sum_{\mathbf{x}} w(\mathbf{x}) \cdot P(\mathbf{x})},
+\end{equation}
+where \(\phi_{\text{FMS}}(\mathbf{x})\) is the Boolean condition (FMS $>$ 4), and \(w(\mathbf{x})\) represents combined evidence conditions (Section~\ref{sec:prob_veri}).
+
+\vspace{2pt}
+\noindent\textbf{Illustrative Verification Scenario.}
+Consider verifying cybersickness risk under realistic VR conditions with mixed evidence:
+\begin{itemize}[leftmargin=*, itemsep=0pt, topsep=2pt]
+    \item \textit{Hard Condition:} luminance strictly above discretized level 3.
+    \item \textit{Soft Condition:} HOG features (visual complexity) at least discretized level 4 with 90\% probability, reflecting uncertainty or adversarial conditions.
+\end{itemize}
+
+Formally, this verification scenario is represented as:
+\begin{equation}
+    P(\text{FMS} > 4 \mid \text{luminance}>3,\,\text{hog\_features}\geq 4\sim\text{Bernoulli}(0.9)).
+\end{equation}
+Dice calculates this posterior probability exactly, quantifying cybersickness risk explicitly. This allows direct verification against formal safety thresholds, confirming whether VR scenarios remain within predefined safety bounds.
+% }
+
+
+% {\color{red}
+\vspace{2pt}
+\noindent\textbf{Mitigation Strategies Based on Verification Outcomes.} The explicit quantification of cybersickness risk using Dice's exact inference provides a promising foundation for the design of real-time mitigation strategies. Specifically, when the inferred probability of severe cybersickness surpasses predefined safety thresholds (e.g., \(P(\text{FMS} > 4) \geq 0.8\)), actionable system interventions can be triggered automatically. 
+For instance, if high luminance is a contributing factor, the system can reduce display brightness to a safer level, thereby lowering visual strain and its impact on cybersickness likelihood. Similarly, when scene complexity (reflected in elevated HOG features) significantly increases risk, the system may dynamically simplify the scene by reducing texture detail or object density. These content-level adjustments help maintain a balance between immersion and safety.
+
+Real-time physiological monitoring also plays a crucial role in such adaptive systems. Galvanic Skin Response (GSR), for example, has been identified as a key physiological correlate of stress. Continuous monitoring of GSR can enable immediate system interventions when user stress exceeds safe thresholds. Such interventions might include visual simplification, short rest recommendations, or a temporary pause in intense VR activity.
+
+Furthermore, user-centric responses can be incorporated through feedback loops. For example, if the risk estimate crosses a warning threshold, the system may provide real-time alerts to the user or suggest adaptive pauses to avoid physiological overload. These mechanisms serve as soft interventional layers that enhance system transparency and user trust while preserving engagement.
+
+A notable extension to this verification workflow is modeling the mitigations themselves within the Dice framework. By encoding interventions as modifications to the Bayesian Network or as changes to evidence parameters, one can re-evaluate the cybersickness risk post-mitigation. This allows formal guarantees not only about the current risk level but also about whether proposed interventions are sufficient to bring risk below a target threshold. Formally, this entails verifying a post-mitigation condition of the form:
+\[
+P(\text{FMS} > 4 \mid \text{mitigation}(C))\leq \tau,
+\]
+where $\tau$ is a safety bound, and mitigation(C) reflects updated conditions due to system adaptation. The following pseudocode illustrates how these concepts translate into a runtime context:
+
+% The explicit quantification of cybersickness risk via Dice's exact inference directly informs real-time mitigation strategies. Specifically, upon identifying conditions that elevate cybersickness probability beyond predefined safety thresholds (e.g., \(\mathbb{P}(\text{FMS}>3)\geq0.8\)), actionable system interventions can be triggered automatically:
+
+% \begin{itemize}[leftmargin=*]
+%     \item \textbf{Adaptive Brightness Control:}  
+%     When luminance significantly elevates cybersickness risk, the VR system can dynamically reduce brightness to lower discrete levels, thus decreasing visual strain and reducing the posterior probability of severe cybersickness.
+    
+%     \item \textbf{Scene Complexity Adjustment:}  
+%     In situations where visual complexity (represented by HOG features) contributes substantially to cybersickness risk, the system may simplify or selectively reduce scene complexity by lowering object density or texture detail. Such proactive adjustments maintain cybersickness probabilities within acceptable operational bounds.
+    
+%     \item \textbf{Real-time Physiological Monitoring:}  
+%     Due to the confirmed significance of Galvanic Skin Response (GSR), continuous physiological monitoring can inform immediate system adaptations. Detecting elevated GSR levels beyond discrete safety thresholds (levels 3–5) can prompt visual simplifications or generate alerts recommending brief user rest periods.
+    
+%     \item \textbf{User Feedback and Adaptive Pausing:}  
+%     Probabilistic verification enables automated safety alerts. If cybersickness risk surpasses established thresholds, the system proactively informs users or temporarily pauses intense activities, effectively preventing severe physiological discomfort.
+% \end{itemize}
+
+% \gtan{One thing we can say is that we can incorporate the modeling of these mitigations into our framework and check that after mitigation the cybersickness risk is within an acceptable level.}
+
+
+
+\begin{algorithm}[h]
+\caption{Adaptive Mitigation on Verified Cybersickness Risk}
+\begin{algorithmic}[1]
+\IF{infer($P(\text{FMS} > 4 \mid \text{conditions})$) $> 0.8$}
+    \STATE reduce(luminance)
+    \STATE simplify(scene)
+    \STATE notify("Cybersickness risk elevated. Adjusting for safety.")
+\ENDIF
+\end{algorithmic}
+\end{algorithm}
+
+Although these mitigation strategies are grounded in probabilistic verification, their effectiveness remains to be validated through empirical studies involving diverse user populations. Additionally, the underlying models and thresholds are derived from a specific dataset, potentially introducing dataset-specific biases. Therefore, while the proposed framework provides a rigorous foundation for real-time adaptive safety in VR, future work must emphasize generalization and human-centered validation across broader usage.
+
+% These strategies illustrate how formal probabilistic verification outcomes facilitate adaptive real-time responses in VR system operations. By embedding rigorous probabilistic guarantees within system-level decision-making, immersive experiences remain both safe and comfortable across diverse scenarios. However, these mitigation strategies are still hypotheses. Their effectiveness is yet to be confirmed through comprehensive user studies encompassing diverse participant populations. Furthermore, the proposed inferences and corresponding interventions are derived from a specific dataset, which may introduce inherent biases. As such, caution must be exercised when generalizing these findings beyond the present experimental scope, and future work should emphasize empirical validation across broader usage contexts.
+
+% \vspace{2mm}
+% \noindent\textbf{Illustrative Dice Implementation Example:}
+% \begin{verbatim}
+% // Check if cybersickness risk exceeds threshold
+% if (infer(phi_FMS | conditions) > 0.8) {
+%     luminance = adjust(luminance, decrease);
+%     simplify_scene(detail_level - 1);
+%     trigger_alert("Cybersickness risk elevated; 
+%     reducing brightness and simplifying scene.");
+% }
+% \end{verbatim}
+
+% }
+
+
+% \subsection{Implementation and Example using Dice}\label{sec:Dice}
+% We implement the theoretical framework by representing the BN using a probabilistic programming language which supports conditioning and inference. Contemporary languages can be split into two categories based on the inference technique: languages such as STAN\cite{carpenter2017stan} perform inference through sampling, whereas languages such as Dice\cite{dice} and PSI\cite{psi} use exact techniques to solve for the posterior. We use exact inference for our approach as it is well suited for exact guarantees on the model, and Dice in particular, as it is optimized for discrete probabilistic models, Our verification process includes four key steps:
+
+% \paragraph{Step 1: BN Encoding in Dice.} Each node in the BN is encoded as a probabilistic assignment, reflecting its conditional probability table (CPT). Nodes are processed in topological order to preserve dependencies.
+
+% \paragraph{Step 2: Conditioning in Dice.} The framework takes input conditions, which are represented using Dice's observation statements:
+% \begin{itemize}
+%     \item Hard conditions: encoded directly as \texttt{observe(condition)}. For instance, enforcing luminance above 3:
+%     \begin{verbatim}
+%     observe(luminance > int(3,3));
+%     \end{verbatim}
+%     \item Soft conditions: encoded using probabilistic equivalence statements. For instance, ``hog\_features $\geq$ 4 occurs with 90\% likelihood'':
+%     \begin{verbatim}
+%     observe((hog_features >= int(3,4)) <=> flip(0.9))
+%     \end{verbatim}
+% \end{itemize}
+
+% \paragraph{Step 3: Property Specification.} Each property is explicitly represented by a boolean node added to the program:
+% \begin{verbatim}
+% let property_FMS = (FMS > int(3,3))
+% \end{verbatim}
+
+% \paragraph{Step 4: Exact Inference.} Dice computes the posterior probability exactly according to the equation:
+% \begin{equation}
+%     \mathbb{P}(\text{property\_FMS} = \text{true} \mid \text{conditions}) =
+%     \frac{\sum_{\mathbf{x}} [\text{FMS} > 3](\mathbf{x}) \cdot w(\mathbf{x}) \cdot \mathbb{P}(\mathbf{x})}
+%     {\sum_{\mathbf{x}} w(\mathbf{x}) \cdot \mathbb{P}(\mathbf{x})}.
+% \end{equation}
+
+% As an illustrative example, suppose we aim to verify the probability of high cybersickness (FMS$>$3) given:
+% \begin{itemize}
+%     \item A hard condition: luminance must be greater than 3.
+%     \item A soft condition: hog\_features is at least 4 with probability 0.9.
+% \end{itemize}
+% Formally, we compute:
+% \begin{equation}
+%     \mathbb{P}(\text{FMS}>3 \mid \text{luminance}>3, \text{hog\_features}\ge 4\sim\text{Bernoulli}(0.9)).
+% \end{equation}
+
+% The resulting posterior probability explicitly quantifies the model's behavior under these realistic VR constraints, enabling rigorous verification of BN performance.
+
+\section{Results analysis}
+In this section, we present the findings from our Bayesian Network–based cybersickness modeling and verification. Section~\ref{subsec:BNpredict} evaluates predictive performance using accuracy metrics, and Section~\ref{subsec:verification_result} details how probabilistic verification was conducted to ensure safety constraints under varying VR conditions.
+% \begin{itemize}
+%     \item Include one table for accuracy for K folds, and parameters statistic, analysis.
+%     \item Verification results, with analysis and reasoning
+% \end{itemize}
+
+\subsection{Bayesian Network Prediction Analysis}
+\label{subsec:BNpredict}
+To enhance the prediction of high cybersickness levels, we applied a series of data preprocessing steps as described in Section~\ref{sec:data_preprocessing}. The Bayesian Network (BN) was trained on a carefully curated subset of features, selected through a combination of statistical correlation analysis and expert domain knowledge. From an initial pool of 20 candidate features (10 system-level and 10 human-level), the final model retained four critical system-level features (Spectral Entropy, HOG Features, Temporal Smoothness, and Luminance) and seven human-level physiological signals, including galvanic skin response, pupil dilation, heart rate variability, and eye tracking metrics. Figure~\ref{fig:structure_learned} illustrates the learned BN structure, showing the causal and probabilistic dependencies among these variables.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/structure_learned.png}\vspace{-1ex}
+\caption{\scriptsize Structure of the learned BN showing system-level features (orange), physiological human-level features (blue), and the cybersickness severity (FMS, green) node. Directed edges represent learned dependencies that capture causal influences among these variables.}
+%    \caption{Structure of the Bayesian Network, highlighting the relationships between system features (orange), human features (blue), and the FMS (green) output node.}
+    \label{fig:structure_learned}
+\end{figure}
+
+Model performance was evaluated using participant-level five-fold cross-validation, ensuring that data from each participant appeared in only one fold to avoid data leakage. To account for the inherent subjectivity and variability in cybersickness ratings, we adopted two performance metrics:
+\begin{enumerate}
+    \item \textbf{Exact Label Accuracy}, which counts only perfectly matched predictions as correct.
+    \item \textbf{Extended Label Accuracy ($\pm$1)}, which treats predictions within one level of the true FMS score as correct, reflecting perceptual ambiguity in cybersickness severity.
+\end{enumerate}
+The average Exact Label Accuracy across folds was 62.12\%, reflecting the difficulty of classifying subjective symptom severity at fine granularity. However, the Extended Label Accuracy ($\pm$1) increased to 83.55\%, showing that most errors were minor deviations rather than severe misclassifications. This substantial improvement demonstrates the network's capability to capture meaningful probabilistic distributions over FMS levels.
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{figures/confusion_matrix_fold1.png}
+% \caption{Confusion matrix for Fold 1 (as an example) evaluated under Exact Label Accuracy, where predictions must match the true cybersickness (FMS) levels exactly to be counted correct. Diagonal entries indicate correct predictions; off-diagonal entries show misclassifications.}
+% %    \caption{Confusion matrix for Fold 1 using the standard accuracy metric.}
+%     \label{fig:real_cm}
+% \end{figure}
+
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{figures/confusion_matrix_fold1_extended.png}
+%  \caption{Confusion matrix for Fold 1 (as an example) using Extended Label Accuracy, where predictions within $\pm$1 level of the true cybersickness (FMS) labels are considered correct. }
+% %   \caption{Confusion matrix for Fold 1 using Extended Label Accuracy (±1).}
+%     \label{fig:extended_cm}
+% \end{figure}
+
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{0.23\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/confusion_matrix_fold1.png}
+        % \caption{
+        % % \textcolor{blue}{
+        % Exact Label Accuracy (Fold 1)}
+        % % }
+        \label{fig:real_cm}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.23\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/confusion_matrix_fold1_extended.png}
+        % \caption{
+        % % \textcolor{blue}{
+        % Extended Label Accuracy (Fold 1)}
+        % }
+        \label{fig:extended_cm}
+    \end{minipage}
+    \caption{
+    % \textcolor{blue}{
+    Comparison of confusion matrices for Fold 1 under different accuracy metrics, left figure shows exact Label Accuracy, right figure shows extended label accuracy.}
+    % }
+    \label{fig:cm_comparison}
+\end{figure}
+
+As shown in 
+% \textcolor{blue}{
+Figure \ref{fig:cm_comparison}
+% }
+,
+% Figures~\ref{fig:real_cm} and~\ref{fig:extended_cm},
+confusion matrices from Fold 1 (as an example) illustrate that errors typically occur between adjacent FMS levels. Notably, FMS levels 3 and 4 exhibit the most frequent confusion, which aligns with the variability and overlap expected in moderate cybersickness cases.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/accuracy_comparison.png}
+\caption{Average accuracy per cybersickness (FMS) level across five cross-validation folds using the Exact Label Accuracy metric (regular) compare with extended label accuracy method. 
+% The model achieves stable performance across severity levels, with slightly better accuracy for higher severity classifications (levels 6 and 7).
+}
+%    \caption{Average model accuracy per FMS level across all folds using the standard accuracy metric.}
+    \label{fig:real_bar}
+\end{figure}
+
+Figures~\ref{fig:real_bar} 
+% and~\ref{fig:extended_bar}
+show the average per-class accuracy across all folds under both metrics. The model maintains balanced performance across all FMS levels without strong bias toward lower-severity classes. Importantly, accuracy for high-severity levels (FMS 6 and 7) exceeds 70\% under Exact Accuracy and surpasses 80\% with Extended Accuracy—highlighting the model's reliability in detecting the most safety-critical conditions. %Preliminary comparisons with simpler baselines such as logistic regression and decision trees revealed approximately 10–15\% lower Extended Accuracy, supporting the advantage of our Bayesian Network’s causal structure and inference capability.
+These results confirm that the Bayesian Network effectively supports both accurate prediction and robust probabilistic reasoning. By modeling full posterior distributions over cybersickness severity, the model enables formal verification under uncertainty, advancing the design of user-safe, verification-driven VR systems.
+
+
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.6\linewidth]{figures/extended_bar.png}
+% \caption{Average accuracy per cybersickness (FMS) level across five cross-validation folds under the Extended Label Accuracy metric. }
+% %    \caption{Average model accuracy per FMS level across all folds using the extended label accuracy metric.}
+%     \label{fig:extended_bar}
+% \end{figure}
+
+
+
+% \subsection{BN Model prediction analysis}
+% The Bayesian Network model was trained on a refined set of features derived through systematic feature selection. From an initial pool of 20 features consisting of 10 system-level and 10 human-level parameters, the model retained 55\% of the most impactful features that contributed significantly to the prediction of Fast Motion Sickness (FMS). The results, as illustrated in Figure \ref{fig: structure_learned}, show that four system-level features were retained, including Spectral Entropy, HOG Features, Temporal Smoothness, and Luminance, alongside seven human-level features. These selected features played a crucial role in capturing the physiological and environmental factors influencing cybersickness in virtual reality settings.
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.8\linewidth]{figures/structure_learned.png}
+%     \caption{Structure of the Bayesian Network, highlighting the relationships between system features (orange), human features (blue), and the FMS (green) output node.
+% }
+%     \label{fig: structure_learned}
+% \end{figure}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.8\linewidth]{figures/real_cm.png}
+%     \caption{Confusion matrix for Fold 1 using the standard accuracy metric.}
+%     \label{fig:real_cm}
+% \end{figure}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.8\linewidth]{figures/extended_cm.png}
+%     \caption{Confusion matrix for Fold 1 using Extended Label Accuracy (±1).}
+%     \label{fig:extended_cm}
+% \end{figure}
+
+% The model was evaluated using five-fold cross-validation, yielding a standard test accuracy of 62.12\%. This result indicates strong classification performance but also highlights the inherent complexity of cybersickness prediction, where small feature variations can cause neighboring level misclassifications. When evaluated using the Extended Label Accuracy (±1), where predictions within one level of the true FMS score are accepted as correct, the accuracy significantly improved to 83.55\%. This substantial increase in performance confirms the model’s ability to generalize well and provide meaningful predictions, even in cases where exact classification is inherently ambiguous.
+
+
+
+% Figures \ref{fig:real_cm} and \ref{fig:extended_cm} illustrate the confusion matrices for Fold 1, presenting classification performance under both the standard accuracy metric and the Extended Label Accuracy (±1) criterion. Since the results across all folds exhibit similar trends, only one confusion matrix is presented for brevity. 
+
+
+
+
+
+% The results demonstrate that while the standard accuracy metric correctly classifies most instances, misclassifications primarily occur between adjacent FMS levels. This is expected given the subjective nature of cybersickness evaluations, where mild variations in symptoms can lead to slight shifts in severity classification. The Extended Label Accuracy (±1) metric accounts for this expected variability and, as a result, significantly improves accuracy, reinforcing the Bayesian Network’s ability to produce reliable probabilistic estimates of FMS levels.
+
+% Figures \ref{fig:real_bar} and \ref{fig:extended_bar} present the average accuracy per FMS level across all folds under the standard accuracy metric and Extended Label Accuracy (±1), respectively.
+
+% The results indicate that the model maintains a balanced predictive capability across all FMS levels, rather than being biased toward lower-severity cases, which are more frequent in the dataset. Notably, accuracy exceeds 70\% for FMS levels 6 and 7, confirming the model’s effectiveness in predicting high-severity cybersickness, which is critical for applications such as military training and high-intensity virtual reality simulations.
+
+% When evaluated using Extended Label Accuracy (±1), the model demonstrates an even stronger performance, achieving over 80\% accuracy across almost all FMS levels. This highlights the effectiveness of data balancing techniques and feature selection enhancements, leading to a model that is both robust and reliable in cybersickness prediction.
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.8\linewidth]{figures/real_bar.png}
+%     \caption{Average model accuracy per FMS level across all folds using the standard accuracy metric.}
+%     \label{fig:real_bar}
+% \end{figure}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=0.8\linewidth]{figures/extended_bar.png}
+%     \caption{Average model accuracy per FMS level across all folds using the extended label accuracy metric.}
+%     \label{fig:extended_bar}
+% \end{figure}
+% \vspace{-0.3cm}
+\subsection{Verification Results Analysis}
+\label{subsec:verification_result}
+Our probabilistic verification framework enables formally grounded queries over the Bayesian Network to estimate cybersickness risk under defined evidence conditions. Specifically, this analysis addresses three core verification questions:
+\begin{itemize}[leftmargin=*, itemsep=0pt, topsep=2pt] 
+    \item \textbf{Q1:} Which parameters have the most significant impact on cybersickness severity?
+    \item \textbf{Q2:} How is user cybersickness affected under adverse scenarios where certain parameters are elevated?
+    \item \textbf{Q3:} What are the "safe" operational ranges for critical parameters that reliably minimize the risk of cybersickness?
+\end{itemize}
+
+\subsubsection{Impact of Individual Parameters}
+To address Q1, we systematically evaluated individual system parameters and selected human-level signals. This approach enables the simulation of adversarial manipulations (e.g., intentionally increased luminance), supports early risk detection, and guides targeted mitigation strategies. Additionally, examining parameter extremes characterizes worst-case cybersickness scenarios.
+Each retained system parameter (Spectral Entropy, HOG Features, Temporal Smoothness, and Luminance) and three directly influential human signals were evaluated independently: Galvanic Skin Response, gaze error angle and Reaction Time. These variables were retained due to their empirical relevance and potential causal roles established through Bayesian Network structure learning. Conditions simulating elevated parameter values were applied using Bayesian conditioning, and posterior probabilities \(P(\text{FMS} > 4 \mid \text{condition})\) were computed explicitly to estimate cybersickness risk.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/system_params_impact_seaborn.png}
+    \caption{Impact of individual system parameters. While absolute probability shifts are modest, luminance and HOG features consistently exhibit the highest relative influence on FMS elevation. }
+    % {\color{red}Remove the spectral entropy???}.}
+    \label{fig:system-fms}
+\end{figure}
+
+Figure~\ref{fig:system-fms} illustrates how changes in each system parameter affect cybersickness probability. The x-axis denotes parameter lower bounds, while the y-axis shows the posterior probability of elevated FMS levels. Although absolute shifts in probability are modest (typically under 1\%), even small probability shifts can be practically meaningful in safety-critical VR scenarios, where subtle parameter adjustments significantly affect user comfort over extended durations. Luminance and particularly, HOG features consistently exhibit the greatest relative influence, highlighting them as critical candidates for real-time monitoring or mitigation. In contrast, temporal smoothness and spectral entropy show negligible correlation, suggesting limited operational utility as standalone indicators of cybersickness.
+
+% Figure~\ref{fig:human-fms} examines the influence of human physiological signals. Elevated GSR shows a strong correlation with cybersickness: GSR values above 3 correspond to an 80\% likelihood of experiencing cybersickness (FMS $>$ 4) compared to a baseline of approximately 45\%. This substantial increase reinforces GSR as a reliable real-time marker for detecting cybersickness risk. Reaction time, initially included based on domain assumptions, showed minimal direct influence, suggesting an indirect or context-dependent relationship to cybersickness.
+
+Figure~\ref{fig:human-fms} examines the influence of human physiological signals. Elevated GSR shows a strong correlation with cybersickness: GSR values above 3 correspond to an 80\% likelihood of experiencing cybersickness (FMS $>$ 4) compared to a baseline of approximately 45\%. Combined gaze error angle also demonstrates significant impact, increasing cybersickness probability from 45\% to 60\%. These factors directly connect with the cybersickness node (FMS) in our Bayesian Network. In contrast, reaction time, despite its direct connection in the network structure, shows negligible effect on FMS probability. Similarly, other physiological features demonstrate minimal influence on cybersickness probability.
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/human_params_impact_seaborn_all.png}
+    \caption{Impact of human physiological signals on cybersickness. Elevated GSR strongly correlates with increased cybersickness risk, while reaction time shows minimal consistent impact.}
+    \label{fig:human-fms}
+\end{figure}
+
+This analysis isolates the effects of individual parameters, providing insight into their standalone influence on cybersickness. However, features that appear less impactful in isolation may still play a significant role when combined with others. As explored in subsequent experiments, combinatorial effects can amplify cybersickness risk, though exhaustively presenting all possible combinations is infeasible. Instead, we focus on integrating features that show strong individual influence, as these are more likely to yield meaningful compounded effects. These findings underscore the importance of parameter-specific prioritization in operational VR systems. Notably, signals such as luminance and GSR emerge as actionable indicators for real-time monitoring and proactive mitigation. Moreover, identifying such critical parameters and their effective thresholds directly contributes to probabilistic safety guarantees, thereby enhancing formal verification processes.
+
+% These findings emphasize parameter-specific prioritization in operational VR environments. Features such as luminance and GSR emerge as actionable signals for proactive mitigation and continuous monitoring. Such insights directly enhance the formal verification process by identifying critical parameters and threshold levels for probabilistic safety guarantees. %Consequently, these results provide a foundation for adaptive VR systems that dynamically modulate key parameters to optimize user comfort and safety in real time.
+
+
+% \subsection{Verification results analysis}
+
+% We use the verification framework to answer the following questions:
+% \begin{itemize}
+%     \item Which parameters have the most impact on cybersickness?
+%     \item How is the user cybersickness impacted in adverse scenarios, where some parameters are elevated?
+%     \item What are "safe" operation values for the parameters, i.e values that ensure that the user does not experience cybersickness with high probability? 
+% \end{itemize}
+
+% \subsubsection{Impact of system and human parameters}
+% Here we look at impact of each parameter on user cybersickness. This serves 2 purposes. By identifying which system parameters can cause cybersickness, we can model attacks on the system that hijack those parameters, which in turn can guide mitigation strategies to recover from attacks. In addition, it helps us analyze the worst case cybersickness, by looking at scenarios where all the relevant parameters are modified to simulate maximum cybersickness levels. 
+
+% We perform this analysis on each system parameter, and two human parameters: GSR and reaction time. The two human parameters are chosen because they directly influence FMS in the Bayesian Network (Figure \ref{fig: structure_learned}). We use conditions to simulate a simple scenario where the parameter is elevated. An example condition would be $luminance \geq 2$, which restricts the model to the scenario where luminance values are at least 2. For each scenario we compute the probability that the user experiences cybersickness. As the mean value of the user reported FMS score is 3, we consider FMS values above 3 to denote presence of cybersickness. This is represented by the property $FMS > 3$. 
+
+% According to the Bayesian network structure, system parameters affect FMS scores indirectly rather than directly. Nevertheless, since each system parameter connects to FMS through directed paths, any modifications to these parameters create cascading effects that ultimately influence FMS outcomes. Figure \ref{fig:system-fms} illustrates the experimental results quantifying each system parameter's influence on cybersickness probability, with other features marginalized as described in section \ref{sec:prob_veri}. The x-axis represents the lower bounds of system parameters (ranging from 1 to 4), while the y-axis indicates the probability of experiencing cybersickness. The analysis reveals that each individual parameter has modest impacts on cybersickness probability, with maximum variations of approximately 1\% as the system parameter value increases. Furthermore, temporal smoothness and spectral entropy demonstrate no significant correlation with elevated FMS levels, suggesting they are not reliable indicators of cybersickness. This systematic analysis enables us to identify HOG features and luminance as the primary system parameters capable of influencing cybersickness levels.
+
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=\linewidth]{figures/system_params_impact_seaborn.png}
+%     % {figures/impact_system_params_all.png}
+%     \caption{Impact of system parameters on cybersickness}
+%     \label{fig:system-fms}
+% \end{figure}
+
+
+% In addition to the effect of the system parameters on cybersickness, we also analyze how human parameters could influence FMS. Figure \ref{fig:human-fms} looks at how elevated human parameters correlate with onset of cybersickness. Increasing GSR is seen to have a strong correlation with increased FMS, in particular, values of GSR above 2 indicate almost $80\%$ likelihood of cybersickness, as compared to the average of $45\%$. This result could guide cybersickness detection strategies by tracking GSR levels in real time. Reaction time is seen to not have a direct correlation with increased FMS. This can be explained by the fact that complex MR scenarios can led to slower user reactions, without necessarily inducing cybersickness.
+
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=\linewidth]{figures/human_params_impact_seaborn.png}
+%     % {figures/impact_human_params.png}
+%     \caption{Impact of human features on cybersickness}
+%     \label{fig:human-fms}
+%\end{figure}
+
+\subsubsection{Probability of Cybersickness Under Adverse Scenario}
+
+To address Q2, this analysis combines multiple parameters identified as influential (luminance, HOG features, and GSR). Since these parameters individually showed significant correlations with increased FMS, their combined elevation represents realistic conditions where heightened visual complexity and physiological stress might occur (e.g., demanding task or environmental changes). An exhaustive search was conducted across discretized parameter bounds (levels 1–5), yielding 125 possible combinations. The analysis revealed that cybersickness severity peaks when all three parameters are simultaneously constrained to discrete levels of at least 4. Formally, it corresponds to the posterior probabilistic query:
+\[
+P(\text{FMS} > 4 \mid \text{luminance} \geq 4, \text{HOG} \geq 4, \text{GSR} \geq 4),
+\]
+which quantifies cybersickness risk under these conditions.
+
+Figure~\ref{fig:fms-posterior-attack} illustrates the resulting shift in FMS distribution. The mean FMS level increases notably from 4.21 (baseline) to 6.13 (adverse scenario), and the probability of severe cybersickness ($\text{FMS} > 4$) escalates from 45.34\% to 80.65\%. Practically, this translates to roughly four out of five users experiencing significant discomfort under these elevated conditions. Such results underscore the need for adaptive mitigation mechanisms—such as dynamic luminance adjustment, scene simplification, or proactive user alerts—to maintain user comfort and operational safety in mixed-reality systems.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/fms_comparison.png}
+    \caption{Shift in FMS distribution comparing baseline conditions (light blue) and elevated conditions (dark blue). Under elevated luminance, HOG features, and GSR (levels $\geq 4$), cybersickness risk increases significantly, particularly at higher FMS scores.}
+    \label{fig:fms-posterior-attack}
+\end{figure}
+
+% \begin{figure}[htbp]
+% \centering
+% \subfloat[Shift in FMS distribution comparing baseline conditions (light blue) and elevated conditions (dark blue). Under elevated luminance, HOG features, and GSR (levels $\geq 4$), cybersickness risk increases significantly, particularly at higher FMS scores.]{\includegraphics[width=0.45\columnwidth]{figures/fms_comparison.png}}\label{fig:fms-posterior-attack}
+% \hfill
+% \subfloat[Comparison of Galvanic Skin Response (GSR) distributions under baseline (light blue) and safety-constrained conditions (dark blue). Enforcing the probabilistic safety constraint ($\text{FMS} \leq 4$ with 95\% probability) significantly reduces the likelihood of elevated GSR levels, effectively guiding real-time system management.]{\includegraphics[width=0.45\columnwidth]{figures/gsr_comparison.png}\label{fig:gsr-posterior}}
+% % \caption{Combined analysis of FMS distribution and GSR under safety constraints.}
+% % \label{fig:sidebyside}
+% \end{figure}
+
+% \begin{figure}[htbp]
+%     \centering
+%     % Subfigure 1
+%     \begin{subfigure}[t]{0.45\columnwidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{figures/fms_comparison.png}
+%         \caption{Shift in FMS distribution comparing baseline conditions (light blue) and elevated conditions (dark blue). Under elevated luminance, HOG features, and GSR (levels $\geq 4$), cybersickness risk increases significantly, particularly at higher FMS scores.}
+%         \label{fig:fms-posterior-attack}
+%     \end{subfigure}
+%     \hfill % Pushes the subfigures apart
+%     % Subfigure 2
+%     \begin{subfigure}[t]{0.45\columnwidth}
+%         \centering
+%         \includegraphics[width=\linewidth]{figures/gsr_comparison.png}
+%         \caption{Comparison of Galvanic Skin Response (GSR) distributions under baseline (light blue) and safety-constrained conditions (dark blue). Enforcing the probabilistic safety constraint ($\text{FMS} \leq 4$ with 95\% probability) significantly reduces the likelihood of elevated GSR levels, effectively guiding real-time system management.}
+%         \label{fig:gsr-posterior}
+%     \end{subfigure}
+    
+%     % \caption{Combined analysis of FMS distribution and GSR under safety constraints.} % <-- Uncomment this for a main caption
+%     % \label{fig:sidebyside} % <-- Uncomment this for a main label
+% \end{figure}
+
+\vspace{-0.1cm}
+\subsubsection{Establishing Operational Safety Guarantees}
+
+To address Q3, this analysis defines and evaluates formal probabilistic safety constraints, such as the following safety constraint:
+% \[
+$P(\text{FMS} \leq 4) = 0.95.$
+% \]
+This constraint represents a soft probabilistic condition, explicitly requiring that severe cybersickness occurs with no more than a 5\% probability under given conditions. Due to its strong correlation and direct impact on FMS, GSR was selected for in-depth posterior analysis under this constraint.
+
+Figure~\ref{fig:gsr-posterior} shows the posterior distribution of GSR under imposed safety constraints; a clear shift toward lower GSR. The likelihood of high-risk GSR (levels 4–5) becomes negligible under this condition. Practically, maintaining GSR within levels 1–3 (representing physiologically mild to moderate stress) can serve as a clear operational guideline for real-time monitoring and intervention. This recommendation also aligns with the insights presented in Figure~\ref{fig:human-fms}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/gsr_comparison.png}
+    \caption{Comparison of Galvanic Skin Response (GSR) distributions under baseline (light blue) and safety-constrained conditions (dark blue). Enforcing the probabilistic safety constraint ($\text{FMS} \leq 4$ with 95\% probability) significantly reduces the likelihood of elevated GSR levels, effectively guiding real-time system management.}
+    \label{fig:gsr-posterior}
+\end{figure}
+
+These results provide formally grounded safety verification, directly informing mixed-reality system design and adaptive management. By continuously monitoring and maintaining critical physiological signals such as GSR within empirically derived safe bounds, systems can proactively adjust environmental and operational parameters—ensuring immersive experiences remain within safe, comfortable physiological limits.
+
+
+% \subsubsection{Probability of user cybersickness}
+% % To look at probability of cybersickness in day-to-day execution of the MR system, we simply generate the posterior distribution of FMS (\ref{fig-predict}) and of the property $FMS > 3$. 
+% % Next, we look at cybersickness in adverse scenarios, where the values of the parameters are elevated beyond the mean. Based on our analysis in the previous section, the parameters that highly influence FMS are GSR, HOG features and luminance. We performed an enumerative search on combinations of these parameters to conclude that FMS is most elevated when all 3 parameters have a lower bound of 3. We look at cybersickness under this worst case scenario.
+
+% Previously, we analyzed the lower bounds of cybersickness experienced by users under varying conditions of system and human features. As shown in Figure \ref{fig-predict}, we also aim to examine how the FMS distribution changes under attack and non-attack scenarios. Based on our prior analysis, we focus exclusively on the combined conditions of luminance, HOG features, and GSR. To simulate an attack scenario, we set a similar condition as in the previous section, setting lower bounds on all 3 parameters at the same time in this case. We performed an enumerative search on the different combinations of lower bounds and concluded that the FMS is most elevated when all 3 parameters are restricted to values at least 3.
+
+
+
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=\linewidth]{figures/fms_comparison.png}      
+%     \caption{Distribution of $FMS > 3$ before and after elevating system and human features}
+%     \label{fig:fms-posterior-attack}
+% \end{figure}
+
+% Figure \ref{fig:fms-posterior-attack} shows how the FMS distribution is affected in the attack scenario. The mean value of FMS is observed to increase from $3.21$ to $5.13$, and values below 3 -- which correspond to negligible cybersickness -- have a very low chance of occurring. In addition, the probability of the user experiencing cybersickness (defined as $P(FMS > 3))$ goes up from $45.30\%$ to $80.70\%$, which shows that 4 in 5 users would experience cybersickness in this adverse scenario. This analysis motivates the need to perform mitigation strategies and/or to alert users in such scenarios.
+
+% \subsubsection{Safety guarantees on the MR system}
+% % After the previous attack analysis, it's also important to provide safety guarantees analysis on the MR system, we use the condition that $FMS <= 3$ holds with probability $95\%$. This represents a $95\%$ chance of FMS being in safe levels. We use the soft condition $(FMS<=3,\,Bernoulli(0.95))$ to simulate this. We then analyze the posterior of each parameter.  
+
+% After the previous attack analysis, it is important to provide safety guarantees for the MR system. We use the condition that $FMS \leq 3$ holds with probability 95\%, representing a high likelihood of maintaining FMS within safe levels. To simulate this scenario, we implement the soft condition ($FMS \leq 3, Bernoulli(0.95))$ and analyze the posterior distribution of GSR parameter.
+
+% % Figures \ref{fig:hog-posterior} and \ref{fig:luminance-posterior} compare the distributions of HOG features and luminance before and after imposing the restriction on FMS being at safe levels. We look at these two features because they are shown to be correlated with cybersickness. Since the two features have only a minor impact, the distributions shift only slightly towards lower values.
+
+% Figure \ref{fig:gsr-posterior} shows the shift in the distribution for GSR after imposing the restriction. In this case, there is a significant shift towards lower levels, as GSR is directly related to FMS. The mean value of GSR goes down significantly from $2.40$ to $1.31$. Since GSR values of 4 and 5 have very low probability in the latter case, we can conclude that GSR needs to be between 1 and 3 for safe user experience.
+
+
+% \begin{figure}
+%     \centering
+%         \includegraphics[width=\linewidth]{figures/gsr_comparison.png}        
+%     \caption{Comparison of GSR distribution before (left) and after observation on safe levels of FMS (right)}
+%     \label{fig:gsr-posterior}
+% \end{figure}
+
+
+
+% ...
+\vspace{-0.1cm}
+\section{Conclusion 
+% \textcolor{blue}{
+and Future work}
+% }
+
+
+This paper introduced a novel probabilistic verification framework using Bayesian Networks (BN) to assess and mitigate cybersickness risks in virtual and mixed reality (VR/MR) environments. By explicitly modeling interactions between system parameters, physiological signals, and cybersickness severity, this approach provides interpretable and formally verifiable insights into cybersickness dynamics. Unlike traditional deep learning approaches, the BN framework offers structured causal transparency, enabling explicit reasoning about probabilistic safety guarantees.
+Empirical analyses demonstrated the framework's effectiveness in both accurately predicting cybersickness severity and identifying high-impact mitigation strategies. Notably, under adverse scenarios with elevated luminance, HOG features, and galvanic skin response (GSR), the probability of severe cybersickness (FMS $>$ 4) increased substantially from 45.3\% to 80.7\%. Additionally, GSR was confirmed as a critical physiological indicator, with operational safety requiring its levels to remain within discrete ranges (levels 1–3) to reliably maintain low cybersickness risk. These results underscore the practical utility of probabilistic verification—particularly given the subjective and inherently variable nature of cybersickness—in ensuring robust safety thresholds for immersive environments.
+% Future work will extend the framework toward real-time adaptive mitigation, enhance scalability for larger and more diverse datasets, and explore applicability to other human-system interactions. 
+By effectively bridging predictive modeling with formal verification, this paper provides a robust operational foundation for designing safer, adaptive, and user-centric VR/MR experiences.
+
+% \textcolor{blue}{
+While our framework demonstrates effective cybersickness verification, several limitations warrant discussion. First, generalization across diverse VR/MR platforms remains challenging—different headsets and environments (e.g., forest scenes with unique luminance patterns) may require model fine-tuning or structural updates to capture platform-specific features. Second, our current approach processes visual information through extracted features (luminance, HOG, spectral entropy) and physiological signals; incorporating direct sensory modalities such as visual, audio could impact cybersickness but would necessitate expanded signal processing pipelines, model restructuring, and updated verification procedures. Third, our offline verification analyzes pre-specified scenarios, which, while comprehensive, cannot exhaustively cover all possible runtime conditions; developing online verification capabilities that adapt to real-time user responses represents an important future direction. Additionally, alternative verification frameworks such as sampling-based methods could complement our probabilistic approach by enabling verification without explicit probabilistic models, using statistical sampling and confidence intervals to estimate safety properties from black-box simulators or complex user models that are computationally intractable for exact inference. Finally, advanced data augmentation techniques like Safe-Level-SMOTE \cite{bunkhumpornpat2009safe} could better address class imbalance while preserving the natural distribution of cybersickness severity levels. Addressing these limitations will enhance the framework's robustness and practical applicability across diverse VR/MR deployments.
+% }
+
+% \section{Conclusion}
+
+% This work introduced a probabilistic verification framework for assessing and mitigating cybersickness in VR/MR environments using Bayesian Networks. By modeling the interactions between system parameters, human physiological responses, and cybersickness severity, the proposed approach provides interpretable and formally verifiable insights into the factors contributing to cybersickness. Unlike traditional deep learning models, the Bayesian Network framework offers a structured and transparent representation of causal dependencies, enabling the derivation of probabilistic guarantees on user safety. The results demonstrated the effectiveness of the framework in predicting cybersickness severity and identifying mitigation strategies under adverse conditions. Key findings include the significant impact of system parameters such as luminance and motion smoothness, as well as physiological responses like galvanic skin response, on cybersickness risk. The probabilistic verification approach ensures that safety thresholds, such as maintaining FMS levels below critical values, are met, thereby enhancing the reliability of VR/MR systems in safety-critical applications. Future work will focus on extending the framework to incorporate real-time adaptive mitigation strategies, improving scalability for larger datasets, and exploring its applicability to other domains where human-system interactions are critical. By bridging the gap between prediction and formal verification, this study provides a robust foundation for designing safer and more user-friendly immersive environments.
+
+
+
+% \section*{Supplemental Materials}
+% \label{sec:supplemental_materials}
+
+
+
+
+% \section*{Figure Credits}
+% \label{sec:figure_credits}
+
+
+
+%% if specified like this the section will be committed in review mode
+\acknowledgments{
+This work was supported in part by the Defense Advanced Research Projects Agency (DARPA) under grant HR00112420366, and the National Science Foundation (NSF) under award \#2311969.}
+
+%\bibliographystyle{abbrv}
+\bibliographystyle{abbrv-doi}
+%\bibliographystyle{abbrv-doi-narrow}
+%\bibliographystyle{abbrv-doi-hyperref}
+%\bibliographystyle{abbrv-doi-hyperref-narrow}
+
+\bibliography{template}
+\end{document}

@@ -1,0 +1,836 @@
+% \documentclass{vgtc}                          % final (conference style)
+\documentclass[review]{vgtc}                 % review
+%\documentclass[widereview]{vgtc}             % wide-spaced review
+%\documentclass[preprint]{vgtc}               % preprint
+%\documentclass[electronic]{vgtc}             % electronic version
+
+%% Uncomment one of the lines above depending on where your paper is
+%% in the conference process. ``review'' and ``widereview'' are for review
+%% submission, ``preprint'' is for pre-publication, and the final version
+%% doesn't use a specific qualifier. Further, ``electronic'' includes
+%% hyperreferences for more convenient online viewing.
+
+%% Please use one of the ``review'' options in combination with the
+%% assigned online id (see below) ONLY if your paper uses a double blind
+%% review process. Some conferences, like IEEE Vis and InfoVis, have NOT
+%% in the past.
+
+%% Figures should be in CMYK or Grey scale format, otherwise, colour 
+%% shifting may occur during the printing process.
+
+%% These few lines make a distinction between latex and pdflatex calls and they
+%% bring in essential packages for graphics and font handling.
+%% Note that due to the \DeclareGraphicsExtensions{} call it is no longer necessary
+%% to provide the the path and extension of a graphics file:
+%% \includegraphics{diamondrule} is completely sufficient.
+%%
+\ifpdf%                                % if we use pdflatex
+  \pdfoutput=1\relax                   % create PDFs from pdfLaTeX
+  \pdfcompresslevel=9                  % PDF Compression
+  \pdfoptionpdfminorversion=7          % create PDF 1.7
+  \ExecuteOptions{pdftex}
+  \usepackage{graphicx}                % allow us to embed graphics files
+  \DeclareGraphicsExtensions{.pdf,.png,.jpg,.jpeg} % for pdflatex we expect .pdf, .png, or .jpg files
+\else%                                 % else we use pure latex
+  \ExecuteOptions{dvips}
+  \usepackage{graphicx}                % allow us to embed graphics files
+  \DeclareGraphicsExtensions{.eps}     % for pure latex we expect eps files
+\fi%
+
+%% it is recomended to use ``\autoref{sec:bla}'' instead of ``Fig.~\ref{sec:bla}''
+\graphicspath{{figures/}{pictures/}{images/}} % where to search for the images
+
+\usepackage{microtype}                 % use micro-typography (slightly more compact, better to read)
+\PassOptionsToPackage{warn}{textcomp}  % to address font issues with \textrightarrow
+\usepackage{textcomp}                  % use better special symbols
+\usepackage{mathptmx}                  % use matching math font
+\usepackage{times}                     % we use Times as the main font
+\renewcommand*\ttdefault{txtt}         % a nicer typewriter font
+\usepackage{cite}                      % needed to automatically sort the references
+\usepackage{tabu}                      % only used for the table example
+\usepackage{booktabs}                  % only used for the table example
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{array}
+%% We encourage the use of mathptmx for consistent usage of times font
+%% throughout the proceedings. However, if you encounter conflicts
+%% with other math-related packages, you may want to disable it.
+\newif\ifprintcomments
+\newcommand{\kaiming}[1]{
+    \ifprintcomments
+        \textcolor{olive}{{\em\bf Kaiming:} #1}
+    \fi}
+\newcommand{\gtan}[1]{
+    \ifprintcomments
+        \textcolor{blue}{[\textbf{GT:} #1]}
+    \fi}
+\newcommand{\peng}[1]{
+    \ifprintcomments
+        \textcolor{red}{[\textbf{Peng:} #1]}
+    \fi}
+\printcommentstrue
+
+
+
+\microtypecontext{expansion=sloppy}
+
+%% If you are submitting a paper to a conference for review with a double
+%% blind reviewing process, please replace the value ``0'' below with your
+%% OnlineID. Otherwise, you may safely leave it at ``0''.
+\onlineid{1966}
+
+%% declare the category of your paper, only shown in review mode
+\vgtccategory{Research}
+
+%% allow for this line if you want the electronic option to work properly
+\vgtcinsertpkg
+
+%% In preprint mode you may define your own headline.
+%\preprinttext{To appear in an IEEE VGTC sponsored conference.}
+
+%% Paper title.
+%\title{Time-Series Engagement Prediction and verification in Mixed Reality: A Contrastive Learning Approach}
+\title{Robust Engagement Estimation in Mixed Reality Under Cognitive Attack}
+%% Author and Affiliation (multiple authors with multiple affiliations)
+\author{Peng Wu\thanks{e-mail: wu.p@northeastern.com}\\ %
+        \scriptsize Northeastern University %
+\and Kaiming\thanks{e-mail:ed.grimley@aol.com}\\ %
+     \scriptsize Pen state %
+\and Mingyu Zhu\thanks{e-mail:martha.stewart@marthastewart.com}\\ %
+     \scriptsize Pen state
+ \and Nasim Ahmed\thanks{e-mail:martha.stewart@marthastewart.com}\\ %
+     \scriptsize Kensaw State
+     }
+
+
+\teaser{
+ \includegraphics[width=\linewidth]{figs/Teaser/Teaser.pdf}
+ \caption{Our proposed two-stage framework estimates user engagement in Mixed Reality (MR) environments using multimodal time-series signals. Under cognitive attacks, instantiated here as latency perturbations in an MR task, the contrastive encoder learns invariant embeddings of behavioral trajectories that are mapped to a continuous engagement score via a calibrated regressor. The learned model can then be analyzed with formal verification tools to derive conservative operating envelopes for controllable MR parameters.}
+}
+
+
+
+
+\abstract{
+
+Engagement is a critical operational state in immersive systems, where users must sustain attention to virtual content despite distraction, workload, and degraded system responsiveness. In MR, one important source of disruption is a \emph{cognitive attack}: an adversarial or system-level perturbation to the interaction loop that interferes with attention, situational awareness, or stable task execution. In this paper, we study induced latency as a concrete MR-relevant cognitive attack and present a two-stage model for estimating engagement from multimodal time-series data, including eye tracking, head motion, scene dynamics, and system latency. The first stage uses contrastive learning to encode variable-length behavioral trajectories into compact embeddings that suppress nuisance variation while preserving engagement-relevant structure. A lightweight regression head then maps these embeddings to a continuous engagement score.
+%
+We evaluate the framework in a controlled hostage-rescue MR study with step-wise latency perturbations and minute-level engagement self-reports. Across cross-validation and held-out-user evaluation, the proposed model performs favorably relative to traditional regressors on pooled features, indicating that temporally structured multimodal representations provide a measurable benefit for engagement estimation under attack. We further show how formal verification can be used to derive conservative safe operating intervals for controllable MR parameters, connecting engagement estimation to runtime reasoning in safety-aware MR systems.}
+
+
+
+
+
+
+
+
+%This work aims to predict user engagement in a Mixed Reality (MR) environment using time-series data. Engagement is a key metric for evaluating user effectiveness in immersive applications. Accurately predicting engagement enables adaptive MR systems that can adjust information presentation in real time to maintain user focus. We formulate the task as supervised regression from recent multi-sensor windows to a continuous 1–7 engagement score. The dataset comprises system features, human features (eye and head tracking), and latency attack data. We propose a two-phase modeling approach that combines contrastive representation learning with supervised regression using an LSTM encoder. Beyond predictive performance, we also introduce a verification framework that evaluates whether the learned model satisfies deployment-relevant reliability conditions. This verification step parallels probabilistic verification in XR safety research, ensuring that engagement estimates remain trustworthy under varying window lengths, latency perturbations, and unseen users. Empirically, a rigorous label-level stratified 4-fold cross-validation yields an average Mean Absolute Error (MAE) of 0.94, and a fully held-out test on three unseen users achieves MAE 0.84. Together, our results and verification analyses demonstrate not only predictive accuracy but also formal robustness properties critical for reliable integration into adaptive MR systems.}
+% \abstract{This work aims to predict user engagement in a Mixed Reality (MR) environment using time-series data. Engagement is a key metric for evaluating user effectiveness in immersive applications. Accurately predicting engagement enables adaptive MR systems that can adjust information presentation in real time to maintain user focus. We formulate the task as supervised regression from recent multi-sensor windows to a continuous 1--7 engagement score. The dataset comprises system features, human features (eye and head tracking), and latency attack data. We propose a two-phase modeling approach that combines contrastive representation learning with supervised regression using an LSTM encoder. A rigorous label-level stratified 4-fold cross-validation yields an average Mean Absolute Error (MAE) of 0.94, and a fully held-out test on three unseen users achieves MAE 0.84. This paper details the methodology, training strategy, and evaluation, and outlines a forthcoming comparison against a single-stage (no-contrastive) baseline.} % end of abstract
+
+%% ACM Computing Classification System (CCS). 
+%% See <http://www.acm.org/class/1998/> for details.
+%% The ``\CCScat'' command takes four arguments.
+
+\CCScatlist{ 
+  Mixed Reality, Engagement Estimation, Cognitive Attacks, Contrastive Learning, Safety-Critical Systems
+}
+
+
+\begin{document}
+
+\firstsection{Introduction}
+\maketitle
+Mixed Reality (MR) systems, spanning Virtual Reality (VR), Augmented Reality (AR), and their combinations, are increasingly deployed in critical domains such as pilot training, military operations, robotic surgery, manufacturing, and complex remote collaboration~\cite{falola2024role}. These systems blend real and virtual content into unified user experiences, relying on high-fidelity rendering, accurate tracking, and low-latency interaction to sustain immersion and performance. However, the reliability of MR in high-stakes environments hinges not only on system fidelity, but on the user’s ability to maintain sustained cognitive engagement. Factors such as latency, jitter, resolution degradation, luminance shifts, and tracking artifacts can erode attention, degrade situational awareness, and compromise task success~\cite{li2025benefits, gruen2020measuring}.
+
+Prior work has explored engagement estimation in VR and MR environments, typically as a predictive modeling task using behavioral or physiological signals \cite{garro2025neurophysiological, adhanom2023eye}. 
+% \gtan{We should provide citations for the previous sentence.}
+However, these models generally assume nominal conditions and do not account for the effects of system stressors. In contrast, this paper focuses on engagement under \emph{cognitive attacks}, defined here as adversarial or system-level perturbations to the MR interaction loop that degrade attention, interaction quality, or situational awareness. We study latency perturbation as a concrete instance because it is both operationally relevant in MR and directly tied to rendering and interaction fidelity \cite{chen2025neurosymbolic, cheng2023exploring}. Our objective is to model how engagement responds to these stressors so that MR systems can \emph{anticipate disengagement early enough to act}. This dual function, engagement estimation and runtime assurance, is central to enabling adaptive, safety-aware MR.
+
+We define engagement as a latent cognitive state reflecting sustained attention to task-relevant virtual content. It overlaps with, but is not identical to, related MR constructs: presence describes the feeling of ``being there,'' immersion often refers to the technical and perceptual envelope of the system, and workload characterizes cognitive demand. Engagement is the construct of interest here because our goal is to estimate whether users remain attentive to MR-presented information when the system is perturbed. It is influenced by both \emph{human-level features} (e.g., gaze patterns, head dynamics, prior MR familiarity) and \emph{system-level parameters} (e.g., latency, resolution, luminance entropy), as well as their temporal evolution ~\cite{Wu2025Personalized}. For example, brief latency spikes may not disrupt an experienced user, while sustained latency in a complex scene may cause rapid disengagement. This motivates a time-series modeling approach that jointly considers recent behavior and system dynamics.
+%
+Modeling engagement under cognitive attacks presents a number of interrelated challenges that go beyond standard sequence prediction~\cite{10.1145/3706598.3713392}. First, engagement supervision is both sparse and delayed: labels are typically sparse via self-report, which makes dense annotation infeasible and requires the model to infer latent cognitive states from weakly labeled behavioral sequences~\cite{somarathna2023exploring}. Second, user responses vary widely depending on prior experience, cognitive load, and attentional resilience, making it difficult to learn generalizable patterns across subjects~\cite{10.1145/3419249.3421246}. Third, the input data are inherently multimodal and asynchronous, combining signals such as eye gaze, head motion, system latency, luminance, and scene entropy, each evolving at different temporal resolutions. 
+
+To address these challenges, we propose a two-phase learning framework that separates the task of temporal abstraction from that of engagement estimation. This decoupling improves generalization across users, scenes, and attack conditions while enabling efficient and interpretable inference.
+\begin{itemize}
+    \item \textbf{Phase 1: Contrastive Embedding.} A recurrent encoder maps each variable-length multimodal trajectory to a fixed-dimensional vector. The encoder is trained using a soft InfoNCE objective guided by ordinal engagement similarity \cite{khosla2020supervised}: trajectories with similar self-reported engagement levels are pulled closer in the embedding space, while those with divergent levels are pushed apart. This training encourages the model to learn a cognitively meaningful latent space that captures engagement-relevant structure while suppressing nuisance variation such as user identity or scene layout.    
+    \item \textbf{Phase 2: Regression Head.} Once the encoder is trained, its parameters are frozen, and a lightweight feedforward head is trained to map embeddings to continuous engagement scores in $[1,7]$. Because the embeddings already reflect engagement semantics, the regression head remains simple and sample-efficient. To avoid prediction bias toward frequent mid-level scores, we use (i) stratified sampling to ensure label diversity in each batch, and (ii) a variance-based regularizer that promotes balanced accuracy across all engagement levels, including rare but critical states like full disengagement.
+\end{itemize}
+Together, these two phases produce a model that supports real-time, cognitively grounded estimation of engagement under stress. The architecture is fast to compute, robust to user variability, and suitable for deployment in safety-critical MR systems that require continuous monitoring and early disengagement detection.
+
+% \textcolor{blue}{In addition to prediction, our framework supports \emph{verification} of engagement under disruptive conditions \cite{?}. Specifically, we can analyze whether certain ranges of controllable system parameters (e.g., latency or luminance) are sufficient to guarantee that engagement remains above a desired threshold. Such verification yields interpretable safety intervals that link system design choices to cognitive outcomes, allowing developers to enforce operating conditions that preserve attention and situational awareness. Although these intervals can be conservative, they provide a principled basis for runtime assurance and highlight the potential of combining predictive models with formal safety guarantees in XR environments.}
+
+% Finally, our architecture is utilized for \emph{real-time verification}. At deployment, the model processes streaming windows of behavioral data and produces updated engagement scores. When predicted engagement falls below a critical threshold (e.g., $y \leq 3$) for a sustained duration, the system can trigger disengagement alerts. This enables sample-based runtime assurance: a low-latency, actionable mechanism for maintaining user state in adaptive MR systems. Therefore, our approach provides both insight and guarantees, making it suitable for high-stakes, human-in-the-loop MR deployments.
+
+%In addition to prediction, our framework supports both offline and real-time \emph{verification} of user engagement under disruptive conditions~\cite{10.1007/978-3-031-60698-4_19}. Offline, we analyze whether specific ranges of controllable system parameters (e.g., latency, luminance) are sufficient to guarantee that engagement remains above a desired threshold, yielding interpretable safety intervals that link design choices to cognitive outcomes. Although conservative, these intervals provide a principled basis for runtime assurance and make predictive guarantees formally actionable~\cite{10.1007/978-3-031-60698-4_19,hobbs2023runtime}. At deployment, our architecture enables \emph{real-time verification} by continuously monitoring behavioral data streams and updating engagement predictions; when predicted engagement falls below the certified threshold (e.g., y$\leq$3) for a sustained period, or when monitored parameters violate the offline assumptions, the system triggers disengagement alerts. This process validates the offline guarantees by checking that assumptions remain true in situ (e.g., bounded latency, stable feature distributions, and sufficient prediction confidence), and exemplifies the integration of predictive models with formal safety monitors.
+
+In addition to prediction, our framework supports formal verification of user engagement under disruptive conditions~\cite{10.1007/978-3-031-60698-4_19}. Specifically, we analyze whether ranges of controllable MR parameters such as latency or luminance are sufficient to keep predicted engagement above a desired threshold, yielding interpretable safety intervals that link rendering or interaction choices to cognitive outcomes. Although conservative, these intervals provide a principled basis for reasoning about safe operating regions in MR systems and make predictive guarantees formally actionable~\cite{10.1007/978-3-031-60698-4_19,hobbs2023runtime}.
+
+
+To evaluate our framework, we conducted a controlled user study on a tactical MR testbed. Participants operated in a mixed-reality hostage-rescue scenario while step-wise latency conditions were applied once per minute to simulate cognitive attacks. Eleven users completed 10-minute sessions consisting of ten one-minute intervals, each ending with a self-reported engagement rating on a 1--7 scale \cite{joshi2015likert}. During each session, high-frequency multimodal data were captured, including gaze direction, head motion, system latency, luminance, scene entropy, and object interaction. Our approach achieves an average Mean Absolute Error (MAE) of 0.94 across four stratified folds and 0.84 on a held-out user set, demonstrating strong generalization and robustness. Visualization of the learned embedding space shows that engagement trajectories form distinct clusters by level, feature attribution analysis confirms that the model integrates both system and human signals rather than only attack intensity, and comparisons against Ridge, SVR, and XGBoost baselines show that the proposed architecture provides a consistent gain over common traditional regressors on pooled features. These results affirm the model’s utility for cognitively grounded MR engagement monitoring under attack.
+
+
+
+% \newpage
+
+% \section{Introduction}
+% User engagement is a critical metric for evaluating the quality of user experience in immersive applications such as Mixed Reality (MR) and Virtual Reality (VR) \cite{fertleman2018discussion}. The ability to accurately predict user engagement in real time can enable adaptive MR systems that dynamically adjust information to maintain focused awareness and mitigate issues like distraction or cybersickness. This project addresses the challenge of predicting user engagement in an MR environment by leveraging time-series data collected from users.
+
+% The prediction task is formulated as a supervised learning problem. Given a recent window of sensor data, the objective is to predict a user's engagement score, which is a continuous value on a scale of 1 to 7. The dataset employed in this study is particularly rich, encompassing a variety of features that capture different aspects of the user's interaction with the MR system. These features are broadly categorized into:
+% \begin{itemize}
+%     \item \textbf{System Features}: These include data extracted from the video scenes, which describe the characteristics of the virtual environment presented to the user.
+%     \item \textbf{Human Features}: This category comprises physiological and behavioral data from the user, with a significant emphasis on eye and head tracking. These are known to be strong indicators of a user's attention and level of engagement.
+%     \item \textbf{Latency Attack Data}: This data records instances of intentionally induced latency in the system, with one level of latency attack applied per minute to study its effect on user engagement.
+% \end{itemize}
+
+% The central contribution of this project is a novel two-phase modeling approach. This method combines the power of contrastive learning for representation learning with a traditional supervised learning paradigm to construct a robust and accurate prediction model. The first phase focuses on learning meaningful representations of the time-series data, while the second phase fine-tunes the model for the specific task of engagement prediction.
+
+% In our study protocol, participants completed ten-minute MR sessions with step-wise latency perturbations. At the end of each minute, they reported perceived engagement on a 1--7 Likert scale via a headset prompt. Meanwhile, eye/head telemetry and frame-derived scene descriptors were recorded continuously and later aligned to the engagement timestamps. This setup yields short windows of multimodal sequences paired with scalar engagement labels—well-suited for sequence encoders trained with a regression objective.
+
+% \textcolor{blue}{Missing a paragraph talking about the verification with our work}
+
+\section{Related Work}
+
+This section reviews the body of literature pertinent to engagement prediction in MR and VR environments, drawing from research in engagement recognition, time-series analysis, and contrastive learning.
+
+\subsection{Engagement Recognition in Immersive Environments}
+The study of user engagement is a well-established field in Human-Computer Interaction (HCI). Seminal work by \cite{radianti2020systematic} and \cite{merchant2014effectiveness} has explored the various facets of engagement in virtual environments, identifying key behavioral and physiological correlates. Engagement in educational settings, particularly in e-learning and virtual laboratories, has been extensively studied, with researchers focusing on how to measure and maintain student interest to improve learning outcomes ~\cite{hu2025influencing, viitaharju2023student}. In VR and MR, engagement is often discussed alongside presence, immersion, and workload, but these constructs are not interchangeable. Presence captures perceived ``being there,'' immersion describes properties of the system and display, and workload reflects cognitive demand; engagement instead emphasizes whether users remain behaviorally and cognitively tuned to task-relevant MR content under changing conditions. Predicting engagement therefore often involves analyzing behaviors that indicate sustained attention, such as head and eye movements~\cite{DavidJohn2021GazeIntentVR, Wang2025PresenceReview, austermann2025exploring}.
+
+\subsection{Time-Series Analysis for Behavioral Modeling}
+The sequential nature of the data in this project necessitates the use of advanced time-series analysis techniques. Machine learning methods for sequential data have been a subject of extensive research. Comprehensive reviews by \cite{ismail2019deep} and \cite{jebb2015time} provide a thorough overview of both classical and deep learning approaches for time-series classification and regression. Models such as Long Short-Term Memory (LSTM) networks~\cite{hochreiter1997long} and Transformers~\cite{thoyyibah2023transformers} have shown exceptional performance in capturing temporal dependencies in various domains. Furthermore, the analysis of behavioral time series, as explored by~\cite{xu2020finding}, provides a foundation for understanding how to model and interpret the complex patterns of human behavior over time.
+
+\subsection{Contrastive Learning for Time-Series Representation}
+Contrastive learning has emerged as a powerful self-supervised learning technique for learning effective data representations without relying on large amounts of labeled data \cite{khosla2020supervised}. This approach learns representations by maximizing the similarity between "positive" pairs (similar samples) and minimizing the similarity between "negative" pairs (dissimilar samples). While initially popularized in computer vision and Natural Language Processing (NLP), its application to time-series data is a rapidly growing area of research. Recent studies, such as the systematic review by \cite{liu2023self} and the investigative work by \cite{zhang2023constitutes}, have demonstrated the potential of contrastive learning to learn robust representations for time-series forecasting and classification tasks. This project builds upon these advancements by adapting contrastive learning to the specific challenge of engagement prediction.
+
+\subsection{Verification Frameworks and Attack Mitigation in XR Systems}
+
+The use of formal verification for attack mitigation in XR systems has not yet been extensively explored, but it holds significant potential. XR applications are vulnerable to adversarial manipulations of visual input, latency, and rendering pipelines that can degrade user performance or cause cybersickness~\cite{islam2020automatic, li2024less}. While most existing work on verification has focused on vision or sequential models in general domains, frameworks such as DeepPoly~\cite{deeppoly} and Prover~\cite{prover} demonstrate that it is possible to provide certified robustness against bounded perturbations. Translating these ideas to XR could allow systems to reason formally about whether changes to controllable MR parameters or to sensed behavior can push a user model outside acceptable operating conditions.
+
+A recent study by Wu et al.~\cite{wu2025bn} introduced a Bayesian Network framework for
+cybersickness prediction in VR, which not only models system and physiological factors but also
+supports formal probabilistic verification of safety thresholds. Similar approaches could be
+applied in XR to formally verify that parameter settings remain within ranges that prevent
+cognitive attacks and preserve user comfort. Additionally, studies in adversarial robustness of perception networks, such as Weng et al.’s work on certifying robustness against adversarial examples~\cite{weng2018towards}, provide the methodological
+building blocks. Applying such techniques to XR contexts would enable the derivation of interpretable safety intervals (e.g., allowable ranges of latency or luminance) that protect against cognitive attacks. Although this direction remains largely open, it points to a promising line of research at
+the intersection of XR, formal methods, adversarial ML, and human-in-the-loop safety.
+
+
+
+
+\section{Modeling Engagement Under Cognitive Attack: A Two-Phase Architecture}
+
+We introduce a two-phase learning framework for modeling user engagement in MR environments under cognitive attack, where induced latency disrupts attentional state and system responsiveness. The goal is to estimate engagement from multimodal time-series signals (eye tracking, head motion, scene descriptors, and system telemetry) in real time, even when cognitive stressors are present. 
+
+In our study design, users experienced fixed but varied levels of latency while performing the same scenario. After each minute, they reported their engagement level on a 1--7 scale (higher = greater engagement, lower = disengagement). The available information for modeling thus includes both \emph{system-level features} (latency, frame rates, luminance statistics) and \emph{human-level features} (gaze trajectories, head motion patterns). The same latency condition can have different effects across users: some may remain focused due to prior VR familiarity or resilient eye behavior, while others disengage quickly.
+
+
+
+We begin by formalizing the available data and learning objective. In our study design, each participant is exposed to a fixed but varied level of cognitive attack over a continuous time interval. A cognitive attack is induced via a fixed latency condition (e.g., reduced frame rate), held constant over a window of length $T$. During this window, we record high-frequency multimodal signals, including system-level features such as frame latency, luminance statistics, entropy, and motion complexity from the scene, and human-level features including 3D gaze direction, head motion quaternions, and scene interaction focus.
+This results in a trajectory of the form $X = \{x_1, x_2, \dots, x_T\}$, where each $x_t \in \mathbb{R}^D$ encodes the system and human signals at time $t$. After each interval, the user provides a scalar self-report $y \in \{1, \dots, 7\}$ denoting their engagement level during that window, where $y=1$ reflects complete disengagement and $y=7$ indicates full cognitive immersion.
+
+Thus, the full training dataset consists of $N$ labeled sequences:
+\[
+\mathcal{D} = \left\{ (X^{(i)}_{1:T^{(i)}},\; y^{(i)}) \right\}_{i=1}^N
+\]
+where $T^{(i)}$ is the length of the $i$-th trajectory and $y^{(i)}$ is the reported engagement score at the end of that trajectory. The goal is to estimate user engagement at inference time from partial or full observations:
+\[
+\hat{y}_t = f(X_{1:t})
+\]
+where $t < T$ ensues enabling early prediction and adaptive MR response. This setup reflects real-world deployment, where decisions must be made on streaming, truncated windows.
+
+
+
+Two major challenges in building such models are:
+\begin{itemize}
+    \item \textbf{Data sparsity and individual variability.} Engagement labels are minute-level, limited in number, and subject to user-specific resilience factors (e.g., gaming experience, VR familiarity, gaze stability). Collecting the massive datasets normally required for end-to-end time-series models is impractical.
+    
+    \item \textbf{Feature entanglement.} Raw multimodal features encode both \emph{nuisance variation} (user identity, scene layout, background detail) and \emph{true drivers of engagement} (interaction of human and system dynamics). A direct regression model risks conflating these factors, leading to poor generalization across users, scenes, or attack levels.
+\end{itemize}
+These challenges are further amplified by the high dimensionality and asynchronous nature of the input signals. Each user trajectory spans a variable-length time window and consists of multimodal features that evolve at different temporal granularities. Moreover, engagement labels are only available at coarse intervals, and identical latency levels can lead to vastly different outcomes depending on a user's internal state or behavioral patterns. In light of this, we aim to first learn a compact embedding that captures the latent engagement-relevant structure of each trajectory, without overfitting to superficial patterns like user identity or scene layout. This motivates a contrastive learning stage, in which trajectories are aligned according to engagement similarity in the absence of dense supervision.
+
+
+To address these challenges, we propose a two-phase learning architecture that is both \textit{sample-efficient} and \textit{robust to behavioral variability}. Our model separates the task of \textbf{learning a temporally abstract, cognitively grounded representation} of user behavior from the task of \textbf{mapping that representation to engagement scores}. This decoupling has several benefits:
+\begin{itemize}
+    \item The first phase learns a compact, low-dimensional embedding space where trajectories with similar engagement levels---even across different users, scenes, or attack intensities---are geometrically aligned. This embedding is trained contrastively to reflect latent cognitive state rather than surface-level differences.
+    
+    \item The second phase uses these embeddings to make predictions via an ordinal regression head. Because the embedding has already disentangled nuisance variation, the downstream mapping becomes simple, interpretable, and effective even with limited labeled data.
+\end{itemize}
+This structure, described below, enables the model to generalize across latency conditions, window lengths, and user profiles, while supporting real-time estimation, monitoring, and early detection of disengagement. The result is a deployable, cognitively informed inference system for adaptive MR applications.
+
+\subsection{Phase 1: Contrastive Engagement Embedding}
+
+We now describe the first stage of our model, which maps a multimodal behavioral trajectory into a fixed-size latent embedding that reflects engagement-relevant structure while abstracting away nuisance variation. This embedding space is trained using a contrastive objective, relying solely on coarse, sparse engagement labels provided at the end of each trajectory window.
+
+Let \( X_{1:t} = \{x_1, \dots, x_t\} \) be a multimodal sequence of sensor features, where each \( x_k \in \mathbb{R}^D \) includes eye tracking, head motion, scene dynamics, and system telemetry (e.g., latency). The engagement label \( y_t \in \{1, \dots, 7\} \) is reported once per window, after the user experiences the full cognitive attack condition. Our goal is to learn an embedding function
+\[
+z = g_w(X_{1:t}) \in \mathbb{R}^E,
+\]
+where \( g_w \) is an LSTM encoder parameterized by weights \( w \), followed by masked average pooling and a projection layer. The output embedding \( z \) is L2-normalized to lie on the unit hypersphere (i.e., \( \|z\|_2 = 1 \)), which improves numerical stability and enables cosine-based similarity learning. This training procedure does not require frame-level supervision. Instead, we exploit {\em ordinal relationships between trajectories}: those with similar engagement labels should produce similar embeddings, while those with divergent scores should be pushed apart in latent space.
+
+Let \((X^{(i)}_{1:T^{(i)}}, y^{(i)})\) and \((X^{(j)}_{1:T^{(j)}}, y^{(j)})\) be two labeled trajectories. We define two forms of similarity:
+
+\paragraph{(1) Engagement Similarity.}
+Given the ordinal nature of the engagement labels, we define a soft similarity weight between label pairs as:
+\[
+\omega_{ij} \propto \exp\!\left(-\frac{|y^{(i)} - y^{(j)}|}{\tau_s}\right),
+\]
+where \( \tau_s > 0 \) is a temperature parameter controlling label sharpness. Higher \( \omega_{ij} \) indicates stronger similarity between the perceived engagement levels of two trajectories. Note that this similarity is defined over labels, not the time-series themselves, allowing the model to generalize across users and window lengths.
+
+\paragraph{(2) Embedding Similarity.}
+Each trajectory is passed through the encoder to produce embeddings \( z_i = g_w(X^{(i)}_{1:T}) \) and \( z_j = g_w(X^{(j)}_{1:T}) \). The similarity between embeddings is computed using cosine similarity:
+\[
+\text{Sim}(z_i, z_j) = \frac{z_i^\top z_j}{\|z_i\|_2 \|z_j\|_2}.
+\]
+Figure~\ref{fig:contrastive-diagram} illustrates the key contrastive alignment mechanism. For each pair of trajectories, we compute a soft engagement similarity based on label proximity and a cosine-based embedding similarity. The contrastive objective then aligns these two metrics, encouraging the learned embedding space to reflect engagement-level proximity.
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.45\textwidth]{figs/Cont1.png}
+    \caption{Illustration of the contrastive learning mechanism. Each trajectory is mapped to an embedding \( z_i \), and the loss encourages alignment between label-derived engagement similarity \( \omega_{ij} \) and cosine embedding similarity \( \text{Sim}(z_i, z_j) \).}
+    \label{fig:contrastive-diagram}
+\end{figure}
+
+
+\paragraph{Contrastive Loss.}
+The core idea is to align the geometry of the embedding space with the structure of engagement similarity. The contrastive loss for anchor \( i \) is defined as:
+\[
+\mathcal{L}_{\text{con}} = - \sum_{i=1}^N \omega_{ij} \log \left( \frac{\exp(\text{Sim}(z_i, z_j)/\tau)}{\sum_{k \ne i} \exp(\text{Sim}(z_i, z_k)/\tau)} \right),
+\]
+where \( \tau > 0 \) is a separate temperature parameter for the embedding space. This soft InfoNCE formulation encourages embeddings from similarly engaged trajectories to lie closer together, regardless of user, scene, or attack condition. Thus, the parameters of the encoder \( w \) are optimized via standard gradient descent:
+\[
+w \leftarrow w - \nabla_w \mathcal{L}_{\text{con}}.
+\]
+This training strategy forces the LSTM to act as an engagement-sensitive filter: discarding irrelevant variation (e.g., background complexity, scene layout, user identity), while preserving latent cognitive dynamics. It also enables alignment of trajectories of different lengths into a common static embedding space.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figs/sep1.png}\vspace{-2ex}
+\caption{Illustrative visualization of the intended structure of the embedding space learned via contrastive training. Each point represents a user trajectory, and color-coded ellipses denote engagement levels. }
+    \label{fig:embedding-clusters}
+\end{figure}
+
+
+Figure~\ref{fig:embedding-clusters} represents an illustrative embedding diagram, where trajectories naturally group by engagement level. This reflects the desired clustering effect encouraged by our contrastive loss, where the embedding serves as input to the downstream prediction head (Phase~2), described next.
+
+
+
+\subsection{Phase 2: Regression from Embedding}
+Once the encoder \( g_w \) is trained to produce engagement-sensitive embeddings, we freeze its parameters and train a lightweight regression head \( f_\theta: \mathbb{R}^E \to \mathbb{R} \) that maps each static embedding \( z \) to a continuous engagement score \( \hat{y} \in [1,7] \). While engagement labels are ordinal in nature, we treat this as a regression problem to directly optimize numerical prediction accuracy while keeping the head architecture simple and fast.
+
+\paragraph{Model structure.}
+The prediction head is a two-layer feedforward network parameterized by \( \theta \). Given an input embedding \( z \in \mathbb{R}^E \), the model computes:
+\[
+\hat{y} = f_\theta(z) = W_2 \cdot \mathrm{ReLU}(W_1 z + b_1) + b_2,
+\]
+where \( \{W_1, W_2, b_1, b_2\} \subset \theta \). The output \( \hat{y} \in \mathbb{R} \) is interpreted as the predicted engagement level.
+
+For a given trajectory \( X^{(i)}_{1:t} \) with label \( y^{(i)} \), the encoder first computes the embedding \( z_i = g_w(X^{(i)}_{1:t}) \), which is then passed to the regression head. The primary training objective is to minimize mean squared error (MSE) between predictions and true labels:
+\[
+\mathcal{L}_{\text{reg}} = \frac{1}{N} \sum_{i=1}^{N} \left( f_\theta(z_i) - y^{(i)} \right)^2.
+\]
+To ensure robust performance across the full range of engagement levels, we introduce a regularization term that penalizes variance in error across levels. Let \( \mathcal{I}_k = \{i \mid y^{(i)} = k\} \) be the set of samples labeled with level \( k \in \{1, \dots, 7\} \). The per-level error is:
+\[
+\text{Err}_k = \frac{1}{|\mathcal{I}_k|} \sum_{i \in \mathcal{I}_k} \left( f_\theta(z_i) - y^{(i)} \right)^2,
+\]
+and the final loss becomes:
+\[
+\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{reg}} 
++ \lambda \cdot \mathrm{Var}\left( \{\text{Err}_k\}_{k=1}^{7} \right),
+\]
+where \( \lambda > 0 \) is a regularization strength. This encourages the model to distribute predictive accuracy evenly across all engagement levels, including rare but critical states like complete disengagement.
+In addition, we adopt a stratified sampling strategy during training to ensure that each mini-batch includes trajectories from across the engagement spectrum. This mitigates overfitting to mid-range labels and improves robustness to data imbalance.
+
+\paragraph{Real-time prediction.}
+At inference time, the model operates over a rolling window of streaming data. Given a time-series window \( X_{1:t} \), the encoder produces an updated embedding \( z_t = g_w(X_{1:t}) \), which is passed through the regression head to obtain \( \hat{y}_t = f_\theta(z_t) \). To support applications that rely on discrete engagement levels, the model’s continuous output can optionally be rounded to the nearest integer:
+\[
+\hat{y}^{\text{int}}_t = \text{Round}\left( \hat{y}_t \right), \quad \hat{y}^{\text{int}}_t \in \{1, \dots, 7\}.
+\]
+This provides a categorical prediction that aligns with the user-reported Likert-style scale, suitable for downstream thresholding, binning, or visualization.
+
+The two-phase training process is shown in Figure~\ref{fig:two-phase-architecture}. 
+In Phase~1, the encoder \( g_w \) is trained using a contrastive loss that aligns embeddings based on engagement label proximity.  Each mini-batch consists of multimodal trajectories and their corresponding engagement labels, from which soft label-derived weights \( \omega_{ij} \) are computed. 
+These weights guide the InfoNCE-style objective, pulling together embeddings of similar engagement and pushing apart those with dissimilar levels. 
+Once trained, the encoder is frozen, and Phase~2 proceeds to fit a lightweight regression head \( f_\theta \), which maps the embeddings to continuous engagement scores. 
+The regression loss incorporates both mean squared error and a balancing regularizer that promotes uniform performance across all seven engagement levels. 
+
+Figure~\ref{fig:two-phase-architecture} summarizes our full architecture, highlighting the contrastive encoder that abstracts temporally rich behavior into a static embedding, and the regression head that translates this representation into continuous engagement estimates.  This decoupled, two-stage procedure enables sample-efficient learning and robust generalization across users, latency conditions, and variable-length trajectories.
+
+
+%As new data point \( x_{t+1} \) arrives, it is appended to the sequence, the LSTM state is updated incrementally, and the embedding \( z_{t+1} \) is recomputed. This updated embedding is immediately passed through the prediction head to yield a new engagement estimate \( \hat{y}_{t+1} \). This process runs recursively and in real time, allowing the system to continuously track engagement using the latest observations. 
+
+% \begin{figure}[t]
+%     \centering
+%     \includegraphics[width=1.\linewidth]{figs/Two1.png}\vspace{-1ex}
+%     \caption{\small
+%     Overview of our two-phase engagement estimation model. The \textbf{Contrastive Engagement Encoder} (left) maps a variable-length multimodal time-series window to a static embedding. This \textbf{Engagement Embedding} (center) captures latent cognitive state while abstracting nuisance variation. The \textbf{Regression Head} (right) is a lightweight feedforward network that predicts a continuous engagement score from this embedding. Together, the architecture supports real-time, low-overhead monitoring of engagement under cognitive stress.
+%     }
+%     \label{fig:two-phase-architecture}
+% \end{figure}
+
+
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\linewidth]{figs/Methodology/Two_phase_training.pdf}
+    \caption{Two-phase training framework for engagement prediction. Phase 1 performs contrastive pretraining of the encoder using similarity-based objectives. Phase 2 freezes the encoder and trains a regression head with supervised loss and regularization of error variance.
+    }
+    \label{fig:two-phase-architecture}
+\end{figure*}
+
+
+
+% \begin{figure}[t]
+% \centering
+% \fbox{
+% \parbox{\linewidth}{
+% \textbf{Algorithm 1: Two-Phase Training for Engagement Prediction} \\[0.5ex]
+% \textbf{Inputs:} Labeled dataset $\mathcal{D}_{\text{train}} = \{(X_i, y_i)\}_{i=1}^N$ \\
+% \hspace*{5.2em} Encoder $g_w$, Regression head $f_\theta$ \\
+% \hspace*{5.2em} Epochs $E_1$, $E_2$, learning rates $\alpha_1$, $\alpha_2$, regularization $\lambda$ \\
+
+% \vspace{0.5ex}
+% \textbf{Phase 1: Contrastive Pretraining of Encoder} \\
+% \hspace*{1em} \textbf{for} epoch $= 1$ to $E_1$ \textbf{do} \\
+% \hspace*{2em} Sample mini-batch $\{(X_i, y_i)\}_{i=1}^B$ from $\mathcal{D}_{\text{train}}$ \\
+% \hspace*{2em} Compute embeddings: $z_i = g_w(X_i)$ for all $i$ \\
+% \hspace*{2em} Compute similarity weights $\omega_{ij}$ from $\{y_i\}$ \\
+% \hspace*{2em} Compute contrastive loss: $\mathcal{L}_{\text{con}}$ \\
+% \hspace*{2em} Update encoder weights $w \leftarrow w - \alpha_1 \nabla_w \mathcal{L}_{\text{con}}$ \\
+% \hspace*{1em} \textbf{end for} \\
+
+% \vspace{0.5ex}
+% \textbf{Phase 2: Supervised Training of Prediction Head} \\
+% \hspace*{1em} Freeze encoder weights $w$ \\
+% \hspace*{1em} \textbf{for} epoch $= 1$ to $E_2$ \textbf{do} \\
+% \hspace*{2em} Sample mini-batch $\{(X_i, y_i)\}_{i=1}^B$ from $\mathcal{D}_{\text{train}}$ \\
+% \hspace*{2em} Encode: $z_i = g_w(X_i)$ for all $i$ \\
+% \hspace*{2em} Predict: $\hat{y}_i = f_\theta(z_i)$ for all $i$ \\
+% \hspace*{2em} Compute total loss:
+% \[
+% \mathcal{L}_{\text{total}} = \frac{1}{B} \sum_{i=1}^B ( \hat{y}_i - y_i )^2
+% + \lambda \cdot \mathrm{Var}\left( \left\{ \text{Err}_k \right\}_{k=1}^{7} \right)
+% \]
+% \hspace*{2em} Update head parameters $\theta \leftarrow \theta - \alpha_2 \nabla_\theta \mathcal{L}_{\text{total}}$ \\
+% \hspace*{1em} \textbf{end for} \\
+% \textbf{Return:} Trained encoder $g_w$ and regression head $f_\theta$
+% }
+% }
+% \caption{\small Two-phase training of the engagement model: contrastive embedding learning (Phase 1), followed by supervised regression training (Phase 2).}
+% \label{fig:training-algorithm}
+% \end{figure}
+
+
+
+
+
+% \section{Methodology: A Two-Phase Modeling Approach}
+
+% The project proposes a two-phase training strategy to effectively learn from time-series data and predict user engagement. The framework uses a Long Short-Term Memory (LSTM) network as the core encoder. The overall architecture consists of an \textbf{Encoder} and a \textbf{Prediction Head}.
+
+% \subsection{Model Architecture}
+% Let a single input time-series sequence be denoted by $X = \{x_1, x_2, ..., x_T\}$, where $x_t \in \mathbb{R}^D$ is the feature vector at time step $t$, $T$ is the sequence length, and $D$ is the number of features.
+
+% \subsubsection{Encoder}
+% The encoder's primary function is to map a variable-length input sequence $X$ into a fixed-size embedding vector $z \in \mathbb{R}^E$, where $E$ is the embedding dimension.
+
+% \paragraph{LSTMEncoder} This model utilizes LSTM layers to process the sequence. The LSTM's ability to remember information over long periods makes it well-suited for time-series data. For a given input $x_t$ and the previous hidden state $h_{t-1}$, the LSTM computes the new hidden state $h_t$ as follows:
+% \begin{align*}
+% i_t &= \sigma(W_i x_t + U_i h_{t-1} + b_i) \\
+% f_t &= \sigma(W_f x_t + U_f h_{t-1} + b_f) \\
+% o_t &= \sigma(W_o x_t + U_o h_{t-1} + b_o) \\
+% \tilde{c}_t &= \tanh(W_c x_t + U_c h_{t-1} + b_c) \\
+% c_t &= f_t \odot c_{t-1} + i_t \odot \tilde{c}_t \\
+% h_t &= o_t \odot \tanh(c_t)
+% \end{align*}
+% The final embedding $z$ is produced by applying masked average pooling over the sequence of hidden states $\{h_1, ..., h_T\}$, followed by a projection layer and L2 normalization.
+% Masked average pooling supports variable-length inputs without leaking information from padding. Compared to using the last hidden state, masked pooling empirically stabilizes training when trajectories vary from very short (\(<10\)~s) to longer contexts (\(>40\)~s), because it aggregates evidence across the observed segment rather than relying on a single timestep.
+
+% % (Transformer encoder removed in the updated analysis.)
+
+% \subsubsection{Prediction Head}
+% The prediction head is a simple multi-layer perceptron (MLP) that takes the learned embedding $z$ as input and produces the final engagement prediction:
+% \[ \hat{y} = W_2 \cdot \text{ReLU}(W_1 z + b_1) + b_2 \]
+
+% \subsection{Two-Phase Training Strategy}
+% The key innovation is a two-phase process that first learns a rich representation of the data and then trains for the prediction task.
+
+% \subsubsection{Phase 1: Contrastive Pre-training}
+% The objective of this phase is to learn an embedding space where the distance between embeddings reflects the similarity of their corresponding engagement scores. This is achieved through a contrastive loss function.
+
+% \paragraph{Continuous Contrastive Loss}
+% For a batch of embeddings $\{z_i\}$ and their corresponding continuous engagement scores $\{s_i\}$, a pairwise similarity matrix of scores is first computed. This similarity is defined by applying a softmax function over the negative absolute difference between scores, controlled by a temperature parameter $\tau_s$:
+% \[
+% W_{ij} = \text{softmax}\left(-\frac{|s_i - s_j|}{\tau_s}\right)_j
+% \]
+% Similarly, a pairwise similarity matrix of the embeddings is computed, typically using cosine similarity: $S_{ij} = \frac{z_i \cdot z_j}{\|z_i\| \|z_j\|}$. The contrastive loss is then the weighted negative log-likelihood of the embedding similarities, where the score similarities serve as the weights:
+% \[
+% \mathcal{L}_{\text{contrastive}} = - \frac{1}{N} \sum_{i=1}^{N} \sum_{j=1}^{N} W_{ij} \log(\text{softmax}(S_{ij})_j)
+% \]
+
+% % (Discrete/classification variant omitted in the updated analysis.)
+
+% \subsubsection{Phase 2: Prediction Training}
+% In the second phase, the pre-trained encoder is frozen, and only the prediction head is trained on the specific task of engagement prediction.
+
+% \paragraph{Regression}
+% For the regression task, the Mean Squared Error (MSE) loss is used to measure the difference between the true scores $y_i$ and the predicted scores $\hat{y}_i$:
+% \[
+% \mathcal{L}_{\text{regression}} = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2
+% \]
+
+% % (Classification head and loss removed; regression only.)
+
+% \subsection{Training Algorithms}
+% The two-phase training process is summarized in Algorithm 1 and Algorithm 2.
+
+% \begin{figure}[H]
+%     \centering
+%     \fbox{
+%         \parbox{\columnwidth}{
+%             \textbf{Algorithm 1: Phase 1 - Contrastive Pre-training}
+%             \hrule
+%             \textbf{Input:} Training data $\mathcal{D}_{\text{train}}$, Encoder $f_\theta$, epochs $E_c$, learning rate $\alpha_c$. \\
+%             \textbf{Initialize:} Optimizer for encoder parameters $\theta$. \\
+%             \textbf{for} epoch = 1 to $E_c$ \textbf{do} \\
+%             \hspace*{1em}\textbf{for} each batch $\{X_i, s_i\}_{i=1}^B$ in $\mathcal{D}_{\text{train}}$ \textbf{do} \\
+%             \hspace*{2em}1. Compute embeddings: $z_i = f_\theta(X_i)$. \\
+%             \hspace*{2em}2. Comput+e $\mathcal{L}_{\text{contrastive}}$ using the batch embeddings and scores. \\
+%             \hspace*{2em}3. Backpropagate the loss and update $\theta$. \\
+%             \hspace*{1em}\textbf{end for} \\
+%             \textbf{end for} \\
+%             \textbf{Return:} Pre-trained encoder parameters $\theta$.
+%         }
+%     }
+%     \caption{Contrastive Pre-training Algorithm}
+% \end{figure}
+
+% \begin{figure}[H]
+%     \centering
+%     \fbox{
+%         \parbox{\columnwidth}{
+%             \textbf{Algorithm 2: Phase 2 - Prediction Head Training}
+%             \hrule
+%             \textbf{Input:} Training data $\mathcal{D}_{\text{train}}$, Pre-trained encoder $f_\theta$, Prediction Head $g_\phi$, epochs $E_p$, learning rate $\alpha_p$. \\
+%             \textbf{Initialize:} Optimizer for prediction head parameters $\phi$. \\
+%             \textbf{Freeze} encoder parameters $\theta$. \\
+%             \textbf{for} epoch = 1 to $E_p$ \textbf{do} \\
+%             \hspace*{1em}\textbf{for} each batch $\{X_i, y_i\}_{i=1}^B$ in $\mathcal{D}_{\text{train}}$ \textbf{do} \\
+%             \hspace*{2em}1. Get embeddings from frozen encoder: $z_i = f_\theta(X_i)$. \\
+%             \hspace*{2em}2. Make prediction: $\hat{y}_i = g_\phi(z_i)$. \\
+%             \hspace*{2em}3. Compute $\mathcal{L}_{\text{prediction}}$ ($\mathcal{L}_{\text{regression}}$ or $\mathcal{L}_{\text{classification}}$). \\
+%             \hspace*{2em}4. Backpropagate the loss and update $\phi$. \\
+%             \hspace*{1em}\textbf{end for} \\
+%             \textbf{end for} \\
+%             \textbf{Return:} Trained prediction head parameters $\phi$.
+%         }
+%     }
+%     \caption{Prediction Head Training Algorithm}
+% \end{figure}
+
+
+\section{Verification for the Model}
+\label{sec:verification}
+
+To complement the predictive evaluation, we also investigated whether the engagement model can be verified with formal guarantees under cognitive attacks. We use \emph{Prover}~\cite{prover} as the verifier; it relies on \emph{DeepPoly}-style relational abstractions~\cite{deeppoly} to propagate linear constraints through the unrolled LSTM and its nonlinear gates. These tools are well-established in the verification community and let us pose guarantees over \emph{bounded ranges of system parameters}.
+
+\paragraph{From robustness certification to safety intervals.}
+Prover was originally developed to certify the \emph{robustness} of recurrent networks, such as LSTMs, against bounded input perturbations~\cite{prover}. Given an input region defined by an $\ell_p$-ball or other bounded set, the tool proves that the network’s output does not change prediction across all inputs
+in that region. This guarantees stability of the model under adversarial perturbations.
+
+For our purpose, we reinterpret this robustness framework as a way to verify \emph{safety intervals} for mission-related system parameters. Suppose we want to check whether a given interval \(I\) of system parameters
+(e.g., latency between 15--35~ms) is sufficient to keep engagement
+above a target threshold~\(\tau\). The safety requirement can then be expressed as
+\[
+\forall x \in I:\; f(x)\ \ge\ \tau,
+\]
+where \(f(x)\) is the predicted engagement score. In other words, every input generated under the parameter constraints in \(I\) must yield an engagement level at least \(\tau\).
+If Prover can discharge this property on the unrolled LSTM, then \(I\) is formally verified as a safe
+operating interval for threshold~\(\tau\). We focus on thresholds \(\tau=4\) and \(\tau=5\) because they align with natural breakpoints in the engagement scale: a score of~4 marks the midpoint boundary between distracted and attentive states, while a score of~5, the second highest observed score, represents strong engagement. Verifying guarantees at these two levels therefore captures both an acceptable level and a higher standard of engagement.
+
+
+
+\section{Dataset collection and process}
+The data pipeline is designed with a high degree of automation and flexibility, accommodating multiple data sources and formats to streamline the experimental process.
+
+\subsection{Data introduction}
+
+%\peng{@Mingyu, explain the data: how we collect and what we collect, and add a figure shows the experiment, please rewrite this subsection}
+
+% We conducted a mixed-reality study with eleven participants who completed a single ten-minute session each in a guided MR scenario. The environment presented dynamic visual content and periodic interaction prompts while step-wise latency perturbations were introduced once per minute to vary task difficulty. At the end of each minute, participants self-reported their perceived engagement on a 1--7 Likert scale within the headset, yielding sparse, time-stamped labels.
+
+We conducted a controlled MR user study on a tactical search-and-rescue testbed using a Microsoft HoloLens 2 headset in a consistent room-scale setup across all participants. The cohort comprised 11 male college students aged 25--32. Each participant completed a single ten-minute session in a mixed-reality hostage-rescue scenario containing hostages, enemies, fires, medical kits, and weapons. Participants were free to move, inspect the scene, and optionally interact with virtual elements using gaze or controller input, but no explicit score or time-critical task objective was imposed. This open-ended design was intended to elicit engagement with the MR interface itself rather than optimize a narrow task-performance metric.
+
+To modulate cognitive stress, we injected step-wise latency cognitive attacks once per minute with three broad ranges: low latency (45--60 FPS), medium latency (20--45 FPS), and high latency (5--20 FPS). These conditions were pseudo-randomized across the ten one-minute intervals so that each participant experienced multiple attack intensities during the session. At the end of each minute, an in-headset prompt asked: \emph{``On a scale of 1--7, how would you rate your level of engagement with the mixed reality display during the last minute?''} Here, 1 denoted complete disengagement from the MR content and 7 denoted full engagement. The next latency level was applied immediately after the participant submitted the rating.
+
+Throughout each session, we continuously captured multimodal telemetry reflecting both user behavior and scene dynamics. Human-centric signals included binocular eye tracking (3D eye positions, gaze directions, and ocular rotations), gaze-target encodings that identify what category of object the user was attending to, and 6-DoF head pose (3D position and rotation quaternions). System- and scene-centric signals included a perturbation indicator capturing the intensity of each one-minute latency attack together with its start timestamp, plus nine video-derived descriptors that characterize scene motion and appearance: optical flow magnitude, histogram-of-oriented-gradients features, edge intensity, temporal smoothness, brightness flicker, spectral entropy, spatial frequency, luminance, and contrast. These streams were sampled at their native rates and later aligned to the minute-wise engagement labels by matching each label to the nearest telemetry timestamp.
+
+This acquisition protocol yields short, multi-sensor sequences paired with scalar engagement labels, enabling supervised learning with sequence encoders. The eye and head signals capture overt attentional behavior, the scene descriptors summarize visual complexity and stability, and the latency channel encodes the cognitive attack itself. As shown in Fig.~\ref{fig:distribution_engagement_score}, no responses were recorded at level 7. The label distribution is uneven across both levels and individuals: some participants did not traverse all engagement levels during the protocol, and several contributed only three distinct levels. This heterogeneity motivates modeling and evaluation procedures that are robust to sparse and imbalanced labels.
+
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.99\linewidth]{figs/engagement_score_user_distribution.png}\vspace{-2ex}
+%     \caption{\small Distribution of Engagement score reported by 11 users.}
+%     \label{fig:distribution_engagement_score}
+% \end{figure}
+
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.99\linewidth]{figs/Results/partEngSCore.pdf}\vspace{-2ex}
+    \caption{Distribution of engagement scores reported by 11 users, separated into training and held-out (test) sets. Bars represent the frequency of reports at each engagement level.}
+    \label{fig:distribution_engagement_score}
+\end{figure}
+
+\subsection{Data Processing Pipeline}
+The raw data undergoes a systematic, multi-step processing pipeline to prepare it for the machine learning models. This pipeline includes the following stages. Design choices mirror the constraints of real-time deployment (low latency, variable window lengths) and the study protocol (minute-wise labels):
+\begin{enumerate}
+    \item \textbf{Timestamp Alignment}: For each user, the engagement scores (labels) are loaded from their corresponding files. The timestamps of these scores are then precisely matched to the closest timestamps in the aligned feature data. This critical step ensures that each label is correctly associated with a specific point in the time-series data.
+    \item \textbf{Feature Preprocessing}: Two optional preprocessing steps can be applied to enhance the quality of the feature data:
+    \begin{itemize}
+        \item \textbf{Rolling Average}: A rolling mean can be applied to the feature data over a specified window. This helps to smooth the data and reduce noise.
+        \item \textbf{Subsampling}: The data can be subsampled by taking every \textit{n}-th data point. This is useful for reducing sequence length and redundancy, which can improve training efficiency.
+    \end{itemize}
+    \item \textbf{Sample Creation}: For each engagement score, multiple training samples are generated. Each sample consists of a sequence of feature vectors that lead up to the time of the engagement score. A \texttt{max\_lookback} parameter defines the maximum length of these sequences. To augment the dataset and improve model robustness, the \texttt{num\_samples\_per\_score} parameter can be set to create multiple sequences for each score. Each of these sequences is generated with a randomly chosen start point within the lookback window, ensuring that the model is exposed to sequences of varying lengths and that no two samples are identical.
+    \item \textbf{Padding and Masking}: Since the generated sequences can have variable lengths (up to \texttt{max\_lookback}), they are front-padded with zeros to create batches of uniform length. This is a necessary step for efficient batch processing in deep learning models. A corresponding binary mask is also generated to distinguish the real data points from the padded values. The models use this mask to ignore the padded values during computations, ensuring that the results are not affected by the padding.
+\end{enumerate}
+The final output of this comprehensive data pipeline is a set of \texttt{(sequence, mask, label)} tuples, which are ready for use in training and evaluating the models.
+
+\subsection{Training}
+Training follows the two-phase strategy outlined in the methodology. All hyperparameters for data processing, model architecture, and optimization are explicitly configured and recorded to ensure reproducibility. We use the Adam optimizer~\cite{kingma2014adam} in both phases due to its efficiency and convergence stability. The contrastive pretraining phase optimizes a continuous contrastive loss, while the regression phase minimizes Mean Squared Error (MSE). After each phase, the best-performing model is selected based on validation performance to enable fair comparison and subsequent evaluation.
+
+
+% \section{Experimental Setup}
+% The project incorporates a robust framework for training and evaluating the models, supporting both individual training runs and rigorous cross-validation to ensure the reliability of the results.
+
+% \subsection{Training}
+% Training adheres to the two-phase strategy described in the methodology section. Key aspects include:
+% \begin{itemize}
+%     \item \textbf{Hyperparameter Management}: All hyperparameters for data processing, model architecture, and training are configured and recorded for reproducibility.
+%     \item \textbf{Optimizer}: Adam is used for both the contrastive and prediction phases due to its efficiency and robustness.
+%     \item \textbf{Loss Functions}: The contrastive phase uses a continuous contrastive objective, and the prediction phase uses Mean Squared Error (MSE) for regression.
+%     \item \textbf{Model Selection}: The best-performing models from each phase are retained based on validation performance to enable fair comparison and subsequent evaluation.
+% \end{itemize}
+
+\subsection{Evaluation and Cross-Validation}
+ We use \textbf{label-level stratified 4-fold cross-validation}, which balances the engagement label distribution across folds to mitigate class-imbalance artifacts (e.g., rare levels missing from a fold).  This split strategy encourages learning class-specific patterns rather than overfitting to a specific user's distribution. For each fold, the complete two-phase training process is executed from scratch. We report MAE and standard deviations across folds. Here, label-level means we stratify individual engagement labels (rounded to 1--7) across four folds while ignoring user boundaries, and all samples derived from the same label remain within a single fold to avoid leakage.
+
+We also conduct a \textbf{fully held-out generalization test} on three users whose data are excluded from both training and cross-validation. This evaluates performance on truly unseen individuals, a deployment-relevant condition for MR systems.
+
+\section{Results and Discussion}
+
+To evaluate the effectiveness of the proposed two-phase framework, we conducted label-level stratified four-fold cross-validation using an LSTM encoder. Performance is reported with MAE between the predicted and self-reported engagement scores (lower is better).
+
+\subsection{Cross-Validation Performance}
+Table~\ref{tab:lstm_cv} provides a detailed breakdown of performance across four cross-validation folds, aligned with the latest analysis.
+
+\begin{table}[h]
+    \centering
+    \caption{Performance metrics per fold for the LSTM encoder. The rightmost column reports the mean and population standard deviation across folds.}
+    \label{tab:lstm_cv}
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabular}{lccccc}
+        \hline
+        \textbf{Metric} & \textbf{Fold 1} & \textbf{Fold 2} & \textbf{Fold 3} & \textbf{Fold 4} & \textbf{Average} \\
+        \hline
+        Overall MAE & 1.109 & 1.238 & \textbf{0.664} & 0.760 & \textbf{0.94~$\pm$~0.24} \\
+        MAE Level 1 & 1.120 & 2.270 & \textbf{0.484} & 0.997 & 1.22~$\pm$~0.70 \\
+        MAE Level 2 & 0.605 & 1.007 & \textbf{0.491} & 0.509 & 0.65~$\pm$~0.23 \\
+        MAE Level 3 & 1.258 & 1.243 & \textbf{0.370} & 0.604 & 0.87~$\pm$~0.39 \\
+        MAE Level 4 & \textbf{0.601} & 0.899 & 1.109 & 0.947 & 0.89~$\pm$~0.19 \\
+        MAE Level 5 & 1.304 & 1.818 & \textbf{0.465} & 1.012 & 1.15~$\pm$~0.52 \\
+        MAE Level 6 & 1.430 & 0.625 & 1.053 & \textbf{0.534} & 0.91~$\pm$~0.37 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+% (Transformer comparison removed in the updated paper.)
+The model achieves an average MAE of 0.94, which is practically meaningful given the inherent subjectivity of self-reported engagement scores. An error of less than one level is reasonable because adjacent ratings on a 1--7 scale are semantically close and often noisy even for the same user. The variance across folds, highlighted by the superior performance in Fold 3 (MAE 0.664), points to data sparsity in certain label regimes, a common challenge in behavioral studies. Despite this, the model remains stable across folds, and the average error for most engagement levels stays around or below the 1.0 threshold.
+
+\subsection{Baseline Comparison}
+To evaluate whether the proposed architecture is necessary, we compared it against three traditional non-sequential regressors: Ridge, SVR, and XGBoost. For each trajectory, we temporally averaged the variable-length multimodal sequence into a single fixed-length feature vector and trained each regressor on the same label-level stratified 4-fold splits used by the proposed model. Table~\ref{tab:baseline_comparison} shows a clear spread in performance: Ridge reaches 1.09 $\pm$ 0.18 MAE, SVR reaches 1.24 $\pm$ 0.15 MAE, and XGBoost is the strongest traditional baseline at 0.96 $\pm$ 0.12 MAE, while the proposed two-stage model achieves 0.94 $\pm$ 0.24 MAE. This indicates that pooled multimodal features already carry useful predictive signal, but the full model remains the most accurate overall while additionally producing structured embeddings that support trajectory-length analysis, visualization, and formal verification.
+
+\begin{table}[h]
+    \centering
+    \caption{Cross-validation comparison between the proposed model and traditional regressors on temporally averaged trajectory features.}
+    \label{tab:baseline_comparison}
+    \setlength{\tabcolsep}{8pt}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Model} & \textbf{Feature Setting} & \textbf{CV MAE} \\
+        \midrule
+        Ridge baseline & Temporal mean features only & $1.09 \pm 0.18$ \\
+        SVR baseline & Temporal mean features only & $1.24 \pm 0.15$ \\
+        XGBoost baseline & Temporal mean features only & $0.96 \pm 0.12$ \\
+        Proposed two-stage model & Contrastive LSTM + regressor & $0.94 \pm 0.24$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Generalization Test (Held-Out Users)}
+We evaluate generalization on a fully held-out set of three users excluded from training and cross-validation. The model achieves an overall MAE of 0.84 on 1{,}200 holdout samples, indicating strong performance on unseen users (Table~\ref{tab:holdout_results}).
+
+\begin{table}[h]
+    \centering
+    \caption{Performance on a holdout test set of three unseen users.}
+    \label{tab:holdout_results}
+    \setlength{\tabcolsep}{8pt}
+    \begin{tabular}{lc}
+        \hline
+        \textbf{Holdout User} & \textbf{Mean Absolute Error (MAE)} \\
+        \hline
+        New User 1 & 0.66 \\
+        New User 2 & 0.92 \\
+        New User 3 & 0.95 \\
+        \hline
+        \textbf{Overall Performance} & \textbf{0.84} \\
+        \hline
+    \end{tabular}
+\end{table}
+
+The model demonstrates strong generalization to unseen users, achieving an overall MAE of 0.84, which is better than the cross-validation average. This suggests that the features learned by the model are not merely memorizing the training participants. The performance is consistently high across all three held-out users, with MAE ranging from 0.66 to 0.95. This behavior is important for MR deployment scenarios where per-user calibration may be limited or unavailable.
+
+\subsection{Embedding and Trajectory-Length Analyses}
+Further analysis confirms the model's robustness and provides insights for practical deployment. The t-SNE visualization of the learned embeddings (Figure~\ref{fig:lstm_tsne}) reveals a highly structured representation space where different engagement levels are effectively separated. This distinct clustering, especially for extreme engagement states, confirms the success of the contrastive pre-training phase in learning meaningful features.
+
+
+To understand the impact of the look-back window on performance, we analyzed the prediction error (MAE) across various trajectory lengths. As shown in Figure~\ref{fig:mae_vs_traj}, our analysis shows that the model's accuracy improves with more context and stabilizes with input windows of around 30 seconds. This finding is critical for real-time applications, as it demonstrates that high accuracy can be achieved with short, low-latency input windows. The combination of a well-structured embedding space and strong performance with short trajectories makes the model highly suitable for efficient, real-time engagement tracking in MR systems.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figs/embedding.png}\vspace{-2ex}
+    \caption{t-SNE projection of the 128-D embeddings produced by the LSTM encoder for all test sequences in Fold~3. Colours denote the ground-truth engagement score (1--6). Well-separated clusters at the extremes (dark purple, yellow) corroborate the quantitative results.}
+    \label{fig:lstm_tsne}
+\end{figure}
+
+% \begin{figure}[t]
+%     \centering
+%     \includegraphics[width=0.99\linewidth]{figs/cross_validation_mae_vs_trajectory_length.png}\vspace{-2ex}
+%     \caption{Relationship between input trajectory length and prediction error (MAE) for the best-performing LSTM model. Error bars indicate one standard deviation; $n$ above each bar denotes the number of test samples in the bucket.}
+%     \label{fig:mae_vs_traj}
+% \end{figure}
+
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{figs/Results/TrajectoryMAE.pdf}\vspace{-2ex}
+    \caption{Relationship between input trajectory length and prediction error (MAE) for the best-performing LSTM model. Error bars indicate one standard deviation; $n$ above each bar denotes the number of test samples in the bucket.}
+    \label{fig:mae_vs_traj}
+\end{figure}
+
+\subsection{Feature Importance Analysis}
+
+To understand which signals the model relies on, we compute permutation-based feature importance. After training, we independently shuffle each feature in the test set and measure the resulting increase in MAE; larger increases indicate greater importance. As shown in Table~\ref{tab:feature_importance}, the attack indicator (\texttt{AttackIntensity}) is most influential, but several non-attack cues also contribute substantially, including scene descriptors (spatial frequency, temporal smoothness, luminance) and gaze features. This indicates the model leverages diverse behavioral and scene signals rather than overfitting to the attack channel alone. For MR system design, this is important: the model is sensitive not only to the injected perturbation itself, but also to how the user visually and behaviorally responds to that perturbation in context.
+
+\begin{table}[h]
+    \centering
+    \caption{Top 10 most influential features for the LSTM encoder, ranked by permutation importance. The importance score represents the increase in MAE when the feature is permuted.}
+    \label{tab:feature_importance}
+    \setlength{\tabcolsep}{6pt}
+    \begin{tabular}{lr}
+        \toprule
+        \textbf{Feature} & \textbf{Importance (MAE Increase)} \\
+        \midrule
+        AttackIntensity & 1.0324 \\
+        Feature\_spatial\_frequency & 0.4454 \\
+        Feature\_temporal\_smoothness & 0.4145 \\
+        RightGazeDirectionZ & 0.1865 \\
+        RightGazeDirectionY & 0.1688 \\
+        Feature\_luminance & 0.1216 \\
+        ObjectCount\_encoded & 0.0328 \\
+        Feature\_spectral\_entropy & 0.0057 \\
+        HeadRotationY & 0.0055 \\
+        LeftEyePositionZ & 0.0045 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Verification results and analysis}
+
+\label{sec:verification-results}
+
+Table~\ref{tab:core-verification} reports the verified parameter intervals obtained using our verification methodology described in Section~\ref{sec:verification}. 
+%
+% \begin{table}[t]
+% \centering
+% \caption{Verification results obtained using DeepPoly and Prover. 
+% The verified sets correspond to the parameter 
+% intervals for which deterministic guarantees can be established. }\vspace{-1ex}
+% \begin{tabular}{lc}
+% \toprule
+% \textbf{System Parameters} & \textbf{Verified Range} \\
+% \midrule
+% \multicolumn{2}{c}{\textbf{Engagement $\geq 4$}} \\
+% \midrule
+% Luminance          & $[110.2,\,111.0]$ \\
+% Optical Flow       & $[0.021,\,0.024]$ \\
+% Spatial Frequency  & $[943.5,\,944.2]$ \\
+% Temporal Smoothness & $[7.1,\,8.0]$ \\
+% \midrule
+% \multicolumn{2}{c}{\textbf{Engagement $\geq 5$}} \\
+% \midrule
+% Luminance          & $[109.8,\,110.6]$ \\
+% Optical Flow       & $[0.019,\,0.022]$ \\
+% Spectral Entropy   & $[7.01,\,7.05]$ \\
+% Spatial Frequency  & $[944.0,\,945.2]$ \\
+% \bottomrule
+% \end{tabular}
+% \label{tab:core-verification}
+% \end{table}
+%
+\begin{table}[t]
+\centering
+\caption{Verification results using \textit{DeepPoly~\cite{deeppoly}} and \textit{Prover~\cite{prover}}. 
+The verified sets correspond to parameter intervals where deterministic 
+guarantees of engagement estimation hold.}
+\vspace{1ex}
+\begin{tabular}{lcc}
+\toprule
+\textbf{System Parameter} & \textbf{Engagement $\geq 4$} & \textbf{Engagement $\geq 5$} \\
+\midrule
+Luminance          & $[110.2,\,111.0]$ & $[109.8,\,110.6]$ \\
+Optical Flow       & $[0.021,\,0.024]$ & $[0.019,\,0.022]$ \\
+Spatial Frequency  & $[943.5,\,944.2]$ & $[944.0,\,945.2]$ \\
+Temporal Smoothness & $[7.1,\,8.0]$     & --- \\
+Spectral Entropy   & ---                & $[7.01,\,7.05]$ \\
+\bottomrule
+\end{tabular}
+\label{tab:core-verification}
+\end{table}
+
+The results in Table~\ref{tab:core-verification} show that the approach using Prover can indeed verify safe operating intervals for the engagement model. However, the verified ranges are extremely tight; for example,
+luminance is confined to less than a single unit. This outcome is not surprising given the structure of the model: it combines 40 input features at each timestep, spanning both system-level parameters
+(e.g., latency, frame rate, luminance) and user-level features (e.g., gaze stability, blink
+frequency, head motion). When verifying a property, Prover must account for all possible variations
+of the uncontrolled user features while simultaneously constraining the system parameters. To ensure that the engagement score remains above the threshold for \emph{all} inputs consistent with a chosen
+interval, the verifier produces the interval to a very conservative slice of the input space. These guarantees are therefore sound but narrow, reflecting the worst-case combination of stochastic user behavior and adversarial perturbations of controllable system parameters. As a result, while the
+verified intervals provide a rigorous baseline, their small size limits their direct applicability in realistic MR deployments. Even so, they demonstrate that an engagement model can be connected back to controllable MR parameters such as latency, luminance, and scene motion, rather than treated as a purely black-box predictor.
+
+More broadly, robustness verification as performed by Prover is inherently deterministic: it proves that outputs are stable across a bounded region of inputs. Engagement, in contrast, is a stochastic
+cognitive state influenced by human variability and environmental noise. Thus, even if Prover
+verifies that engagement $\geq \tau$ for all inputs in a region, this does not quantify the probability that real users will maintain that engagement level. For deployment and enforcement,
+however, it is often more practical to provide \emph{probabilistic guarantees}, where the system ensures that engagement stays above the threshold with high probability and confidence rather than
+under every conceivable input variation. Such guarantees yield broader, more interpretable operating ranges that can still be enforced meaningfully in practice, even if they admit a small residual risk.
+Bridging this gap requires methods that combine symbolic verification with probabilistic reasoning, so that verified intervals can be interpreted as actionable MR operating conditions with statistical confidence. This motivates future directions such as integrating probabilistic analysis with abstract
+domains, tailoring abstractions to multimodal and asynchronous features, and exploring hybrid symbolic–statistical approaches that yield guarantees aligned with deployment needs.
+\section{Limitations and Future Work}
+%\peng{@kaiming, can you check this section and conclusion, abstract, to ensure there are no mistakes statement for the verification part}
+
+Our results are encouraging, but several limitations should shape their interpretation.
+
+\paragraph{Dataset Expansion and Diversity.} The current dataset, while richly detailed, is modest in size. The subjectivity of minute-level self-reported engagement and the natural imbalance in label distributions present challenges. The cohort also consisted of 11 male college students aged 25--32, which limits claims about population-level generalization across gender, age, and background. At the same time, this relatively homogeneous cohort is still useful for an initial proof-of-concept study because it reduces between-subject variance and allows us to isolate how engagement changes under controlled latency perturbations in a shared MR scenario. Future work should focus on collecting data from a larger and more diverse cohort of participants, balancing the occurrence of rare engagement levels, and studying how participant background influences both reporting style and model behavior.
+
+\paragraph{Measurement Fidelity.} The model is trained entirely from self-report labels and does not yet incorporate objective engagement proxies such as task performance, physiological signals, or independent observer annotations. As a result, the learned target remains a subjective operationalization of engagement. Future studies should pair self-report with objective indicators so that the model can be validated against both perceived and externally measurable aspects of user state.
+
+\paragraph{Advanced Modeling Architectures.} While our two-phase LSTM-based approach proved effective, the baseline comparison shows that a traditional XGBoost regressor on temporally pooled features remains competitive on this dataset. Future research should therefore evaluate richer architectures only when they deliver clear gains in accuracy, interpretability, or deployment value. Attention-based architectures like Transformers may capture longer-range dependencies more effectively, and personalized fine-tuning may better account for individual differences in behavior and reporting styles.
+
+\paragraph{Enhanced Verification Frameworks.} Our initial application of formal verification provided sound, deterministic guarantees but resulted in narrow, conservative operating intervals. A key direction for future work is to develop a verification framework better suited to the stochastic nature of human cognitive states. This involves moving beyond deterministic guarantees toward probabilistic ones, which can provide wider, more practical operating ranges for system parameters while maintaining high confidence in the model's safety. Bridging this gap may involve integrating statistical methods with symbolic verification to produce guarantees that are both rigorous and directly applicable to real-world MR deployments.
+
+\section{Conclusion}
+We presented a two-phase modeling approach that combines contrastive pre-training with a supervised LSTM for predicting user engagement in Mixed Reality from multimodal time-series data under cognitive attack. In a controlled MR hostage-rescue study with step-wise latency perturbations, the model achieved an average MAE of 0.94 in label-level stratified cross-validation, outperforming Ridge, SVR, and XGBoost baselines on temporally averaged features, and reached 0.84 MAE on fully held-out users. We also applied formal verification to derive conservative operating intervals for engagement-preserving MR parameter settings, establishing an initial bridge between engagement prediction and runtime reasoning.
+
+Our work highlights several key directions for the future. The primary challenges are not only improving predictive accuracy, but also grounding engagement more fully in MR study design and making verification outputs more actionable for system designers. Future efforts will focus on expanding the dataset, incorporating objective engagement measures, evaluating when more complex models are genuinely necessary, and developing verification methods that provide wider and more practically useful guarantees for adaptive MR environments.
+
+\bibliographystyle{abbrv-doi}
+\bibliography{references}
+
+\end{document}
